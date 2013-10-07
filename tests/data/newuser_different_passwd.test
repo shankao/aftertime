@@ -1,0 +1,7 @@
+"index.php?section=users&page=insert"
+{
+	'username': 'ut_user', 
+        'email': 'ut_user@bla.com', 
+        'password': 'ut_user', 
+        'password2': 'kalsj', 
+}

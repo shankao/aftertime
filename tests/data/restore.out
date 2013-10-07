@@ -1,0 +1,2 @@
+mysql longaway -u root -pari4beth < tests/dumps/testdb
+0

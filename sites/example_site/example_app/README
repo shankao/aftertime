@@ -1,0 +1,4 @@
+Example app
+
+Each app needs at least one code.php file that contains the app's main class. 
+This class must extend from the App class.

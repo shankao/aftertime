@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <meta http-equiv="Content-Language" content="en" />
+		<title> - New user account</title>
+                <link rel="stylesheet" type="text/css" href="http://emilia/longaway/trunk/css/longaway.css?304" />
+		<link rel="stylesheet" type="text/css" href="http://emilia/longaway/trunk/css/users.css?304" />
+		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>		<script type="text/javascript" src="lib/jquery-1.5.2.min.js"></script>		<script type="text/javascript" src="lib/jquery-ui-1.8.9.custom.min.js"></script>
+		<script type="text/javascript" src="js/util.js?304" charset="utf-8"></script>
+		<script type="text/javascript" src="js/lamaps.js?304" charset="utf-8"></script>
+		<script type="text/javascript" src="js/longaway.js?304" charset="utf-8"></script>
+		<!--		<link rel="SHORTCUT ICON" type="image/vnd.microsoft.icon" href="img/favicon.ico" /> -->
+		<!-- Fix for google maps in IE. Also the xmlns part in the html tag -->
+		<style type="text/css"> 
+			v\:* { 
+				behavior:url(#default#VML); 
+			} 
+		</style>
+		<!-- End fix -->
+        </head>
+        <body>
+		<div id="header">
+
+	<h1>
+		<a id="logo" href="http://emilia/longaway/trunk/" title="LongAway"><img src="http://emilia/longaway/trunk/img/logo.png" title="LongAway" /></a>
+	</h1>
+	<span id="user-menu">
+                        <form action="index.php?section=welcome" method="post">
+                	<input type="submit" name="logout" value="Logout" />
+        	</form></span>
+</div>
+		<div id="content">
+	        	<h2>
+	<a id="back-button" href="index.php" title="Back to the home"><img src="http://emilia/longaway/trunk/img/arrow_rounded_left_T.png" alt="&lt;&lt;" /></a>
+	Create a new user account
+</h2>
+
+        <p><strong class="error">There was an error creating the user: Username missing</strong></p>
+
+<p>Please, fill the following data in order to register your new account:</p>
+
+<form id="new-user-form" action="index.php?section=users&amp;page=insert" method="post">
+	<p><label>Username: <input id="username" name="username" type="text" required /></label></p>
+	<p><label>Your e-mail address: <input name="email" type="email" value="ut_user@bla.com" required /></label></p>
+	<p><label>Password: <input name="password" type="password" /></label></p>
+	<p><label>Confirm password: <input name="password2" type="password" /></label></p>
+	<p><input name="insert" type="submit" value="Send" /></p>
+	<br />
+	<p id="terms-msg"><label>By clicking on "Send" you accept the <a href="docs/terms.html" target="_blank">Terms and Conditions</a></p>
+</form>
+		</div>
+		<div id="footer">
+	<p>
+		<a href="index.php?section=contact&amp;page=index">Contact us</a>
+		<a href="docs/terms.html" target="_blank">Terms and Conditions</a>
+	</p>
+	<p id="copyright">LongAway &copy; 2011</p>
+</div>
+		<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-117087-7']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+	</body>
+</html>
+

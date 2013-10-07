@@ -1,0 +1,10 @@
+logs
+build
+packages
+config/*.json
+config/.current.site
+*.mwb.bak
+lib/pear/cache
+lib/pear/download
+lib/pear/php/.channels
+lib/pear/php/.registry

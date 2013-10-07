@@ -1,0 +1,4 @@
+Example site
+
+config/			Site's configuration files
+example_app/		The only app that our example site implements. There could be more...

@@ -1,0 +1,29 @@
+Site configuration files in json format. 
+
+Available keys:
+
+"site" (string): ID for the site. Must match the site's folder
+"webtitle" (string): Human-readable title of the site
+"database" (object): Database connection parameters
+{
+	"protocol" (string): Connection protocol (i.e. mysqli)
+	"host" (string): URL to the DB server
+	"dbname" (string): name of the main DB schema
+	"user" (string): username for the DB connection
+	"password" (string): password for the DB connection
+}
+"init_app" (string): ID of the default app
+"logs" (string): path to the logs folder
+"content" (string): path to the site's static content folder
+"apps" (object)
+{
+	appID (object): Application config. The key is the AppID
+	{
+		"init_page" (string): Default page to be loaded when starting the app
+		"user" (string, optional): User name to access the app
+		"passwd" (string, optional): Password to access the app
+	}
+}
+"root-content" (array of strings): Files to be specificaly served from the root folder (i.e. robots.txt)
+[
+]
