@@ -1,54 +1,79 @@
 AVAILABLE_SITES:=$(shell ls sites)
 SITE_FILE:=config/.current.site
-CURRENT_SITE := $(shell cat $(SITE_FILE))
 CODE_REVNO:=$(shell git log | grep "commit " | wc -l)
 BUILDPATH=build
 PACKAGESPATH=packages
+
+ifeq ($(wildcard $(SITE_FILE)),)
+	CURRENT_SITE := $(notdir $(firstword $(wildcard sites/*)))
+else
+	CURRENT_SITE := $(shell cat $(SITE_FILE))
+endif
 
 ifndef VERBOSE
         MAKEFLAGS += --no-print-directory
 endif
 
+ifneq ($(shell php scripts/getconfig.php | grep "database.host" | cut -f2 -d"="),)
+	DB_DEFINED := yes
+endif
+
 all:
-	$(MAKE) clean-build
+	$(MAKE) db-drop
+	$(MAKE) clean-config config
 	$(MAKE) build
-	$(MAKE) db-restore FILE=sites/${CURRENT_SITE}/db/example_data.sql
+	$(MAKE) db-restore FILE=sites/${CURRENT_SITE}/db/example_data.sql; \
+
+config: config/aftertime.json
+
+config/aftertime.json: config/aftertime.json.in
+	(cd config; \
+		cp aftertime.json.in aftertime.json; \
+		sed -i "s/__REVNO__/$(CODE_REVNO)/g" aftertime.json; \
+		sed -i "s/__SITE__/`cat .current.site`/g" aftertime.json; \
+	)
+
+clean-config:
+	-rm config/aftertime.json
 
 build: logs
-	if [ -d ${BUILDPATH} ]; then \
-		chmod -R u+rxw ${BUILDPATH}; \
-	        rm -rf ${BUILDPATH}; \
-	fi;
-	$(MAKE) -C config all
+	$(MAKE) clean-build
 	git checkout-index -a -f --prefix=${BUILDPATH}/
 	# Remove the rest of the sites from the build folder
-	rm -r $(addprefix ${BUILDPATH}/sites/,$(filter-out ${CURRENT_SITE}, $(AVAILABLE_SITES)))
+	if [ "${CURRENT_SITE}" != "${AVAILABLE_SITES}" ]; then \
+		rm -r $(addprefix ${BUILDPATH}/sites/,$(filter-out ${CURRENT_SITE}, $(AVAILABLE_SITES))); \
+	fi;
 	# Copy aftertime's build config
 	cp config/aftertime.json ${BUILDPATH}/config
 	$(MAKE) root-content 
 	$(MAKE) .htaccess
-
-$(SITE_FILE):
-	$(MAKE) -C config .current.site
 
 info:
 	@echo "Available sites: ${AVAILABLE_SITES}"
 	@echo "Current site: ${CURRENT_SITE}"
 
 $(AVAILABLE_SITES):
-	@echo Setting site to $@
+	@echo "Setting site to $@"
 	echo $@ > $(SITE_FILE)
 	$(MAKE) all
 
-clean-build: 
-	$(MAKE) db-drop
-	-chmod -R u+rxw build;
-	-rm -rf build
+clean-build:
+	if [ -d "${BUILDPATH}" ]; then \
+		chmod -R u+rxw "${BUILDPATH}"; \
+		rm -rf "${BUILDPATH}"; \
+	fi;
+
+clean-packages:
+	if [ -d "${PACKAGESPATH}" ]; then \
+		chmod -R u+rxw "${PACKAGESPATH}"; \
+		rm -rf "${PACKAGESPATH}"; \
+	fi;
 
 clean:
+	$(MAKE) db-drop
 	$(MAKE) clean-build
-	-chmod -R u+rxw packages;
-	-rm -rf packages
+	$(MAKE) clean-packages
+	$(MAKE) clean-config
 
 logs:
 	mkdir $@
@@ -60,26 +85,36 @@ package:
 	(cd ${PACKAGESPATH} && zip -rq ${CURRENT_SITE}_$(CODE_REVNO).zip ${CURRENT_SITE}_$(CODE_REVNO) upgrade.sh)
 	rm -rf ${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
 
-.PHONY: get-site clean-build clean all $(AVAILABLE_SITES) package build
+.PHONY: info config clean-packages clean-config clean-build clean all $(AVAILABLE_SITES) package build
 
-db-drop: 
-	echo "DROP SCHEMA IF EXISTS ${CURRENT_SITE}" | ./scripts/runmysql.sh -n
+db-drop:
+	if [ "$(DB_DEFINED)" ]; then \
+		echo "DROP SCHEMA IF EXISTS ${CURRENT_SITE}" | ./scripts/runmysql.sh -n; \
+	fi; 
 
 db-create: 
-	echo "CREATE SCHEMA IF NOT EXISTS ${CURRENT_SITE} DEFAULT CHARACTER SET utf8" | ./scripts/runmysql.sh -n;
+	if [ "$(DB_DEFINED)" ]; then \
+		echo "CREATE SCHEMA IF NOT EXISTS ${CURRENT_SITE} DEFAULT CHARACTER SET utf8" | ./scripts/runmysql.sh -n; \
+	fi;
 
 db-restore: 
-	@if [ -f "${FILE}" ]; then \
-		$(MAKE) db-drop; \
-		$(MAKE) db-create; \
-		if [ -f sites/${CURRENT_SITE}/db/schema.sql ]; then \
-			echo "Adding DDLs"; \
-			$(MAKE) db-load FILE=sites/${CURRENT_SITE}/db/schema.sql; \
-			echo "Adding example data"; \
-			$(MAKE) db-load FILE=${FILE}; \
+	@if [ "$(DB_DEFINED)" ]; then \
+		if [ ! "${FILE}" ]; then \
+			echo "Please, indicate the file to load in the FILE variable"; \
+		else \
+			if [ -f "${FILE}" ]; then \
+				$(MAKE) db-drop; \
+				$(MAKE) db-create; \
+				if [ -f sites/${CURRENT_SITE}/db/schema.sql ]; then \
+					echo "Adding DDLs"; \
+					$(MAKE) db-load FILE=sites/${CURRENT_SITE}/db/schema.sql; \
+					echo "Adding example data"; \
+					$(MAKE) db-load FILE=${FILE}; \
+				fi; \
+			else \
+				echo "File does not exists: ${FILE}"; \
+			fi; \
 		fi; \
-	else \
-		echo "Please, indicate the file to load in the FILE variable"; \
 	fi;
 
 # TODO Add support to ignore some tables. I.e.: spidey.page_status could duplicate values and they are UNIQUE. Also, is part of the DDL somehow
@@ -87,12 +122,16 @@ db-snap:
 	@echo Snap DB
 	./scripts/runmysqldump.sh -o sites/${CURRENT_SITE}/db/snap.sql
 
-db-load: 
-	@if [ -f "${FILE}" ]; then \
-		echo "Loading file ${FILE}"; \
-		./scripts/runmysql.sh -f ${FILE}; \
-	else \
+db-load:
+	@if [ ! "${FILE}" ]; then \
 		echo "Please, indicate the file to load in the FILE variable"; \
+	else \
+		if [ -f "${FILE}" ]; then \
+			echo "Loading file ${FILE}"; \
+			./scripts/runmysql.sh -f ${FILE}; \
+		else \
+			echo "File does not exists: ${FILE}"; \
+		fi; \
 	fi;
 
 # TODO Backup. Does an snap, compress it and sends it somewhere. Check what we want, this does not differ from a snap so much
