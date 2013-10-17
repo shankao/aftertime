@@ -36,7 +36,7 @@ config/aftertime.json: config/aftertime.json.in
 clean-config:
 	-rm config/aftertime.json
 
-build: logs
+build:
 	$(MAKE) clean-build
 	git checkout-index -a -f --prefix=${BUILDPATH}/
 	# Remove the rest of the sites from the build folder
@@ -47,6 +47,11 @@ build: logs
 	cp config/aftertime.json ${BUILDPATH}/config
 	$(MAKE) root-content 
 	$(MAKE) .htaccess
+	$(MAKE) logs-folder
+
+logs-folder:
+	mkdir ${BUILDPATH}/logs
+	chmod uog+w ${BUILDPATH}/logs
 
 info:
 	@echo "Available sites: ${AVAILABLE_SITES}"
@@ -75,10 +80,7 @@ clean:
 	$(MAKE) clean-packages
 	$(MAKE) clean-config
 
-logs:
-	mkdir $@
-	chmod uog+w $@
-
+	
 package: 
 	$(MAKE) build BUILDPATH=${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
 	cp scripts/upgrade.sh ${PACKAGESPATH}
