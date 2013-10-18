@@ -1,13 +1,18 @@
-AVAILABLE_SITES:=$(shell ls sites)
-SITE_FILE:=config/.current.site
 CODE_REVNO:=$(shell git log | grep "commit " | wc -l)
 BUILDPATH=build
 PACKAGESPATH=packages
 
+# Figure out the site we're working on
+AVAILABLE_SITES:=$(shell ls sites)
+SITE_FILE:=config/.current.site
 ifeq ($(wildcard $(SITE_FILE)),)
-	CURRENT_SITE := $(notdir $(firstword $(wildcard sites/*)))
+	CURRENT_SITE := $(firstword $(AVAILABLE_SITES))
 else
+  ifeq ($(wildcard $(addprefix "sites/", $(shell cat $(SITE_FILE)))),)
+	CURRENT_SITE := $(firstword $(AVAILABLE_SITES))
+  else
 	CURRENT_SITE := $(shell cat $(SITE_FILE))
+  endif
 endif
 
 ifndef VERBOSE
@@ -20,13 +25,18 @@ endif
 
 all:
 	$(MAKE) db-drop
-	$(MAKE) clean-config config
 	$(MAKE) build
 	$(MAKE) db-restore FILE=sites/${CURRENT_SITE}/db/example_data.sql; \
 
-config: config/aftertime.json
+checkenv:
+	@if [ ! "${AVAILABLE_SITES}" ]; then \
+		echo "Error no available sites"; \
+		return 255; \
+	fi;
+	echo $(CURRENT_SITE) > $(SITE_FILE)
+	$(MAKE) clean-config config
 
-config/aftertime.json: config/aftertime.json.in
+config: config/aftertime.json.in
 	(cd config; \
 		cp aftertime.json.in aftertime.json; \
 		sed -i "s/__REVNO__/$(CODE_REVNO)/g" aftertime.json; \
@@ -38,6 +48,7 @@ clean-config:
 
 build:
 	$(MAKE) clean-build
+	$(MAKE) checkenv
 	git add --all
 	git checkout-index -a -f --prefix=${BUILDPATH}/
 	git reset
@@ -58,6 +69,7 @@ logs-folder:
 info:
 	@echo "Available sites: ${AVAILABLE_SITES}"
 	@echo "Current site: ${CURRENT_SITE}"
+	@echo "Site has DB defined: ${DB_DEFINED}"
 
 $(AVAILABLE_SITES):
 	@echo "Setting site to $@"
