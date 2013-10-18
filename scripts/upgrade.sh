@@ -131,7 +131,11 @@ case $ACTION in
                 echo All done.
 		;;
 	db-snap)
-		echo "Dumping database"
+		get_siterev
+		echo "Dumping database from $SITE"
+		(cd $SITE;
+			./scripts/runmysqldump.sh -o ../$SITE.sql
+		)
 		;;
 	*)
 		echo "Wrong params"
