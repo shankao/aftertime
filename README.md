@@ -28,3 +28,9 @@ Mission: to be an experimental web framework that implements unconventional idea
 * Included javascript libraries: jQuery, Lab.js
 * Image lazy load: none
 * Resource compression/packing: none
+
+= Example site =
+
+Consider it something like a "hello world". It just defines the minimum elements required to show a simple page.
+Have a look at the code in the sites/example_site folder.
+Build the site by running "make" in aftertime's main folder, and browse to the "build" folder to get the site's main page.
