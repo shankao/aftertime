@@ -1,6 +1,0 @@
-"index.php"
-{
-	'login': 'Login', 
-        'email': 'test@test.com', 
-        'password': 'test' 
-}
