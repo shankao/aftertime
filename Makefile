@@ -8,7 +8,7 @@ SITE_FILE:=config/.current.site
 ifeq ($(wildcard $(SITE_FILE)),)
 	CURRENT_SITE := $(firstword $(AVAILABLE_SITES))
 else
-  ifeq ($(wildcard $(addprefix "sites/", $(shell cat $(SITE_FILE)))),)
+  ifeq ($(wildcard $(addprefix sites/, $(shell cat $(SITE_FILE)))),)
 	CURRENT_SITE := $(firstword $(AVAILABLE_SITES))
   else
 	CURRENT_SITE := $(shell cat $(SITE_FILE))
