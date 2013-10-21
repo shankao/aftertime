@@ -102,7 +102,7 @@ class app {
 		log_entry("redirect($dest)");
 		$parts = explode('/', $dest);
 
-		$url = "index.php?app={$_parts[0]}";
+		$url = "index.php?app={$parts[0]}";
 		if (isset($parts[1])) {
 			$url .= "&page={$parts[1]}";
 		}
