@@ -1,19 +1,18 @@
 <?php
-require_once 'include/session_object.class.php';
 require_once 'include/log.php';
 require_once 'include/template_log.php';
 require_once 'include/config.php';
 require_once 'include/db.php';
 
-// XXX Check why app extends the session object instead of include it inside
-class app extends session_object {
+class app {
 
 	protected $action;	// Requested app action
 	protected $page;	// Requested page to show after the action is run
 
 	public $template;	// XXX This is only the template name, not a TemplateLog object
-	public $error;		// Error code
-	public $error_msg;	// Error message
+
+	public $error;          // Error code
+        public $error_msg;      // Error message
 
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
@@ -35,7 +34,7 @@ class app extends session_object {
 		else if (!$this->check_password($password, $user->password, $password_is_encrypted)) {
 			$this->error = 'WRONG_PASSWD';
 		} else {
-			$this->set('user', $user->toArray());
+			$this->keep('user', $user->toArray());
 
 			if ($save_cookie) {	// Save for 10 days
 				setcookie('us', $email, time()+864000, '/', null, false, true);
@@ -43,10 +42,11 @@ class app extends session_object {
 			}
 		}
 
-		if ($this->error)
+		if (isset($this->error)) {
 			log_entry ("Login error for user $email: {$this->error}");
-		else
+		} else {
 			log_entry ("User logged in successfully: $email");
+		}
 	}
 
 	private function clean_login_cookies() {
@@ -97,39 +97,45 @@ class app extends session_object {
 	}
 
 	// App. redirection. Syntax is 'app/page/action'. You can ommit some (i.e. "//newaction"
-	protected function redirect($dest, $http_redirect = false) {
+	protected function redirect($dest) {
 
-		log_entry("redirect($dest, $http_redirect)");
+		log_entry("redirect($dest)");
 		$parts = explode('/', $dest);
 
-		if (isset($parts[0])) {
-			$_SESSION['appname'] = $parts[0];
-		} else {
-			log_enty("WARNING: doing a redirect to the same app. You don't need app redirection for this");
-		}
-		$url = "index.php?app={$_SESSION['appname']}";
-
+		$url = "index.php?app={$_parts[0]}";
 		if (isset($parts[1])) {
-			$this->set('page', $parts[1]);
 			$url .= "&page={$parts[1]}";
-		} else {
-			$this->reset_var('page');
 		}
-
 		if (isset($parts[2])) {
-			$this->set('action', $parts[2]);
 			$url .= "&a={$parts[2]}";
-		} else {
-			$this->reset_var('action');
 		}
 
-		if ($http_redirect) {
-                        log_entry ("HTTP redirecting to {$_SESSION['appname']}");
-			header("Location: $url", true, 303);
-			return 'http redirect';
-		} else {
-                        log_entry ("Internal redirecting to {$_SESSION['appname']}");
-			return 'redirect';
+		if (isset($this->error)) {
+			$this->keep_once('error', $this->error);
+		}
+		if (isset($this->error_msg)) {
+			$this->keep_once('error_msg', $this->error_msg);
+		}
+
+		log_entry ("HTTP redirecting to $url");
+		header("Location: $url", true, 303);
+		return 'redirect';
+	}
+
+	protected function keep_once($var, $value) {
+		$_SESSION['keep_once'][$var] = $value;
+	}
+
+	protected function keep($var, $value) {
+		$_SESSION['keep'][$var] = $value;
+	}
+
+	protected function keep_remove($var) {
+		if (isset($_SESSION['keep_once'][$var])) {
+			unset($_SESSION['keep_once'][$var]);
+		}
+		if (isset($_SESSION['keep'][$var])) {
+			unset($_SESSION['keep'][$var]);
 		}
 	}
 
@@ -145,6 +151,7 @@ class app extends session_object {
 	}
 
 	protected function default_action() {
+		log_entry('App::default_action()');
 		$this->template = 'default';
 	}
 
@@ -180,10 +187,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		$app_name = get_class($this);
 		Log::caller($app_name);
 
-		// XXX check different between set() and setting directly
-		$this->set('action', isset($this->params['a'])? $this->params['a'] : NULL);
-		$this->reset_var('actions');
-
+		$this->action = isset($this->params['a'])? $this->params['a'] : NULL;
 		if ($this->action) {
 			Log::caller("$app_name/{$this->action}");
 		}
@@ -195,25 +199,17 @@ log_entry(print_r($_SERVER, true), 20000);
 			}
 		}
 
-		// XXX check me
-		if (empty($this->params['section']) && empty($this->params['app']) && !empty($_SESSION['appname']) && !empty($this->params['page'])) {
-			// Kept the same app
-                } else {
-			// Changed app
-			$this->reset_var('page');
-		}
+		// TODO check that you can never ask for a page without appname, unless asking for the main one
 
-		if (empty($this->page)) { 
-			if (empty($this->params['page'])) {
-				$app_config = Config::get($app_name);
-				if (!isset($app_config['init_page'])) {
-					log_entry ('WARNING: init_page not set');
-				} else {
-					$this->set('page', $app_config['init_page']);
-				}
+		if (empty($this->params['page'])) {
+			$app_config = Config::get($app_name);
+			if (!isset($app_config['init_page'])) {
+				log_entry ('WARNING: init_page not set');
 			} else {
-				$this->set('page', $this->params['page']);
+				$this->page = $app_config['init_page'];
 			}
+		} else {
+			$this->page = $this->params['page'];
 		}
 
 		if ($this->check_http_auth() == false) {
@@ -222,6 +218,7 @@ log_entry(print_r($_SERVER, true), 20000);
 			return false;
 		}
 
+		// Find method to run based on the requested action
 		$method = false;
 		$action_name = $this->action;
 		if (empty($action_name)) {	// XXX Should an action be tried even if there's not action specified?
@@ -230,10 +227,11 @@ log_entry(print_r($_SERVER, true), 20000);
 			if (!isset($this->actions) || (isset($this->actions) && !in_array($action_name, $this->actions) && !array_key_exists($action_name, $this->actions))) {
 				log_entry("Unsupported action: '$action_name'");
 			} else {
-				if (isset($this->actions[$action_name])) 
+				if (isset($this->actions[$action_name])) {
 					$method = $this->actions[$action_name];
-				else
+				} else {
 					$method = $action_name;
+				}
 			}
 		}
 
@@ -251,10 +249,10 @@ log_entry(print_r($_SERVER, true), 20000);
 			}
 		}
 
-		// XXX After each action should be a HTTP redirect?
+		// XXX After each action (supposedly, an action is POST [or PUT]) should be a HTTP redirect?
 		if (isset($this->error)) {
 			$logline = "ERROR: {$this->error}";
-			if ($this->error_msg) {
+			if (isset($this->error_msg)) {
 				$logline .= " ({$this->error_msg})";
 			}
 			log_entry($logline);
@@ -265,7 +263,17 @@ log_entry(print_r($_SERVER, true), 20000);
 
 	public function __construct(array $request) {
 		// XXX Check / validate?
-		parent::__construct($request);
+		if (isset($_SESSION['keep'])) {
+			foreach ($_SESSION['keep'] as $var => $value) {
+				$this->$var = $value;
+			}
+		}
+		if (isset($_SESSION['keep_once'])) {
+			foreach ($_SESSION['keep_once'] as $var => $value) {
+				$this->$var = $value;
+			}
+			unset ($_SESSION['keep_once']);
+		}
 		$this->params = $request;
 	}
 
@@ -279,9 +287,9 @@ log_entry(print_r($_SERVER, true), 20000);
 
 	public function logout () {
 		if ($this->is_user_logged()) {
-			log_entry ("Logout user {$this->user['email']}");
+			log_entry ("Logging out user {$this->user['email']}");
+			$this->keep_remove('user');
 
-			$this->reset();
 			$config = Config::get();
 			if (!isset($config['init_app'])) {
 				log_entry ("ERROR: init_app is not set");
