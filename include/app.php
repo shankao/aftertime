@@ -200,7 +200,6 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 
 		// TODO check that you can never ask for a page without appname, unless asking for the main one
-
 		if (empty($this->params['page'])) {
 			$app_config = Config::get($app_name);
 			if (!isset($app_config['init_page'])) {
@@ -221,17 +220,13 @@ log_entry(print_r($_SERVER, true), 20000);
 		// Find method to run based on the requested action
 		$method = false;
 		$action_name = $this->action;
-		if (empty($action_name)) {	// XXX Should an action be tried even if there's not action specified?
-			$method = 'default_action';
+		if (!isset($this->actions) || (isset($this->actions) && !in_array($action_name, $this->actions) && !array_key_exists($action_name, $this->actions))) {
+			log_entry("Unsupported action: '$action_name'");
 		} else {
-			if (!isset($this->actions) || (isset($this->actions) && !in_array($action_name, $this->actions) && !array_key_exists($action_name, $this->actions))) {
-				log_entry("Unsupported action: '$action_name'");
+			if (isset($this->actions[$action_name])) {
+				$method = $this->actions[$action_name];
 			} else {
-				if (isset($this->actions[$action_name])) {
-					$method = $this->actions[$action_name];
-				} else {
-					$method = $action_name;
-				}
+				$method = $action_name;
 			}
 		}
 
@@ -250,6 +245,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 
 		// XXX After each action (supposedly, an action is POST [or PUT]) should be a HTTP redirect?
+		// XXX Should the app check that request is either and action XOR a page and never allow both?
 		if (isset($this->error)) {
 			$logline = "ERROR: {$this->error}";
 			if (isset($this->error_msg)) {
