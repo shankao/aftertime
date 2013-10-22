@@ -242,9 +242,6 @@ log_entry(print_r($_SERVER, true), 20000);
 				// TODO Validate method params
 				// Maybe http://www.php.net/manual/en/ref.filter.php
 				$result = $this->$method($this->params);
-				if ($result === 'http redirect') {
-					unset($this->template);  // Don't output, we are going to redirect the user
-				}
 			}
 		}
 
