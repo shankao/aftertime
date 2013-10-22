@@ -198,11 +198,13 @@ log_entry(print_r($_SERVER, true), 20000);
 			}
 		}
 
-		// TODO check that you can never ask for a page without appname, unless asking for the main one
 		if (empty($this->params['page'])) {
 			$app_config = Config::get($app_name);
 			if (!isset($app_config['init_page'])) {
-				log_entry ('WARNING: init_page not set');
+				$this->error = 'ERROR_INIT_PAGE';
+				$this->error_msg = 'ERROR: init_page not set in app\'s config';
+				$this->template = 'apperror';
+				return false;
 			} else {
 				$this->page = $app_config['init_page'];
 			}
@@ -217,12 +219,10 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 
 		// Find method to run, based on the requested action
-		$method = null;
-		if (empty($this->action)) {
-			$method = 'default_action';
-		} else {
+		$method = 'default_action';
+		if (!empty($this->action)) {
 			if (!isset($this->actions) || (isset($this->actions) && !in_array($this->action, $this->actions) && !array_key_exists($this->action, $this->actions))) {
-				log_entry("Unsupported action: '{$this->action}'");
+				log_entry("WARNING: unsupported action: '{$this->action}'");
 			} else {
 				if (isset($this->actions[$this->action])) {
 					$method = $this->actions[$this->action];
@@ -236,7 +236,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		$result = null;
 		if ($method) {
 			if (!method_exists($this, $method)) {
-				log_entry("Unexistent method: $method");
+				log_entry("WARNING: unexistent method: '$method'");
 			} else {
 				// TODO Validate method params
 				// Maybe http://www.php.net/manual/en/ref.filter.php
@@ -246,7 +246,7 @@ log_entry(print_r($_SERVER, true), 20000);
 
 		// Check for errors
 		if (isset($this->error)) {
-			$logline = "ERROR: {$this->error}";
+			$logline = $this->error;
 			if (isset($this->error_msg)) {
 				$logline .= " ({$this->error_msg})";
 			}
@@ -326,7 +326,8 @@ log_entry(print_r($_SERVER, true), 20000);
 		if (isset($this->template) && $this->template != false) {
 			switch ($this->template) {	// XXX TemplateLog types
 				case 'default':
-					$template_filename = 'templates/default.php';
+				case 'apperror':
+					$template_filename = "templates/{$this->template}.php";
 					break;
 				default:	// Local app template. XXX Maybe is worth to remove the appname here and let the app choose
 					$config = Config::get();
