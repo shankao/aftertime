@@ -187,14 +187,13 @@ log_entry(print_r($_SERVER, true), 20000);
 		$app_name = get_class($this);
 		Log::caller($app_name);
 
-		$this->action = isset($this->params['a'])? $this->params['a'] : NULL;
-		if ($this->action) {
+		if (isset($this->params['a'])) {
+			$this->action = $this->params['a'];
 			Log::caller("$app_name/{$this->action}");
 		}
 
 		if (init_db()) {
-			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {
-				// Try auth. automatically by cookies
+			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
 				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);
 			}
 		}
