@@ -38,7 +38,7 @@ if (!$app_name || Config::get($app_name) == false) {
 		} else {
 			$app = new $app_name($request);
 			$result = $app->run();
-			if ($result != 'redirect') {
+			if ($result !== 'redirect') {
 				$app->render_template();
 			}
 		}
