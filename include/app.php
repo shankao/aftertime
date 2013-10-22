@@ -200,7 +200,6 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 
 		// TODO check that you can never ask for a page without appname, unless asking for the main one
-
 		if (empty($this->params['page'])) {
 			$app_config = Config::get($app_name);
 			if (!isset($app_config['init_page'])) {
@@ -234,6 +233,7 @@ log_entry(print_r($_SERVER, true), 20000);
 			}
 		}
 
+		// Run the method
 		$result = null;
 		if ($method) {
 			if (!method_exists($this, $method)) {
@@ -245,7 +245,7 @@ log_entry(print_r($_SERVER, true), 20000);
 			}
 		}
 
-		// XXX After each action (supposedly, an action is POST [or PUT]) should be a HTTP redirect?
+		// Check for errors
 		if (isset($this->error)) {
 			$logline = "ERROR: {$this->error}";
 			if (isset($this->error_msg)) {
