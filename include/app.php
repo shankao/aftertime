@@ -218,19 +218,18 @@ log_entry(print_r($_SERVER, true), 20000);
 			return false;
 		}
 
-		// Find method to run based on the requested action
-		$method = false;
-		$action_name = $this->action;
-		if (empty($action_name)) {
+		// Find method to run, based on the requested action
+		$method = null;
+		if (empty($this->action)) {
 			$method = 'default_action';
 		} else {
-			if (!isset($this->actions) || (isset($this->actions) && !in_array($action_name, $this->actions) && !array_key_exists($action_name, $this->actions))) {
-				log_entry("Unsupported action: '$action_name'");
+			if (!isset($this->actions) || (isset($this->actions) && !in_array($this->action, $this->actions) && !array_key_exists($this->action, $this->actions))) {
+				log_entry("Unsupported action: '{$this->action}'");
 			} else {
-				if (isset($this->actions[$action_name])) {
-					$method = $this->actions[$action_name];
+				if (isset($this->actions[$this->action])) {
+					$method = $this->actions[$this->action];
 				} else {
-					$method = $action_name;
+					$method = $this->action;
 				}
 			}
 		}
