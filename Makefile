@@ -34,16 +34,13 @@ checkenv:
 		return 255; \
 	fi;
 	echo $(CURRENT_SITE) > $(SITE_FILE)
-	$(MAKE) clean-config config
+	$(MAKE) config
 
 config: config/aftertime.json.in
 	mkdir ${BUILDPATH}/config
 	cp config/aftertime.json.in ${BUILDPATH}/config/aftertime.json; \
 	sed -i "s/__REVNO__/$(CODE_REVNO)/g" ${BUILDPATH}/config/aftertime.json; \
 	sed -i "s/__SITE__/`cat ${SITE_FILE}`/g" ${BUILDPATH}/config/aftertime.json; \
-
-clean-config:
-	-rm ${BUILDPATH}/config/aftertime.json
 
 build:
 	$(MAKE) clean-build
@@ -60,6 +57,7 @@ build:
 	$(MAKE) root-content 
 	$(MAKE) .htaccess
 
+# Must take this folder name from the config...
 logs-folder:
 	mkdir ${BUILDPATH}/logs
 	chmod uog+w ${BUILDPATH}/logs
@@ -75,7 +73,7 @@ $(AVAILABLE_SITES):
 	$(MAKE) all
 
 build-folder:
-	mkdir ${BUILDPATH}
+	mkdir -p ${BUILDPATH}
 
 clean-build:
 	if [ -d "${BUILDPATH}" ]; then \
@@ -93,7 +91,6 @@ clean:
 	$(MAKE) db-drop
 	$(MAKE) clean-build
 	$(MAKE) clean-packages
-	$(MAKE) clean-config
 
 package: 
 	$(MAKE) build BUILDPATH=${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
@@ -101,7 +98,7 @@ package:
 	(cd ${PACKAGESPATH} && zip -rq ${CURRENT_SITE}_$(CODE_REVNO).zip ${CURRENT_SITE}_$(CODE_REVNO) upgrade.sh)
 	rm -rf ${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
 
-.PHONY: info config clean-packages clean-config build-folder clean-build logs-folder clean all $(AVAILABLE_SITES) package build
+.PHONY: info config clean-packages build-folder clean-build logs-folder clean all $(AVAILABLE_SITES) package build
 
 db-drop:
 	if [ "$(DB_DEFINED)" ]; then \
