@@ -31,8 +31,8 @@ final class Log {
 		$date = date('Y-m-d');
 		if (!$filename || $date != $filedate) {
 			$config = Config::get();
-			if (!$config) {
-				return false;
+			if (!$config || !isset($config['logs'])) {
+				return false;	// Store the error in some private variable
 			}
 
 			$filename = "{$config['logs']}/$date.log";
