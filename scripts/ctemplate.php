@@ -12,6 +12,7 @@ if (!aftertime_init(false)) {
         echo Config::init_log();
         exit (1);
 }
+$config = Config::get();
 $result = Template::render($opts['t']);
 exit($result? 0 : 1);
 ?>
