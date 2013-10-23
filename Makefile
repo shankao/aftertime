@@ -19,7 +19,7 @@ ifndef VERBOSE
         MAKEFLAGS += --no-print-directory
 endif
 
-ifneq ($(shell php scripts/getconfig.php | grep "database.host" | cut -f2 -d"="),)
+ifneq ($(shell (cd ${BUILDPATH} 2>&1 && php ./scripts/getconfig.php) | grep "database.host" | cut -f2 -d"="),)
 	DB_DEFINED := yes
 endif
 
@@ -37,17 +37,18 @@ checkenv:
 	$(MAKE) clean-config config
 
 config: config/aftertime.json.in
-	(cd config; \
-		cp aftertime.json.in aftertime.json; \
-		sed -i "s/__REVNO__/$(CODE_REVNO)/g" aftertime.json; \
-		sed -i "s/__SITE__/`cat .current.site`/g" aftertime.json; \
-	)
+	mkdir ${BUILDPATH}/config
+	cp config/aftertime.json.in ${BUILDPATH}/config/aftertime.json; \
+	sed -i "s/__REVNO__/$(CODE_REVNO)/g" ${BUILDPATH}/config/aftertime.json; \
+	sed -i "s/__SITE__/`cat ${SITE_FILE}`/g" ${BUILDPATH}/config/aftertime.json; \
 
 clean-config:
-	-rm config/aftertime.json
+	-rm ${BUILDPATH}/config/aftertime.json
 
 build:
 	$(MAKE) clean-build
+	$(MAKE) build-folder
+	$(MAKE) logs-folder
 	$(MAKE) checkenv
 	git add --all
 	git checkout-index -a -f --prefix=${BUILDPATH}/
@@ -56,11 +57,8 @@ build:
 	if [ "${CURRENT_SITE}" != "${AVAILABLE_SITES}" ]; then \
 		rm -r $(addprefix ${BUILDPATH}/sites/,$(filter-out ${CURRENT_SITE}, $(AVAILABLE_SITES))); \
 	fi;
-	# Copy aftertime's build config
-	cp config/aftertime.json ${BUILDPATH}/config
 	$(MAKE) root-content 
 	$(MAKE) .htaccess
-	$(MAKE) logs-folder
 
 logs-folder:
 	mkdir ${BUILDPATH}/logs
@@ -75,6 +73,9 @@ $(AVAILABLE_SITES):
 	@echo "Setting site to $@"
 	echo $@ > $(SITE_FILE)
 	$(MAKE) all
+
+build-folder:
+	mkdir ${BUILDPATH}
 
 clean-build:
 	if [ -d "${BUILDPATH}" ]; then \
@@ -94,23 +95,22 @@ clean:
 	$(MAKE) clean-packages
 	$(MAKE) clean-config
 
-	
 package: 
 	$(MAKE) build BUILDPATH=${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
-	cp scripts/upgrade.sh ${PACKAGESPATH}
+	cp ${BUILDPATH}/scripts/upgrade.sh ${PACKAGESPATH}
 	(cd ${PACKAGESPATH} && zip -rq ${CURRENT_SITE}_$(CODE_REVNO).zip ${CURRENT_SITE}_$(CODE_REVNO) upgrade.sh)
 	rm -rf ${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
 
-.PHONY: info config clean-packages clean-config clean-build clean all $(AVAILABLE_SITES) package build
+.PHONY: info config clean-packages clean-config build-folder clean-build logs-folder clean all $(AVAILABLE_SITES) package build
 
 db-drop:
 	if [ "$(DB_DEFINED)" ]; then \
-		echo "DROP SCHEMA IF EXISTS ${CURRENT_SITE}" | ./scripts/runmysql.sh -n; \
+		echo "DROP SCHEMA IF EXISTS ${CURRENT_SITE}" | (cd ${BUILDPATH}; ./scripts/runmysql.sh -n); \
 	fi; 
 
 db-create: 
 	if [ "$(DB_DEFINED)" ]; then \
-		echo "CREATE SCHEMA IF NOT EXISTS ${CURRENT_SITE} DEFAULT CHARACTER SET utf8" | ./scripts/runmysql.sh -n; \
+		echo "CREATE SCHEMA IF NOT EXISTS ${CURRENT_SITE} DEFAULT CHARACTER SET utf8" | (cd ${BUILDPATH}; ./scripts/runmysql.sh -n); \
 	fi;
 
 db-restore: 
@@ -136,26 +136,30 @@ db-restore:
 # TODO Add support to ignore some tables. I.e.: spidey.page_status could duplicate values and they are UNIQUE. Also, is part of the DDL somehow
 db-snap: 
 	@echo Snap DB
-	./scripts/runmysqldump.sh -o sites/${CURRENT_SITE}/db/snap.sql
+	@(cd ${BUILDPATH}; \
+		./scripts/runmysqldump.sh -o sites/${CURRENT_SITE}/db/snap.sql; \
+	)
 
 db-load:
-	@if [ ! "${FILE}" ]; then \
-		echo "Please, indicate the file to load in the FILE variable"; \
-	else \
-		if [ -f "${FILE}" ]; then \
-			echo "Loading file ${FILE}"; \
-			./scripts/runmysql.sh -f ${FILE}; \
+	@(cd ${BUILDPATH}; \
+		if [ ! "${FILE}" ]; then \
+			echo "Please, indicate the file to load in the FILE variable"; \
 		else \
-			echo "File does not exists: ${FILE}"; \
+			if [ -f "${FILE}" ]; then \
+				echo "Loading file ${FILE}"; \
+				./scripts/runmysql.sh -f ${FILE}; \
+			else \
+				echo "File does not exists: ${FILE}"; \
+			fi; \
 		fi; \
-	fi;
+	)
 
 # TODO Backup. Does an snap, compress it and sends it somewhere. Check what we want, this does not differ from a snap so much
 
 .PHONY: db-create db-restore db-drop db-snap db-load
 
 # TODO Symlinks method should only be used if mod_rewrite is not around
-ROOT_CONTENT:=$(shell php scripts/getconfig.php | grep "root-content" | cut -f2 -d"=")
+ROOT_CONTENT:=$(shell (cd ${BUILDPATH} 2>&1 && php scripts/getconfig.php) | grep "root-content" | cut -f2 -d"=")
 root-content: ${ROOT_CONTENT}
 
 ${ROOT_CONTENT}: 
@@ -176,4 +180,6 @@ ${ROOT_CONTENT}:
 .PHONY: root-content 
 
 .htaccess: templates/htaccess.php
-	php scripts/ctemplate.php -t $^ > ${BUILDPATH}/$@
+	(cd ${BUILDPATH}; \
+		php ./scripts/ctemplate.php -t $^ > $@; \
+	)
