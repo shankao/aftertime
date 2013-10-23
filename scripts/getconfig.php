@@ -16,7 +16,7 @@ require_once 'include/config.php';
 
 $config = Config::init();
 if (!$config) {
-	echo "ERROR loading config\n";
+	echo Config::init_log();
 	exit (-1);
 }
 
