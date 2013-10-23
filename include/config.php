@@ -1,17 +1,14 @@
 <?php
 // TODO Keep the config cached in memory between PHP calls somehow
-// TODO This needs some proper logging that does not depend in the config (stderr? stdout?)
 
 // Initialization of the framework
 function aftertime_init($web_init = true) {
 	$config = Config::init();
 	if ($config === false) {
-		log_entry('ERROR: bad config');
 		return false;
 	}
 
 	// Init the rest (needs config)
-	ini_set ('date.timezone', $config['timezone']);
 	ini_set ('include_path', '.' . PATH_SEPARATOR . 'lib/pear/php' . PATH_SEPARATOR . "sites/{$config['site']}");	// Adds the site folder
 	ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
 
@@ -36,21 +33,26 @@ function aftertime_init($web_init = true) {
 
 final class Config {
 	static private $config = null;
+	static private $log = '';
 
 	private function __construct() {
 	}
 
 	// Load everything that matches config/*.json
 	static public function init() {
-		// Load aftertime config
-		$conf = self::load_json('config/aftertime.json');
-		if (empty($conf)) {
-			return false;
+		self::log("Config::init()");
+		$error = false;
+
+		// Load build config
+		$filename = 'config/aftertime.json';
+		if (self::load_json($filename) === null) {
+			$error = true;
 		}
 
 		// Get site's config files
-		$files = glob("sites/{$conf['active_site']}/config/*.json");
-		$hostname_file = "sites/{$conf['active_site']}/config/hostname_".gethostname().'.json';
+		$site = self::$config['active_site'];
+		$files = glob("sites/$site/config/*.json");
+		$hostname_file = "sites/$site/config/hostname_".gethostname().'.json';
 		if (($key = array_search($hostname_file, $files)) !== false) {	// Moves hostname.conf to the end
 			unset($files[$key]);
 			$files[] = $hostname_file;
@@ -59,51 +61,64 @@ final class Config {
 		// Load them
 		foreach ($files as $filename) {
 			if (strpos($filename, 'hostname_') !== false && $filename != $hostname_file) {
-				continue;	// Avoid hostname config, but the current one
+				self::log("Skip $filename: not current host");
+				continue;	// Skip hostname config, if not for the current one
 			}
-
-			$fileconf = (array)self::load_json($filename);
-			if (!$fileconf) {	// Fail as soon as one of the files cannot be loaded
-				if (function_exists('json_last_error_msg')) {
-					$error = json_last_error_msg();
-				}
-//				echo "$filename wrong $error";
-				return false;
+			if (self::load_json($filename) === null) {
+				$error = true;
 			}
-			$conf = array_merge_recursive_distinct($conf, $fileconf);
-//			echo "$filename loaded\n";
 		}
 
-		unset($conf['active_site']);
-		self::$config = $conf;
-		return self::$config;
+		if ($error) {
+			return false;
+		} else {
+			// Config initialized
+			self::log('SUCCESS: all config loaded');
+			//unset(self::$config['active_site']);
+			if (isset(self::$config['timezone'])) {
+				ini_set ('date.timezone', self::$config['timezone']);
+			}
+			return self::$config;
+		}
 	}
 
 	private function load_json($file) {
-		if (!is_readable($file)) {
-			return false;
-		}
-		if (($contents = file_get_contents($file)) === false) {
-			return false;
-		} else {
-			if (!function_exists('json_decode')) {
-				// XXX i.e. Ubuntu needs php5-json package installed
-				return false;
+		$fileconf = null;
+		if (is_readable($file)) {
+			if (($contents = file_get_contents($file)) !== false) {
+				if (function_exists('json_decode')) {	// XXX i.e. Ubuntu needs php5-json package installed
+					$fileconf = json_decode($contents, true);
+				} else {
+					self::log('json_decode() function is not available');
+				}
+			} else {
+				self::log("Cannot read file '$file'");
 			}
-			return json_decode($contents, true);
 		}
+		if ($fileconf === null) {
+			if (function_exists('json_last_error_msg')) {
+				$error = json_last_error_msg();
+			}
+			self::log("Loading '$file': ERROR ($error)");
+		} else {
+			if (self::$config === null) {
+				self::$config = $fileconf;
+			} else {
+				self::$config = (array)array_merge_recursive_distinct(self::$config, $fileconf);
+			}
+			self::log("Loading '$file': OK");
+		}
+		return $fileconf;
 	}
 
-/* Outdated
-	static public function store($filename) {
-		if (!create_file($filename)) {
-			return false;
-		} else if (file_put_contents($filename, self::$config, LOCK_EX) === false) {
-			return false;
-		}
-		return true;
+	// Private logging
+	private function log($string) {
+		self::$log .= "$string\n";
 	}
-*/
+
+	static public function init_log() {
+		return self::$log;
+	}
 
 	// Get all the config or the one for the specified app
 	static public function get($app_name = false) {
