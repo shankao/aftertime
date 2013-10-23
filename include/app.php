@@ -4,6 +4,48 @@ require_once 'include/template_log.php';
 require_once 'include/config.php';
 require_once 'include/db.php';
 
+final class appFactory {
+	private function __construct () {
+	}
+
+	// TODO Validate method params
+	// Maybe http://www.php.net/manual/en/ref.filter.php
+	static public function getApp($request) {
+		$config = Config::get();
+
+		if (!empty($request['app'])) {
+			$app_name = $request['app'];
+		} else {
+			if (!isset($config['init_app'])) {
+				log_entry ("ERROR: init_app not set");
+				return null;
+			} else {
+				$app_name = $config['init_app'];
+			}
+		}
+
+		if (Config::get($app_name) == false) {
+			log_entry("ERROR: application '$app_name' not defined");
+			return null;
+		}
+
+		log_entry ("Creating app $app_name");
+		$app_code_file = "sites/{$config['site']}/$app_name/code.php";
+		if (!is_readable($app_code_file)) {
+			log_entry ("Cannot load the app's code at $app_code_file");
+			return null;
+		}
+
+		require_once $app_code_file;
+		if (!class_exists($app_name)) {
+			log_entry ("No app class defined: $app_name");
+			return null;
+		}
+
+		return new $app_name($request);
+	}
+}
+
 class app {
 
 	protected $action;	// Requested app action
@@ -238,8 +280,6 @@ log_entry(print_r($_SERVER, true), 20000);
 			if (!method_exists($this, $method)) {
 				log_entry("WARNING: unexistent method: '$method'");
 			} else {
-				// TODO Validate method params
-				// Maybe http://www.php.net/manual/en/ref.filter.php
 				$result = $this->$method($this->params);
 			}
 		}
@@ -257,7 +297,6 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	public function __construct(array $request) {
-		// XXX Check / validate?
 		if (isset($_SESSION['keep'])) {
 			foreach ($_SESSION['keep'] as $var => $value) {
 				$this->$var = $value;
@@ -284,14 +323,6 @@ log_entry(print_r($_SERVER, true), 20000);
 		if ($this->is_user_logged()) {
 			log_entry ("Logging out user {$this->user['email']}");
 			$this->keep_remove('user');
-
-			$config = Config::get();
-			if (!isset($config['init_app'])) {
-				log_entry ("ERROR: init_app is not set");
-			} else {
-				$_SESSION['appname'] = $config['init_app'];
-			}
-			
 			$this->clean_login_cookies();
 		}
 	}
