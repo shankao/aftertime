@@ -9,10 +9,14 @@ function aftertime_init($web_init = true) {
 	}
 
 	// Init the rest (needs config)
+	if (isset($config['timezone'])) {
+		ini_set ('date.timezone', $config['timezone']);
+	}
 	ini_set ('include_path', '.' . PATH_SEPARATOR . 'lib/pear/php' . PATH_SEPARATOR . "sites/{$config['site']}");	// Adds the site folder
 	ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
 
 	if (class_exists('Log')) {
+		log_entry(Config::init_log());
 		ini_set ('error_log', Log::log_file());
 		set_error_handler(array('Log', 'php_errors'));
 		set_exception_handler(array('Log', 'php_errors'));
@@ -74,10 +78,7 @@ final class Config {
 		} else {
 			// Config initialized
 			self::log('SUCCESS: all config loaded');
-			//unset(self::$config['active_site']);
-			if (isset(self::$config['timezone'])) {
-				ini_set ('date.timezone', self::$config['timezone']);
-			}
+			unset(self::$config['active_site']);
 			return self::$config;
 		}
 	}
