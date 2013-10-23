@@ -67,6 +67,9 @@ info:
 	@echo "Current site: ${CURRENT_SITE}"
 	@echo "Site has DB defined: ${DB_DEFINED}"
 
+print-config:
+	@(cd ${BUILDPATH} && php scripts/getconfig.php)	
+
 $(AVAILABLE_SITES):
 	@echo "Setting site to $@"
 	echo $@ > $(SITE_FILE)
@@ -98,7 +101,7 @@ package:
 	(cd ${PACKAGESPATH} && zip -rq ${CURRENT_SITE}_$(CODE_REVNO).zip ${CURRENT_SITE}_$(CODE_REVNO) upgrade.sh)
 	rm -rf ${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
 
-.PHONY: info config clean-packages build-folder clean-build logs-folder clean all $(AVAILABLE_SITES) package build
+.PHONY: info print-config config clean-packages build-folder clean-build logs-folder clean all $(AVAILABLE_SITES) package build
 
 db-drop:
 	if [ "$(DB_DEFINED)" ]; then \
