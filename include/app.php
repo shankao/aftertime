@@ -11,6 +11,17 @@ final class appFactory {
 	// TODO Validate method params
 	// Maybe http://www.php.net/manual/en/ref.filter.php
 	static public function getApp($request) {
+
+		// Log and check the request URL
+		$url = $_SERVER['PHP_SELF'];
+		$url .= !empty($_SERVER['QUERY_STRING'])? "?{$_SERVER['QUERY_STRING']}" : '';
+		if (preg_match('/^\/(index\.php)(\?.*)?$/', $url) === 0) {
+			log_entry("REQUEST FILTERED: $url");
+			return null;
+		} else {
+			log_entry("REQUEST: $url");
+		}
+
 		$config = Config::get();
 
 		if (!empty($request['app'])) {
