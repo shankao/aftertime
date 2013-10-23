@@ -26,7 +26,7 @@ endif
 all:
 	$(MAKE) db-drop
 	$(MAKE) build
-	$(MAKE) db-restore FILE=sites/${CURRENT_SITE}/db/example_data.sql; \
+	$(MAKE) db-restore FILE=sites/${CURRENT_SITE}/db/example_data.sql;
 
 checkenv:
 	@if [ ! "${AVAILABLE_SITES}" ]; then \
@@ -180,6 +180,6 @@ ${ROOT_CONTENT}:
 .PHONY: root-content 
 
 .htaccess: templates/htaccess.php
-	(cd ${BUILDPATH}; \
+	@(cd ${BUILDPATH}; \
 		php ./scripts/ctemplate.php -t $^ > $@; \
 	)
