@@ -8,6 +8,12 @@ if (aftertime_init() === false) {
 } else {
 	require_once 'include/log.php';
 	require_once 'include/app.php';
+
+	// Log the query that we get. Some request could have been filtered by the HTTP server already
+	$url = $_SERVER['PHP_SELF'];
+	$url .= !empty($_SERVER['QUERY_STRING'])? "?{$_SERVER['QUERY_STRING']}" : '';
+	log_entry("REQUEST: $url");
+
 	$app = appFactory::getApp($_REQUEST);
 	if ($app) {
 		if ($app->run() !== 'redirect') {
