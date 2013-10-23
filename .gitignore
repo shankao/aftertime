@@ -1,8 +1,6 @@
 build
 packages
-config/aftertime.json
 config/.current.site
-*.mwb.bak
 lib/pear/cache
 lib/pear/download
 lib/pear/php/.channels
