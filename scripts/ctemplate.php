@@ -9,6 +9,10 @@ if (!isset($opts['t'])) {
 }
 
 $config = Config::init();
+if (!$config) {
+        echo Config::init_log();
+        exit (1);
+}
 $result = Template::render($opts['t']);
 exit($result? 0 : 1);
 ?>
