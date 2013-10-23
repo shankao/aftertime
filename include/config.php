@@ -8,7 +8,6 @@ function aftertime_init($web_init = true) {
 		return false;
 	}
 
-	// Init the rest (needs config)
 	if (isset($config['timezone'])) {
 		ini_set ('date.timezone', $config['timezone']);
 	}
@@ -125,17 +124,17 @@ final class Config {
 	static public function get($app_name = false) {
 		if (!self::$config) {
 			return false;
-		}
-		if ($app_name) {
-			if (!isset(self::$config['apps'])) {
-				return false;
+		} else {
+			if ($app_name) {
+				if (!isset(self::$config['apps']) || !isset(self::$config['apps'][$app_name])) {
+					return false;
+				} else {
+					return self::$config['apps'][$app_name];
+				}
+			} else {
+				return self::$config;
 			}
-			if (!isset(self::$config['apps'][$app_name])) {
-				return false;
-			}
-			return self::$config['apps'][$app_name];
 		}
-		return self::$config;
 	}
 
 	static public function set(array $config = null) {
