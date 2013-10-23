@@ -55,7 +55,7 @@ build:
 		rm -r $(addprefix ${BUILDPATH}/sites/,$(filter-out ${CURRENT_SITE}, $(AVAILABLE_SITES))); \
 	fi;
 	$(MAKE) root-content 
-	$(MAKE) .htaccess
+	$(MAKE) ${BUILDPATH}/.htaccess
 
 # Must take this folder name from the config...
 logs-folder:
@@ -179,7 +179,7 @@ ${ROOT_CONTENT}:
 
 .PHONY: root-content 
 
-.htaccess: templates/htaccess.php
+%.htaccess: templates/htaccess.php
 	@(cd ${BUILDPATH}; \
-		php ./scripts/ctemplate.php -t $^ > $@; \
+		php ./scripts/ctemplate.php -t $^ > .htaccess; \
 	)
