@@ -13,13 +13,11 @@ function print_config_values ($config, $prefix = '') {
 }
 
 require_once 'include/config.php';
-
-$config = Config::init();
-if (!$config) {
+if (aftertime_init(false) === false) {
 	echo Config::init_log();
 	exit (-1);
 }
 
-print_config_values($config);
+print_config_values(Config::get());
 exit (0);
 ?>

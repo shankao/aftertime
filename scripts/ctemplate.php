@@ -8,8 +8,7 @@ if (!isset($opts['t'])) {
 	exit(1);
 }
 
-$config = Config::init();
-if (!$config) {
+if (!aftertime_init(false)) {
         echo Config::init_log();
         exit (1);
 }
