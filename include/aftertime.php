@@ -43,17 +43,6 @@ function html_value($var) {
 		return '';
 }
 
-function load_jquery($url, $fallback = false) { ?>
-	<script type="text/javascript" src="<?php echo $url; ?>"></script><?php
-	if ($fallback) { ?>
-	<script type="text/javascript">
-		if (typeof jQuery == 'undefined') {
-			document.write(unescape("%3Cscript src='<?php echo $fallback; ?>' type='text/javascript'%3E%3C/script%3E"));
-		}
-	</script><?php
-	}
-}
-
 function get_title_tag() {
 	$config = Config::get();
         if (isset($config->pagetitle)) {
