@@ -3,13 +3,29 @@ require_once 'include/log.php';
 require_once 'include/template_log.php';
 require_once 'include/config.php';
 require_once 'include/db.php';
+/*
+	function filter(array $vars) {
+		foreach ($vars as $var => $value) {
+			$validator_fn = "validate_$var";
+			if (!is_callable(array('Validator', $validator_fn))) {
+				log_entry("ERROR: validator not found for '$var' param");
+				$error = true;
+				continue;
+			}
 
+			if ($this->$validator_fn($value) === false) {
+				log_entry("Checking '$var' for '$value': ERROR");
+			} else {
+				log_entry("Checking '$var' for '$value': OK");
+				$this->safe_vars[$var] = $value;
+			}
+		}
+	}
+*/
 final class appFactory {
 	private function __construct () {
 	}
 
-	// TODO Validate method params
-	// Maybe http://www.php.net/manual/en/ref.filter.php
 	static public function getApp($request) {
 
 		// Log and check the request URL
@@ -33,12 +49,14 @@ final class appFactory {
 				$request['app'] = $config['init_app'];
 			}
 		}
-		if (Config::get($request['app']) == false) {
-			log_entry("ERROR: application '{$request['app']}' not defined");
+                $app_config = Config::get($request['app']);
+		if ($app_config === false) {
+			log_entry("ERROR: application '{$request['app']}' invalid");
 			return null;
 		}
+		log_entry("Checking 'app' for '{$request['app']}': OK");
 
-		// page default
+		// page default and check
 		if (empty($request['page'])) {
 			$app_config = Config::get($request['app']);
 			if (!isset($app_config['init_page'])) {
@@ -48,20 +66,37 @@ final class appFactory {
 				$request['page'] = $app_config['init_page'];
 			}
 		}
+                if (!in_array($request['page'], $app_config['pages'])) {
+			log_entry ("ERROR: page '{$request['page']}' invalid");
+                        return null;
+                }
+		log_entry("Checking 'page' for '{$request['page']}': OK");
 
-		log_entry ("Creating app {$request['app']}");
+		// action default and checks
+		if (empty($request['a'])) {
+			$request['a'] = 'default_action';
+		}
+                if (!in_array($request['a'], $app_config['actions'])) {
+			log_entry ("ERROR: action '{$request['a']}' invalid");
+                        return null;
+                }
 		$app_code_file = "sites/{$config['site']}/{$request['app']}/code.php";
 		if (!is_readable($app_code_file)) {
 			log_entry ("Cannot load the app's code at $app_code_file");
 			return null;
 		}
-
 		require_once $app_code_file;
-		if (!class_exists($request['app'])) {
-			log_entry ("No app class defined: {$request['app']}");
+		if (!is_callable(array($request['app'], $request['a']))) {
+			log_entry("WARNING: cannot call method: '{$request['app']}::{$request['a']}'");
 			return null;
 		}
+		log_entry("Checking 'a' for '{$request['a']}': OK");
 
+		// TODO Validate method params now that we have loaded the config
+		// ...then, as specified in the config, for each combination of app+page,app+a
+		// Maybe http://www.php.net/manual/en/ref.filter.php
+
+		log_entry ("Creating app {$request['app']}");
 		return new $request['app']($request);
 	}
 }
@@ -266,40 +301,9 @@ log_entry(print_r($_SERVER, true), 20000);
 			return false;
 		}
 
-		// Find method to run, based on the requested action
-		$method = 'default_action';
-		if (!empty($this->action)) {
-			if (!isset($this->actions) || (isset($this->actions) && !in_array($this->action, $this->actions) && !array_key_exists($this->action, $this->actions))) {
-				log_entry("WARNING: unsupported action: '{$this->action}'");
-			} else {
-				if (isset($this->actions[$this->action])) {
-					$method = $this->actions[$this->action];
-				} else {
-					$method = $this->action;
-				}
-			}
-		}
-
-		// Run the method
-		$result = null;
-		if ($method) {
-			if (!method_exists($this, $method)) {
-				log_entry("WARNING: unexistent method: '$method'");
-			} else {
-				$result = $this->$method($this->params);
-			}
-		}
-
-		// Check for errors
-		if (isset($this->error)) {
-			$logline = $this->error;
-			if (isset($this->error_msg)) {
-				$logline .= " ({$this->error_msg})";
-			}
-			log_entry($logline);
-		}
-
-		return $result;
+		// Run the action
+		$action = $this->params['a'];
+		return $this->$action($this->params);	// TODO remove the param
 	}
 
 	public function __construct(array $request) {

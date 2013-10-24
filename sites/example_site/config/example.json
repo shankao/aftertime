@@ -5,7 +5,13 @@
 	"logs": "logs",
 	"apps": {
 		"example_app": {
-			"init_page": "example_page"
+			"pages": [
+				"example_page"
+			],
+			"init_page": "example_page",
+			"actions": [
+				"default_action"
+			]
 		}
 	}
 }

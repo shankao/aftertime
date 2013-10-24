@@ -21,11 +21,9 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 		<?php TemplateLog::render("$base_folder/templates/header.php"); // XXX This header and footer in every page it's becoming as a bad idea ?>
 		<div id="content"><?php 
 			// Load the current page
-			// XXX check that include file is in allowed pages list. TODO declare a pages list
-			$page = $app->current_page();
-			$app_name = get_class($app);
-			if (!$page || TemplateLog::render("$base_folder/$app_name/$page.php") === false ) {
-	        		echo '<div class="error">Unexistent page</div>';
+			if (TemplateLog::render("$base_folder/{$app->params['app']}/{$app->params['page']}.php") === false) {
+				log_entry('ERROR: unexistent page');
+				TemplateLog::render('templates/apperror.php');
 			} ?>
 		</div>
 		<?php TemplateLog::render("$base_folder/templates/footer.php"); ?>
