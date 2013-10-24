@@ -24,36 +24,45 @@ final class appFactory {
 
 		$config = Config::get();
 
-		if (!empty($request['app'])) {
-			$app_name = $request['app'];
-		} else {
+		// app default and check
+		if (empty($request['app'])) {
 			if (!isset($config['init_app'])) {
 				log_entry ("ERROR: init_app not set");
 				return null;
 			} else {
-				$app_name = $config['init_app'];
+				$request['app'] = $config['init_app'];
 			}
 		}
-
-		if (Config::get($app_name) == false) {
-			log_entry("ERROR: application '$app_name' not defined");
+		if (Config::get($request['app']) == false) {
+			log_entry("ERROR: application '{$request['app']}' not defined");
 			return null;
 		}
 
-		log_entry ("Creating app $app_name");
-		$app_code_file = "sites/{$config['site']}/$app_name/code.php";
+		// page default
+		if (empty($request['page'])) {
+			$app_config = Config::get($request['app']);
+			if (!isset($app_config['init_page'])) {
+				log_entry ('ERROR: init_page not set');
+				return null;
+			} else {
+				$request['page'] = $app_config['init_page'];
+			}
+		}
+
+		log_entry ("Creating app {$request['app']}");
+		$app_code_file = "sites/{$config['site']}/{$request['app']}/code.php";
 		if (!is_readable($app_code_file)) {
 			log_entry ("Cannot load the app's code at $app_code_file");
 			return null;
 		}
 
 		require_once $app_code_file;
-		if (!class_exists($app_name)) {
-			log_entry ("No app class defined: $app_name");
+		if (!class_exists($request['app'])) {
+			log_entry ("No app class defined: {$request['app']}");
 			return null;
 		}
 
-		return new $app_name($request);
+		return new $request['app']($request);
 	}
 }
 
@@ -237,32 +246,18 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	public function run() {
-		$app_name = get_class($this);
-		Log::caller($app_name);
-
-		if (isset($this->params['a'])) {
+		Log::caller($this->params['app']);
+		if (isset($this->params['a'])) {	// TODO Move when the action is running
 			$this->action = $this->params['a'];
-			Log::caller("$app_name/{$this->action}");
+			Log::caller("{$this->params['app']}/{$this->action}");
 		}
+
+		$this->page = $this->params['page'];
 
 		if (init_db()) {
 			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
 				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);
 			}
-		}
-
-		if (empty($this->params['page'])) {
-			$app_config = Config::get($app_name);
-			if (!isset($app_config['init_page'])) {
-				$this->error = 'ERROR_INIT_PAGE';
-				$this->error_msg = 'ERROR: init_page not set in app\'s config';
-				$this->template = 'apperror';
-				return false;
-			} else {
-				$this->page = $app_config['init_page'];
-			}
-		} else {
-			$this->page = $this->params['page'];
 		}
 
 		if ($this->check_http_auth() == false) {
@@ -323,7 +318,7 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	public function current_page() {
-		return isset($this->page)? $this->page : null;
+		return isset($this->params['page'])? $this->params['page'] : null;
 	}
 
 	public function login ($email, $password, $save_cookie=false) {
