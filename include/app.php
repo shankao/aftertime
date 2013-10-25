@@ -56,11 +56,10 @@ final class appFactory {
 		}
 		log_entry("Checking 'app' for '{$request['app']}': OK");
 
-		// page default and check
+		// page default and checks
 		if (empty($request['page'])) {
-			$app_config = Config::get($request['app']);
 			if (!isset($app_config['init_page'])) {
-				log_entry ('ERROR: init_page not set');
+				log_entry ("ERROR: init_page not set");
 				return null;
 			} else {
 				$request['page'] = $app_config['init_page'];
@@ -70,30 +69,20 @@ final class appFactory {
 			log_entry ("ERROR: page '{$request['page']}' invalid");
                         return null;
                 }
-		log_entry("Checking 'page' for '{$request['page']}': OK");
-
-		// action default and checks
-		if (empty($request['a'])) {
-			$request['a'] = 'default_action';
-		}
-                if (!in_array($request['a'], $app_config['actions'])) {
-			log_entry ("ERROR: action '{$request['a']}' invalid");
-                        return null;
-                }
 		$app_code_file = "sites/{$config['site']}/{$request['app']}/code.php";
 		if (!is_readable($app_code_file)) {
 			log_entry ("Cannot load the app's code at $app_code_file");
 			return null;
 		}
 		require_once $app_code_file;
-		if (!is_callable(array($request['app'], $request['a']))) {
-			log_entry("WARNING: cannot call method: '{$request['app']}::{$request['a']}'");
+		if (!is_callable(array($request['app'], $request['page']))) {
+			log_entry("WARNING: page has not method: '{$request['app']}::{$request['page']}'");
 			return null;
 		}
-		log_entry("Checking 'a' for '{$request['a']}': OK");
+		log_entry("Checking 'page' for '{$request['page']}': OK");
 
 		// TODO Validate method params now that we have loaded the config
-		// ...then, as specified in the config, for each combination of app+page,app+a
+		// ...then, as specified in the config, for each combination of app+a
 		// Maybe http://www.php.net/manual/en/ref.filter.php
 
 		log_entry ("Creating app {$request['app']}");
@@ -103,8 +92,7 @@ final class appFactory {
 
 class app {
 
-	protected $action;	// Requested app action
-	protected $page;	// Requested page to show after the action is run
+	public $page;	// page to show after the method is run (used by 'default' template)
 
 	public $template;	// XXX This is only the template name, not a TemplateLog object
 
@@ -193,7 +181,7 @@ class app {
                 return $result;
 	}
 
-	// App. redirection. Syntax is 'app/page/action'. You can ommit some (i.e. "//newaction"
+	// App. redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
 	protected function redirect($dest) {
 
 		log_entry("redirect($dest)");
@@ -202,9 +190,6 @@ class app {
 		$url = "index.php?app={$parts[0]}";
 		if (isset($parts[1])) {
 			$url .= "&page={$parts[1]}";
-		}
-		if (isset($parts[2])) {
-			$url .= "&a={$parts[2]}";
 		}
 
 		if (isset($this->error)) {
@@ -247,11 +232,6 @@ class app {
 		}
 	}
 
-	protected function default_action() {
-		log_entry('App::default_action()');
-		$this->template = 'default';
-	}
-
 	// Basic auth. code taken from http://www.php.net/manual/en/features.http-auth.php
 	private function check_http_auth() {
 		$c = Config::get(get_class($this));
@@ -282,12 +262,11 @@ log_entry(print_r($_SERVER, true), 20000);
 
 	public function run() {
 		Log::caller($this->params['app']);
-		if (isset($this->params['a'])) {	// TODO Move when the action is running
-			$this->action = $this->params['a'];
-			Log::caller("{$this->params['app']}/{$this->action}");
+		if (isset($this->params['page'])) {	// TODO Move to when the method is running
+			Log::caller("{$this->params['app']}/{$this->params['page']}");
 		}
 
-		$this->page = $this->params['page'];
+		$this->page = $this->params['page'];	// Used by 'default' template
 
 		if (init_db()) {
 			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
@@ -301,9 +280,9 @@ log_entry(print_r($_SERVER, true), 20000);
 			return false;
 		}
 
-		// Run the action
-		$action = $this->params['a'];
-		return $this->$action($this->params);	// TODO remove the param
+		// Run the page method
+		$method = $this->params['page'];
+		return $this->$method($this->params);	// TODO remove the param
 	}
 
 	public function __construct(array $request) {
@@ -321,8 +300,9 @@ log_entry(print_r($_SERVER, true), 20000);
 		$this->params = $request;
 	}
 
+	// Used by 'default' template
 	public function current_page() {
-		return isset($this->params['page'])? $this->params['page'] : null;
+		return $this->params['page'];
 	}
 
 	public function login ($email, $password, $save_cookie=false) {

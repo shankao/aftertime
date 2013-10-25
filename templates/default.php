@@ -21,8 +21,8 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 		<?php TemplateLog::render("$base_folder/templates/header.php"); // XXX This header and footer in every page it's becoming as a bad idea ?>
 		<div id="content"><?php 
 			// Load the current page
-			if (TemplateLog::render("$base_folder/{$app->params['app']}/{$app->params['page']}.php") === false) {
-				log_entry('ERROR: unexistent page');
+			if (!isset($app->page) || TemplateLog::render("$base_folder/{$app->params['app']}/{$app->page}.php") === false) {
+				log_entry("ERROR: unexistent page {$app->page}");
 				TemplateLog::render('templates/apperror.php');
 			} ?>
 		</div>
