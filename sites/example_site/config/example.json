@@ -6,9 +6,32 @@
 	"apps": {
 		"example_app": {
 			"init_page": "example_page",
-			"pages": [
-				"example_page"
-			]
+			"pages": {
+				"example_page": {
+					"params": {
+						"int": {
+							"filter": "int",
+							"filter_options": {
+								"min_range": "5",
+								"max_range": "10"
+							},
+							"filter_flags": "FILTER_FLAG_ALLOW_HEX|FILTER_FLAG_ALLOW_OCTAL"
+						},
+						"regexp": {
+							"filter": "validate_regexp",
+							"filter_options": {
+								"regexp": "/^[a|b]?c$/"
+							}
+						},
+						"callback": {
+							"filter": "callback",
+							"filter_options": {
+								"callback": "my_validator"
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }

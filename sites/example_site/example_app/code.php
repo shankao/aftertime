@@ -13,5 +13,14 @@ class example_app extends app {
 		// Presents a standard HTML type (templates/default.php)
 		$this->template = 'default';		
 	}
+
+	// Custom validator
+	function my_validator($param) {
+		if ($param == 'test' && $_REQUEST['int'] == '5') {
+			return $param;
+		} else {
+			return false;
+		}
+	}
 }
 ?>
