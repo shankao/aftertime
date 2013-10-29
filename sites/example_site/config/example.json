@@ -8,6 +8,7 @@
 			"init_page": "example_page",
 			"pages": {
 				"example_page": {
+					"title": "Page example",
 					"params": {
 						"int": {
 							"filter": "int",

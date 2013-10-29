@@ -7,9 +7,6 @@ class example_app extends app {
 
 	// example_page is the only page defined in the app. Its method is called when requesting the page
 	function example_page() {
-		// Set's the title to show in the browser (<title> tag)
-		set_pagetitle('Page example');
-
 		// Presents a standard HTML type (templates/default.php)
 		$this->template = 'default';		
 	}

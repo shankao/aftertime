@@ -7,7 +7,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 	<head>
                 <meta charset="UTF-8" />
                 <meta http-equiv="Content-Language" content="en" />
-		<title><?php echo get_title_tag(); ?></title>
+		<title><?php echo $app->get_title_tag(); ?></title>
 		<?php
 			$favicon = "$base_folder/img/favicon.ico";
 			if (is_readable($favicon)) { ?>

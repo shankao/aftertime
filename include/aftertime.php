@@ -43,21 +43,6 @@ function html_value($var) {
 		return '';
 }
 
-function get_title_tag() {
-	$config = Config::get();
-        if (isset($config->pagetitle)) {
-                $title_tag = "{$config['pagetitle']}";
-                if (isset($config['webtitle']))
-                        $title_tag .= " - {$config['webtitle']}";
-
-        } else if (isset($config['webtitle'])) {
-                $title_tag = "{$config['webtitle']}";
-        } else {
-                $title_tag = "Website";
-        }
-        return $title_tag;
-}
-
 function get_content_folder() {
 	static $folder = false;
 	if (!$folder) {

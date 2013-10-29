@@ -444,5 +444,21 @@ log_entry(print_r($_SERVER, true), 20000);
 			return false;
 		}
 	}
+
+	public function get_title_tag() {
+		$config = Config::get();
+		$app_config = $config['apps'][$this->params['app']];
+		$page_config = $app_config['pages'][$this->page];
+
+		if (isset($page_config['title'])) {
+			$title_tag = "{$page_config['title']}";
+			if (isset($app_config['webtitle']))
+				$title_tag .= " - {$config['webtitle']}";
+
+		} else if (isset($config['webtitle'])) {
+			$title_tag = "{$config['webtitle']}";
+		}
+		return $title_tag;
+	}
 }
 ?>
