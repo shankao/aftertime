@@ -44,7 +44,6 @@ function validate_page_params (array $page_params, array $request, &$errors) {
 		$filter_type = isset($param_conf['filter'])? $param_conf['filter'] : null;
 		if (!$filter_type) {
 			log_entry("WARNING: no filters for '$param_name'");
-			continue;
 		} else {
 			$value = isset($request[$param_name])? $request[$param_name] : null;
 			if ($value === null) {
@@ -52,41 +51,39 @@ function validate_page_params (array $page_params, array $request, &$errors) {
 				if ($param_required) {
 					$errors[] = "PARAM_REQUIRED_$param_name";
 					log_entry("ERROR: param '$param_name' is required");
-				} else {
-					continue;
 				}
-			}
-
-			$options = array();
-			if (isset($param_conf['filter_options'])) {
-				$options['options'] = $param_conf['filter_options'];
-				if (isset($options['options']['callback'])) {	// Don't allow methods out of the App's class
-					$options['options'] = array($appclass, $options['options']['callback']);
-					if (!is_callable($options['options'], $funcname)) {
-						log_entry ("ERROR: cannot find validator function '$funcname'");
-						return false;
+			} else {
+				$options = array();
+				if (isset($param_conf['filter_options'])) {
+					$options['options'] = $param_conf['filter_options'];
+					if (isset($options['options']['callback'])) {	// Don't allow methods out of the App's class
+						$options['options'] = array($appclass, $options['options']['callback']);
+						if (!is_callable($options['options'], $funcname)) {
+							log_entry ("ERROR: cannot find validator function '$funcname'");
+							return false;
+						}
 					}
 				}
-			}
-			if (isset($param_conf['filter_flags'])) {
-				$flags = translate_validate_flags($param_conf['filter_flags']);
-				if ($flags === false) {
-					log_entry ("ERROR: Wrong flags: {$param_conf['filter_flags']}");
-					return false;
+				if (isset($param_conf['filter_flags'])) {
+					$flags = translate_validate_flags($param_conf['filter_flags']);
+					if ($flags === false) {
+						log_entry ("ERROR: Wrong flags: {$param_conf['filter_flags']}");
+						return false;
+					}
+					$options['flags'] = $flags;
 				}
-				$options['flags'] = $flags;
-			}
 
-			log_entry("Checking '$param_name' for filter '$filter_type'"); 
-			$filter_id = filter_id($filter_type);
-			if ($filter_id === false) {
-				log_entry ("ERROR: Filter $filter_type does not exist");
-				log_entry ('Available filter types: '.print_r(filter_list(), true));
-				return false;
-			} else {
-				if (filter_var($value, $filter_id, $options) === false) {
-					log_entry ("ERROR: Filter $filter_type failed for '$param_name'");
-					$errors[] = "PARAM_INVALID_$param_name";
+				log_entry("Checking '$param_name' for filter '$filter_type'"); 
+				$filter_id = filter_id($filter_type);
+				if ($filter_id === false) {
+					log_entry ("ERROR: Filter $filter_type does not exist");
+					log_entry ('Available filter types: '.print_r(filter_list(), true));
+					return false;
+				} else {
+					if (filter_var($value, $filter_id, $options) === false) {
+						log_entry ("ERROR: Filter $filter_type failed for '$param_name'");
+						$errors[] = "PARAM_INVALID_$param_name";
+					}
 				}
 			}
 		}
