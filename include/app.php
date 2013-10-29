@@ -210,7 +210,7 @@ class app {
 		else if (!$this->check_password($password, $user->password, $password_is_encrypted)) {
 			$this->error = 'WRONG_PASSWD';
 		} else {
-			$this->keep('user', $user->toArray());
+			keep('user', $user->toArray());
 
 			if ($save_cookie) {	// Save for 10 days
 				setcookie('us', $email, time()+864000, '/', null, false, true);
@@ -270,46 +270,6 @@ class app {
 		}
 
                 return $result;
-	}
-
-	// App. redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
-	protected function redirect($dest) {
-
-		log_entry("redirect($dest)");
-		$parts = explode('/', $dest);
-
-		$url = "index.php?app={$parts[0]}";
-		if (isset($parts[1])) {
-			$url .= "&page={$parts[1]}";
-		}
-
-		if (isset($this->error)) {
-			$this->keep_once('error', $this->error);
-		}
-		if (isset($this->error_msg)) {
-			$this->keep_once('error_msg', $this->error_msg);
-		}
-
-		log_entry ("HTTP redirecting to $url");
-		header("Location: $url", true, 303);
-		return 'redirect';
-	}
-
-	protected function keep_once($var, $value) {
-		$_SESSION['keep_once'][$var] = $value;
-	}
-
-	protected function keep($var, $value) {
-		$_SESSION['keep'][$var] = $value;
-	}
-
-	protected function keep_remove($var) {
-		if (isset($_SESSION['keep_once'][$var])) {
-			unset($_SESSION['keep_once'][$var]);
-		}
-		if (isset($_SESSION['keep'][$var])) {
-			unset($_SESSION['keep'][$var]);
-		}
 	}
 
 	protected function db_error() {
@@ -377,16 +337,8 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	public function __construct(array $request) {
-		if (isset($_SESSION['keep'])) {
-			foreach ($_SESSION['keep'] as $var => $value) {
-				$this->$var = $value;
-			}
-		}
-		if (isset($_SESSION['keep_once'])) {
-			foreach ($_SESSION['keep_once'] as $var => $value) {
-				$this->$var = $value;
-			}
-			unset ($_SESSION['keep_once']);
+		foreach (keep_get_all() as $name => $value) {
+			$this->$name = $value;
 		}
 		$this->params = $request;
 	}
@@ -403,7 +355,7 @@ log_entry(print_r($_SERVER, true), 20000);
 	public function logout () {
 		if ($this->is_user_logged()) {
 			log_entry ("Logging out user {$this->user['email']}");
-			$this->keep_remove('user');
+			keep_remove('user');
 			$this->clean_login_cookies();
 		}
 	}
@@ -469,5 +421,62 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 		return $title_tag;
 	}
+
+	protected function redirect($dest) {
+		if (isset($this->error)) {
+			keep_once('error', $this->error);
+		}
+		if (isset($this->error_msg)) {
+			keep_once('error_msg', $this->error_msg);
+		}
+
+		redirect($dest);
+		return 'redirect';
+	}
 }
+
+
+
+function keep_once($var, $value) {
+	$_SESSION['keep_once'][$var] = $value;
+}
+
+function keep($var, $value) {
+	$_SESSION['keep'][$var] = $value;
+}
+
+function keep_remove($var) {
+	if (isset($_SESSION['keep_once'][$var])) {
+		unset($_SESSION['keep_once'][$var]);
+	}
+	if (isset($_SESSION['keep'][$var])) {
+		unset($_SESSION['keep'][$var]);
+	}
+}
+
+function keep_get_all() {
+	$vars = array();
+	if (isset($_SESSION['keep'])) {
+		$vars = $_SESSION['keep'];
+	}
+	if (isset($_SESSION['keep_once'])) {
+		$vars = array_merge($vars, $_SESSION['keep_once']);
+		unset ($_SESSION['keep_once']);
+	}
+	return $vars;
+}
+
+// HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
+function redirect(string $dest, $response = 303) {
+	$parts = explode('/', $dest);
+
+	$url = "index.php?app={$parts[0]}";
+	if (isset($parts[1])) {
+		$url .= "&page={$parts[1]}";
+	}
+
+	log_entry ("HTTP redirecting to $url");
+	header("Location: $url", true, $response);
+}
+
 ?>
