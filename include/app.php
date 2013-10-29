@@ -3,25 +3,101 @@ require_once 'include/log.php';
 require_once 'include/template_log.php';
 require_once 'include/config.php';
 require_once 'include/db.php';
-/*
-	function filter(array $vars) {
-		foreach ($vars as $var => $value) {
-			$validator_fn = "validate_$var";
-			if (!is_callable(array('Validator', $validator_fn))) {
-				log_entry("ERROR: validator not found for '$var' param");
-				$error = true;
-				continue;
+
+function translate_validate_flags($string) {
+	$output = 0;
+	foreach (explode('|', $string) as $filter_str) {
+		$filter_str = trim($filter_str);
+		switch($filter_str) {
+			case 'FILTER_FLAG_STRIP_LOW': $filter = FILTER_FLAG_STRIP_LOW; break;
+			case 'FILTER_FLAG_STRIP_HIGH': $filter = FILTER_FLAG_STRIP_HIGH; break;
+			case 'FILTER_FLAG_ALLOW_FRACTION': $filter = FILTER_FLAG_ALLOW_FRACTION; break;
+			case 'FILTER_FLAG_ALLOW_THOUSAND': $filter = FILTER_FLAG_ALLOW_THOUSAND; break;
+			case 'FILTER_FLAG_ALLOW_SCIENTIFIC': $filter = FILTER_FLAG_ALLOW_SCIENTIFIC; break;
+			case 'FILTER_FLAG_NO_ENCODE_QUOTES': $filter = FILTER_FLAG_NO_ENCODE_QUOTES; break;
+			case 'FILTER_FLAG_ENCODE_LOW': $filter = FILTER_FLAG_ENCODE_LOW; break;
+			case 'FILTER_FLAG_ENCODE_HIGH': $filter = FILTER_FLAG_ENCODE_HIGH; break;
+			case 'FILTER_FLAG_ENCODE_AMP': $filter = FILTER_FLAG_ENCODE_AMP; break;
+			case 'FILTER_NULL_ON_FAILURE': $filter = FILTER_NULL_ON_FAILURE; break;
+			case 'FILTER_FLAG_ALLOW_OCTAL': $filter = FILTER_FLAG_ALLOW_OCTAL; break;
+			case 'FILTER_FLAG_ALLOW_HEX': $filter = FILTER_FLAG_ALLOW_HEX; break;
+			case 'FILTER_FLAG_IPV4': $filter = FILTER_FLAG_IPV4; break;
+			case 'FILTER_FLAG_IPV6': $filter = FILTER_FLAG_IPV6; break;
+			case 'FILTER_NO_PRIV_RANGE': $filter = FILTER_NO_PRIV_RANGE; break;
+			case 'FILTER_NO_RES_RANGE': $filter = FILTER_NO_RES_RANGE; break;
+			case 'FILTER_FLAG_PATH_REQUIRED': $filter = FILTER_FLAG_PATH_REQUIRED; break;
+			case 'FILTER_FLAG_QUERY_REQUIRED': $filter = FILTER_FLAG_QUERY_REQUIRED; break;
+			default: return false;
+		}
+		$output = $output | $filter;
+	}
+	return $output;
+}
+
+// Validation using PHP filter functions http://www.php.net/manual/en/ref.filter.php
+function validate_page_params (array $page_params, array $request) {
+	$appclass = $request['app'];
+	unset($request['app']);
+	unset($request['page']);
+	foreach ($page_params as $param_name => $param_conf) {
+		$filter_type = isset($param_conf['filter'])? $param_conf['filter'] : null;
+		if (!$filter_type) {
+			log_entry("WARNING: no filters for '$param_name'");
+			continue;
+		} else {
+			$value = isset($request[$param_name])? $request[$param_name] : null;
+			if ($value === null) {
+				$param_required = isset($param_conf['required'])? $param_conf['required'] : false;
+				if ($param_required) {
+					log_entry("ERROR: param '$param_name' is required");
+					return false;
+				} else {
+					continue;
+				}
 			}
 
-			if ($this->$validator_fn($value) === false) {
-				log_entry("Checking '$var' for '$value': ERROR");
+			$options = array();
+			if (isset($param_conf['filter_options'])) {
+				$options['options'] = $param_conf['filter_options'];
+				if (isset($options['options']['callback'])) {	// Don't allow methods out of the App's class
+					$options['options'] = array($appclass, $options['options']['callback']);
+					if (!is_callable($options['options'], $funcname)) {
+						log_entry ("ERROR: cannot find validator function '$funcname'");
+						return false;
+					}
+				}
+			}
+			if (isset($param_conf['filter_flags'])) {
+				$flags = translate_validate_flags($param_conf['filter_flags']);
+				if ($flags === false) {
+					log_entry ("ERROR: Wrong flags: {$param_conf['filter_flags']}");
+					return false;
+				}
+				$options['flags'] = $flags;
+			}
+
+			log_entry("Checking '$param_name' for filter '$filter_type'"); 
+			$filter_id = filter_id($filter_type);
+			if ($filter_id === false) {
+				log_entry ("ERROR: Filter $filter_type does not exist");
+				log_entry ('Available filter types: '.print_r(filter_list(), true));
+				return false;
 			} else {
-				log_entry("Checking '$var' for '$value': OK");
-				$this->safe_vars[$var] = $value;
+				if (filter_var($value, $filter_id, $options) === false) {
+					log_entry ("ERROR: Filter $filter_type failed for '$param_name'");
+					return false;
+				}
 			}
 		}
+		unset($request[$param_name]);
 	}
-*/
+	if (count($request)) {
+		log_entry("ERROR: unknown params: ".implode(', ', array_keys($request)));
+		return false;
+	}
+	return true;
+}
+
 final class appFactory {
 	private function __construct () {
 	}
@@ -65,7 +141,7 @@ final class appFactory {
 				$request['page'] = $app_config['init_page'];
 			}
 		}
-                if (!in_array($request['page'], $app_config['pages'])) {
+                if (!isset($app_config['pages'][$request['page']])) {
 			log_entry ("ERROR: page '{$request['page']}' invalid");
                         return null;
                 }
@@ -76,14 +152,16 @@ final class appFactory {
 		}
 		require_once $app_code_file;
 		if (!is_callable(array($request['app'], $request['page']))) {
-			log_entry("WARNING: page has not method: '{$request['app']}::{$request['page']}'");
+			log_entry("ERROR: page has not method: '{$request['app']}::{$request['page']}'");
 			return null;
 		}
 		log_entry("Checking 'page' for '{$request['page']}': OK");
 
-		// TODO Validate method params now that we have loaded the config
-		// ...then, as specified in the config, for each combination of app+a
-		// Maybe http://www.php.net/manual/en/ref.filter.php
+		// XXX Consider if param validation should be done after creating the app object, so custom validators can use it too
+		$page_params = $app_config['pages'][$request['page']]['params'];
+		if (validate_page_params($page_params, $request) === false) {
+			return null;
+		}
 
 		log_entry ("Creating app {$request['app']}");
 		return new $request['app']($request);
