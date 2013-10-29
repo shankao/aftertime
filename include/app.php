@@ -46,7 +46,7 @@ function validate_page_params (array $page_params, array $request, &$errors) {
 			log_entry("WARNING: no filters for '$param_name'");
 		} else {
 			$value = isset($request[$param_name])? $request[$param_name] : null;
-			if ($value === null) {
+			if (empty($value)) {
 				$param_required = isset($param_conf['required'])? $param_conf['required'] : false;
 				if ($param_required) {
 					$errors[] = "PARAM_REQUIRED_$param_name";
