@@ -30,7 +30,8 @@
 								"callback": "my_validator"
 							}
 						}
-					}
+					},
+					"params_error" : "my_params_error"
 				}
 			}
 		}

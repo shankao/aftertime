@@ -35,7 +35,8 @@ function translate_validate_flags($string) {
 }
 
 // Validation using PHP filter functions http://www.php.net/manual/en/ref.filter.php
-function validate_page_params (array $page_params, array $request) {
+function validate_page_params (array $page_params, array $request, &$errors) {
+	$errors = array();
 	$appclass = $request['app'];
 	unset($request['app']);
 	unset($request['page']);
@@ -49,8 +50,8 @@ function validate_page_params (array $page_params, array $request) {
 			if ($value === null) {
 				$param_required = isset($param_conf['required'])? $param_conf['required'] : false;
 				if ($param_required) {
+					$errors[] = "PARAM_REQUIRED_$param_name";
 					log_entry("ERROR: param '$param_name' is required");
-					return false;
 				} else {
 					continue;
 				}
@@ -85,7 +86,7 @@ function validate_page_params (array $page_params, array $request) {
 			} else {
 				if (filter_var($value, $filter_id, $options) === false) {
 					log_entry ("ERROR: Filter $filter_type failed for '$param_name'");
-					return false;
+					$errors[] = "PARAM_INVALID_$param_name";
 				}
 			}
 		}
@@ -93,6 +94,9 @@ function validate_page_params (array $page_params, array $request) {
 	}
 	if (count($request)) {
 		log_entry("ERROR: unknown params: ".implode(', ', array_keys($request)));
+		return false;
+	}
+	if (count($errors)) {
 		return false;
 	}
 	return true;
@@ -158,9 +162,17 @@ final class appFactory {
 		log_entry("Checking 'page' for '{$request['page']}': OK");
 
 		// XXX Consider if param validation should be done after creating the app object, so custom validators can use it too
-		if (isset($app_config['pages'][$request['page']]['params'])) {
-			$page_params = $app_config['pages'][$request['page']]['params'];
-			if (validate_page_params($page_params, $request) === false) {
+		$page_config = $app_config['pages'][$request['page']];
+		if (isset($page_config['params'])) {
+			if (validate_page_params($page_config['params'], $request, $param_errors) === false) {
+				if (isset($page_config['params_error'])) {
+					$fn = array($request['app'], $page_config['params_error']);
+					if (!is_callable($fn, $fn_name)) {
+						log_entry("ERROR: cannot call the params_error function: '$fn_name'");
+					} else {
+						$fn($param_errors);	// XXX Should avoid the return null next?
+					}
+				}
 				return null;
 			}
 		} else {

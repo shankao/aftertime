@@ -19,5 +19,11 @@ class example_app extends app {
 			return false;
 		}
 	}
+
+	// Custom params error
+	function my_params_error($errors) {
+		echo 'Found this errors:<br>';
+		echo nl2br(print_r($errors, true));
+	}
 }
 ?>
