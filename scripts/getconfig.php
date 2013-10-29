@@ -3,11 +3,16 @@ Returns the site's configuration
 */
 
 function print_config_values ($config, $prefix = '') {
-	foreach ($config as $key => $value) {
-		if (is_array($value)) {
-			print_config_values($value, "$prefix$key.");
-		} else {
-			echo "$prefix$key=$value\n";
+	if (empty($config)) {
+		$prefix = substr($prefix, 0, -1);
+		echo "$prefix=\n";
+	} else {
+		foreach ($config as $key => $value) {
+			if (is_array($value)) {
+				print_config_values($value, "$prefix$key.");
+			} else {
+				echo "$prefix$key=$value\n";
+			}
 		}
 	}
 }
