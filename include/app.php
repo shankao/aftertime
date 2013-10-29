@@ -158,9 +158,13 @@ final class appFactory {
 		log_entry("Checking 'page' for '{$request['page']}': OK");
 
 		// XXX Consider if param validation should be done after creating the app object, so custom validators can use it too
-		$page_params = $app_config['pages'][$request['page']]['params'];
-		if (validate_page_params($page_params, $request) === false) {
-			return null;
+		if (isset($app_config['pages'][$request['page']]['params'])) {
+			$page_params = $app_config['pages'][$request['page']]['params'];
+			if (validate_page_params($page_params, $request) === false) {
+				return null;
+			}
+		} else {
+			log_entry("WARNING: params not specified for '{$request['page']}' page. Validation checks will not be performed");
 		}
 
 		log_entry ("Creating app {$request['app']}");
