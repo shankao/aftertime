@@ -429,7 +429,6 @@ log_entry(print_r($_SERVER, true), 20000);
 		if (isset($this->error_msg)) {
 			keep_once('error_msg', $this->error_msg);
 		}
-
 		redirect($dest);
 		return 'redirect';
 	}
@@ -467,7 +466,7 @@ function keep_get_all() {
 }
 
 // HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
-function redirect(string $dest, $response = 303) {
+function redirect($dest, $response = 303) {
 	$parts = explode('/', $dest);
 
 	$url = "index.php?app={$parts[0]}";
