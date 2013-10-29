@@ -184,14 +184,22 @@ final class appFactory {
 class app {
 
 	public $page;	// page to show after the method is run (used by 'default' template)
-
 	public $template;	// XXX This is only the template name, not a TemplateLog object
-
-	public $error;          // Error code
-        public $error_msg;      // Error message
-
+	public $errors;		// Errors from the previous app. Originally stored via keep_once()
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
+
+	public function error_add($code, $message = '') {
+		$this->errors[$code] = empty($message)? $code : $message;
+	}
+
+	public function has_error($code = null) {
+		if ($code === null) {
+			return count($this->errors)? true : false;
+		} else {
+			return isset($this->errors[$code])? true : false;
+		}
+	}
 
 	/*
 	Functions for user authentication. 
@@ -205,24 +213,23 @@ class app {
 
 		$user = DB_DataObject::factory('users');
 		$user->email = $email;
-		if (!$user->find(true))
-			$this->error = 'NO_USER_FOUND';
-		else if (!$this->check_password($password, $user->password, $password_is_encrypted)) {
-			$this->error = 'WRONG_PASSWD';
-		} else {
-			keep('user', $user->toArray());
-
-			if ($save_cookie) {	// Save for 10 days
-				setcookie('us', $email, time()+864000, '/', null, false, true);
-				setcookie('pw', $user->password, time()+864000, '/', null, false, true);
-			}
+		if (!$user->find(true)) {
+			$this->error_add('NO_USER_FOUND');
+			log_entry ("User not found for email '$email'");
+			return false;
+		} else if (!$this->check_password($password, $user->password, $password_is_encrypted)) {
+			$this->error_add('WRONG_PASSWD');
+			log_entry ("Wrong password for email '$email'");
+			return false;
 		}
 
-		if (isset($this->error)) {
-			log_entry ("Login error for user $email: {$this->error}");
-		} else {
-			log_entry ("User logged in successfully: $email");
+		keep('user', $user->toArray());
+		if ($save_cookie) {	// Save for 10 days
+			setcookie('us', $email, time()+864000, '/', null, false, true);
+			setcookie('pw', $user->password, time()+864000, '/', null, false, true);
 		}
+		log_entry ("User logged in successfully: $email");
+		return true;
 	}
 
 	private function clean_login_cookies() {
@@ -275,8 +282,7 @@ class app {
 	protected function db_error() {
 		$error = db_error();	// That's the function in include/aftertime.php
 		if ($error) {
-			$this->error = 'DB ERROR';
-			$this->error_msg = $error;
+			$this->error_add('DB_ERROR', $error);
 			return true;
 		} else {
 			return false;
@@ -321,12 +327,12 @@ log_entry(print_r($_SERVER, true), 20000);
 
 		if (init_db()) {
 			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
-				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);
+				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);	// TODO check login result
 			}
 		}
 
 		if ($this->check_http_auth() == false) {
-			$this->error = 'HTTP_AUTH_ERROR';
+			$this->error_add('HTTP_AUTH_ERROR');
 			$this->template = 'apperror';
 			return false;
 		}
@@ -423,11 +429,8 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	protected function redirect($dest) {
-		if (isset($this->error)) {
-			keep_once('error', $this->error);
-		}
-		if (isset($this->error_msg)) {
-			keep_once('error_msg', $this->error_msg);
+		if (isset($this->errors)) {
+			keep_once('errors', $this->errors);
 		}
 		redirect($dest);
 		return 'redirect';
