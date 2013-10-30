@@ -41,18 +41,16 @@ function validate_page_params (array $page_params, array $request, &$errors) {
 	unset($request['app']);
 	unset($request['page']);
 	foreach ($page_params as $param_name => $param_conf) {
-		$filter_type = isset($param_conf['filter'])? $param_conf['filter'] : null;
-		if (!$filter_type) {
-			log_entry("WARNING: no filters for '$param_name'");
+		$value = isset($request[$param_name])? $request[$param_name] : null;
+		if (empty($value)) {
+			$param_required = isset($param_conf['required'])? $param_conf['required'] : false;
+			if ($param_required) {
+				$errors[] = 'PARAM_REQUIRED_'.strtoupper($param_name);
+				log_entry("ERROR: param '$param_name' is required");
+			}
 		} else {
-			$value = isset($request[$param_name])? $request[$param_name] : null;
-			if (empty($value)) {
-				$param_required = isset($param_conf['required'])? $param_conf['required'] : false;
-				if ($param_required) {
-					$errors[] = "PARAM_REQUIRED_$param_name";
-					log_entry("ERROR: param '$param_name' is required");
-				}
-			} else {
+			$filter_type = isset($param_conf['filter'])? $param_conf['filter'] : null;
+			if ($filter_type) {
 				$options = array();
 				if (isset($param_conf['filter_options'])) {
 					$options['options'] = $param_conf['filter_options'];
@@ -82,7 +80,7 @@ function validate_page_params (array $page_params, array $request, &$errors) {
 				} else {
 					if (filter_var($value, $filter_id, $options) === false) {
 						log_entry ("ERROR: Filter $filter_type failed for '$param_name'");
-						$errors[] = "PARAM_INVALID_$param_name";
+						$errors[] = 'PARAM_INVALID_'.strtoupper($param_name);
 					}
 				}
 			}
@@ -189,13 +187,13 @@ class app {
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
 
-	public function error_add($code, $message = '') {
-		$this->errors[$code] = empty($message)? $code : $message;
+	public function error_add($code) {
+		$this->errors[] = $code;
 	}
 
 	public function has_error($code = null) {
 		if ($code === null) {
-			return count($this->errors)? true : false;
+			return count($this->errors);
 		} else {
 			return isset($this->errors[$code])? true : false;
 		}
