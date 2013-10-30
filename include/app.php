@@ -181,9 +181,9 @@ final class appFactory {
 
 class app {
 
-	public $page;	// page to show after the method is run (used by 'default' template)
+	public $page;		// page to show after the method is run (used by 'default' template)
 	public $template;	// XXX This is only the template name, not a TemplateLog object
-	public $errors;		// Errors from the previous app. Originally stored via keep_once()
+	public $errors;		// Errors from the previous app. Usually stored via keep_once()
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
 
@@ -195,7 +195,13 @@ class app {
 		if ($code === null) {
 			return count($this->errors);
 		} else {
-			return isset($this->errors[$code])? true : false;
+			return in_array($code, $this->errors)? true : false;
+		}
+	}
+
+	public function print_error($code) {
+		if ($this->has_error($code)) {
+			echo "<div class=\"error\">$code</div>";	// fixme This should be a template
 		}
 	}
 
