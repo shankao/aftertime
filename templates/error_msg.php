@@ -1,6 +1,7 @@
 <?php
-if (isset($app->error)) {
-	$error = isset($app->error_msg)? $app->error_msg : $app->error;
-	echo "<div class=\"error\">$error</div>";
+if ($app->has_error()) {
+	foreach($app->errors as $error) {
+		echo "<div class=\"error\">$error</div>";
+	}
 }
 ?>
