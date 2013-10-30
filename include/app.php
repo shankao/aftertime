@@ -160,15 +160,10 @@ final class appFactory {
 		$page_config = $app_config['pages'][$request['page']];
 		if (isset($page_config['params'])) {
 			if (validate_page_params($page_config['params'], $request, $param_errors) === false) {
-				if (isset($page_config['params_error'])) {
-					$fn = array($request['app'], $page_config['params_error']);
-					if (!is_callable($fn, $fn_name)) {
-						log_entry("ERROR: cannot call the params_error function: '$fn_name'");
-					} else {
-						$fn($param_errors);	// XXX Should avoid the return null next?
-					}
+				keep_once('errors', $param_errors);
+				if (isset($page_config['params_error_page'])) {
+					redirect($page_config['params_error_page']);
 				}
-				return null;
 			}
 		} else {
 			log_entry("WARNING: params not specified for '{$request['page']}' page. Validation checks will not be performed");
