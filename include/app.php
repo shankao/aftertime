@@ -262,7 +262,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		// Run the page method
 		Log::caller("$appname/$pagename");
 		$this->page = $pagename;		// Used by 'default' template
-		return $this->$pagename($this->params);	// TODO remove the param
+		return $this->$pagename();
 	}
 
 	// Used by 'default' template
