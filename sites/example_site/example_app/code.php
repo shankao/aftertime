@@ -12,18 +12,14 @@ class example_app extends app {
 	}
 
 	// Custom validator
-	function my_validator($param) {
+	// It can return multiple error codes in an array
+	// Return false for "no error found"
+	function my_validator($param, $request) {
 		if ($param == 'test' && $_REQUEST['int'] == '5') {
-			return $param;
-		} else {
 			return false;
+		} else {
+			return 'CALLBACK_VALIDATOR_FAILED';
 		}
-	}
-
-	// Custom params error
-	function my_params_error($errors) {
-		echo 'Found this errors:<br>';
-		echo nl2br(print_r($errors, true));
 	}
 }
 ?>
