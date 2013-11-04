@@ -1,4 +1,21 @@
 <?php
+function get_title_tag($app, $page) {
+	$config = Config::get();
+	$app_config = Config::get($app);
+	$page_config = Config::get($app, $page);
+
+	if ($page_config && isset($page_config['title'])) {
+		$title_tag = "{$page_config['title']}";
+		if ($app_config && isset($app_config['webtitle'])) {
+			$title_tag .= " - {$app_config['webtitle']}";
+		}
+
+	} else if (isset($config['webtitle'])) {
+		$title_tag = "{$config['webtitle']}";
+	}
+	return $title_tag;
+}
+
 $config = Config::get();
 $base_folder = "sites/{$config['site']}";	// XXX Investigate if it can be moved to an app class member or function
 echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
@@ -7,7 +24,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 	<head>
                 <meta charset="UTF-8" />
                 <meta http-equiv="Content-Language" content="en" />
-		<title><?php echo $app->get_title_tag(); ?></title>
+		<title><?php echo get_title_tag($app->params['app'], $app->page); ?></title>
 		<?php
 			$favicon = "$base_folder/img/favicon.ico";
 			if (is_readable($favicon)) { ?>

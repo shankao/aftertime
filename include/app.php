@@ -333,23 +333,6 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 	}
 
-	public function get_title_tag() {
-		$config = Config::get();
-		$app_config = Config::get($this->params['app']);
-		$page_config = Config::get($this->params['app'], $this->page);
-
-		if ($page_config && isset($page_config['title'])) {
-			$title_tag = "{$page_config['title']}";
-			if ($app_config && isset($app_config['webtitle'])) {
-				$title_tag .= " - {$app_config['webtitle']}";
-			}
-
-		} else if (isset($config['webtitle'])) {
-			$title_tag = "{$config['webtitle']}";
-		}
-		return $title_tag;
-	}
-
 	public function redirect($dest) {
 		if ($this->has_error()) {
 			$_SESSION['errors'] = $this->get_all_errors();
