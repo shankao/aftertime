@@ -181,7 +181,7 @@ final class appFactory {
 	}
 }
 
-class app {
+abstract class app {
 
 	public $page;		// page to show after the method is run (used by 'default' template)
 	public $template;	// XXX This is only the template name, not a TemplateLog object
@@ -354,6 +354,7 @@ log_entry(print_r($_SERVER, true), 20000);
 			}
 		}
 
+		// fixme _COOKIE should be validated too
 		if (init_db()) {
 			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
 				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);	// TODO check login result
