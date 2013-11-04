@@ -15,7 +15,7 @@ class example_app extends app {
 	// It can return multiple error codes in an array
 	// Return false for "no error found"
 	function my_validator($param, $request) {
-		if ($param == 'test' && $_REQUEST['int'] == '5') {
+		if ($param == 'test' && $request['int'] == '5') {
 			return false;
 		} else {
 			return 'CALLBACK_VALIDATOR_FAILED';
