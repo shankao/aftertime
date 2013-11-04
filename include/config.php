@@ -121,18 +121,29 @@ final class Config {
 	}
 
 	// Get all the config or the one for the specified app
-	static public function get($app_name = false) {
+	static public function get($app_name = false, $page_name = false) {
 		if (!self::$config) {
 			return false;
 		} else {
-			if ($app_name) {
-				if (!isset(self::$config['apps']) || !isset(self::$config['apps'][$app_name])) {
+			$config = self::$config;
+			if ($app_name === false) {
+				return $config;
+			} else {
+				if (!isset($config['apps']) || !isset($config['apps'][$app_name])) {
 					return false;
 				} else {
-					return self::$config['apps'][$app_name];
+					$app_config = $config['apps'][$app_name];
+					if ($page_name === false) {
+						return $app_config;
+					} else {
+						if (!isset($app_config['pages']) || !isset($app_config['pages'][$page_name])) {
+                                        		return false;
+                                		} else {
+							$page_config = $app_config['pages'][$page_name];
+							return $page_config;
+						}
+					}
 				}
-			} else {
-				return self::$config;
 			}
 		}
 	}
