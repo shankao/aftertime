@@ -132,9 +132,8 @@ final class appFactory {
 			log_entry("REQUEST: $url");
 		}
 
-		$config = Config::get();
-
 		// app default and check
+		$config = Config::get();
 		if (empty($request['app'])) {
 			if (!isset($config['init_app'])) {
 				log_entry ("ERROR: init_app not set");
@@ -175,21 +174,10 @@ final class appFactory {
 		}
 		log_entry("Checking 'page' for '{$request['page']}': OK");
 
-		// XXX Consider if param validation should be done after creating the app object, so custom validators can use it too
-		$page_config = $app_config['pages'][$request['page']];
-		if (isset($page_config['params'])) {
-			if (validate_page_params($page_config['params'], $request, $param_errors) === false) {
-				keep_once('errors', $param_errors);
-				if (isset($page_config['params_error_page'])) {
-					redirect($page_config['params_error_page']);
-				}
-			}
-		} else {
-			log_entry("WARNING: params not specified for '{$request['page']}' page. Validation checks will not be performed");
-		}
-
 		log_entry ("Creating app {$request['app']}");
-		return new $request['app']($request);
+		$app = new $request['app'];
+		$app->params = $request;
+		return $app;
 	}
 }
 
@@ -336,9 +324,9 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	public function run() {
-		Log::caller($this->params['app']);
-		if (isset($this->params['page'])) {	// TODO Move to when the method is running
-			Log::caller("{$this->params['app']}/{$this->params['page']}");
+		$appname = $this->params['app'];
+		$pagename = $this->params['page'];
+		Log::caller($appname);
 
 		// Recover errors from the last App and remove them from the session
 		foreach ($_SESSION['errors'] as $error) {
@@ -346,7 +334,21 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 		unset($_SESSION['errors']);
 
-		$this->page = $this->params['page'];	// Used by 'default' template
+		// Validate page parameters
+                $app_config = Config::get($appname);
+		$page_config = $app_config['pages'][$pagename];
+		if (!isset($page_config['params'])) {
+			log_entry("WARNING: params not specified for '$pagename' page. Validation checks will not be performed");
+		} else {
+			if (validate_page_params($page_config['params'], $this->params, $param_errors) === false) {
+				foreach ($param_errors as $error) {
+					$this->error_add($error);
+				}
+				if (isset($page_config['params_error_page'])) {
+					return $this->redirect($page_config['params_error_page']);
+				}
+			}
+		}
 
 		if (init_db()) {
 			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
@@ -361,12 +363,9 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 
 		// Run the page method
-		$method = $this->params['page'];
-		return $this->$method($this->params);	// TODO remove the param
-	}
-
-	public function __construct(array $request) {
-		$this->params = $request;
+		Log::caller("$appname/$pagename");
+		$this->page = $pagename;		// Used by 'default' template
+		return $this->$pagename($this->params);	// TODO remove the param
 	}
 
 	// Used by 'default' template
