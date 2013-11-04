@@ -1,4 +1,6 @@
 <?php
+require_once 'include/log.php';
+
 class Validate {
 	private $errors = array();
 
