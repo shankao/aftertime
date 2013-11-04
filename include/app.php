@@ -37,9 +37,9 @@ function translate_validate_flags($string) {
 // Validation using PHP filter functions http://www.php.net/manual/en/ref.filter.php
 function validate_page_params (array $page_params, array $request, &$errors) {
 	$errors = array();
-	$appclass = $request['app'];
-	unset($request['app']);
-	unset($request['page']);
+	$unknown_params = $request;
+	unset($unknown_params['app']);
+	unset($unknown_params['page']);
 	foreach ($page_params as $param_name => $param_conf) {
 		$value = isset($request[$param_name])? $request[$param_name] : null;
 		if (empty($value)) {
@@ -51,45 +51,64 @@ function validate_page_params (array $page_params, array $request, &$errors) {
 		} else {
 			$filter_type = isset($param_conf['filter'])? $param_conf['filter'] : null;
 			if ($filter_type) {
-				$options = array();
-				if (isset($param_conf['filter_options'])) {
-					$options['options'] = $param_conf['filter_options'];
-					if (isset($options['options']['callback'])) {	// Don't allow methods out of the App's class
-						$options['options'] = array($appclass, $options['options']['callback']);
-						if (!is_callable($options['options'], $funcname)) {
+				if ($filter_type == 'callback') {	// Custom callback validator, not PHP's one
+					if (!isset($param_conf['filter_options']['callback'])) {
+						log_entry ("ERROR: validator function not specified");
+						$errors[] = 'VALIDATOR_FUNCTION_NOT_FOUND_'.strtoupper($param_name);
+					} else {
+						// Don't allow methods out of the App's class
+						$fn = array($request['app'], $param_conf['filter_options']['callback']);
+						if (!is_callable($fn, $funcname)) {
 							log_entry ("ERROR: cannot find validator function '$funcname'");
-							return false;
+							$errors[] = 'VALIDATOR_FUNCTION_NOT_CALLABLE_'.strtoupper($param_name);
+						} else {
+							$fn_errors = $fn($value, $request);
+							if ($fn_errors) {
+								if (is_array($fn_errors)) {
+									$errors = array_merge($errors, $fn_errors);
+								} else {
+									$errors[] = $fn_errors;
+								}
+							}
 						}
 					}
-				}
-				if (isset($param_conf['filter_flags'])) {
-					$flags = translate_validate_flags($param_conf['filter_flags']);
-					if ($flags === false) {
-						log_entry ("ERROR: Wrong flags: {$param_conf['filter_flags']}");
-						return false;
-					}
-					$options['flags'] = $flags;
-				}
-
-				log_entry("Checking '$param_name' for filter '$filter_type'"); 
-				$filter_id = filter_id($filter_type);
-				if ($filter_id === false) {
-					log_entry ("ERROR: Filter $filter_type does not exist");
-					log_entry ('Available filter types: '.print_r(filter_list(), true));
-					return false;
 				} else {
-					if (filter_var($value, $filter_id, $options) === false) {
-						log_entry ("ERROR: Filter $filter_type failed for '$param_name'");
-						$errors[] = 'PARAM_INVALID_'.strtoupper($param_name);
+					$options = array();
+					if (isset($param_conf['filter_options'])) {
+						$options['options'] = $param_conf['filter_options'];
+					}
+					if (isset($param_conf['filter_flags'])) {
+						$flags = translate_validate_flags($param_conf['filter_flags']);
+						if ($flags === false) {
+							log_entry ("ERROR: Wrong flags: {$param_conf['filter_flags']}");
+							$errors[] = 'PARAM_WRONG_FLAGS_'.strtoupper($param_name);
+						} else {
+							$options['flags'] = $flags;
+						}
+					}
+
+					log_entry("Checking '$param_name' for filter '$filter_type'"); 
+					$filter_id = filter_id($filter_type);
+					if ($filter_id === false) {
+						log_entry ("ERROR: Filter $filter_type does not exist");
+						log_entry ('Available filter types: '.print_r(filter_list(), true));
+						$errors[] = 'PARAM_WRONG_FILTER_'.strtoupper($filter_type);
+					} else {
+						if (filter_var($value, $filter_id, $options) === false) {
+							log_entry ("ERROR: Filter $filter_type failed for '$param_name'");
+							$errors[] = 'PARAM_INVALID_'.strtoupper($param_name);
+						}
 					}
 				}
 			}
 		}
-		unset($request[$param_name]);
+		unset($unknown_params[$param_name]);
 	}
-	if (count($request)) {
-		log_entry("ERROR: unknown params: ".implode(', ', array_keys($request)));
-		return false;
+	if (count($unknown_params)) {
+		log_entry("ERROR: unknown params: ".implode(', ', array_keys($unknown_params)));
+		foreach (array_keys($unknown_params) as $up) {
+			$errors[] = 'PARAM_UNKNOWN_'.strtoupper($up);
+		}
 	}
 	if (count($errors)) {
 		return false;
