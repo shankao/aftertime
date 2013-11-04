@@ -185,7 +185,7 @@ class app {
 
 	public $page;		// page to show after the method is run (used by 'default' template)
 	public $template;	// XXX This is only the template name, not a TemplateLog object
-	public $errors;		// Errors from the previous app. Usually stored via keep_once()
+	public $errors;		// Errors from the previous app
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
 
@@ -199,6 +199,10 @@ class app {
 		} else {
 			return in_array($code, $this->errors)? true : false;
 		}
+	}
+
+	public function get_all_errors() {
+		return $this->errors;
 	}
 
 	public function print_error($code) {
