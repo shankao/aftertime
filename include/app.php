@@ -333,10 +333,12 @@ log_entry(print_r($_SERVER, true), 20000);
 		Log::caller($appname);
 
 		// Recover errors from the last App and remove them from the session
-		foreach ($_SESSION['errors'] as $error) {
-			$this->error_add($error);
+		if (isset($_SESSION['errors'])) {
+			foreach ($_SESSION['errors'] as $error) {
+				$this->error_add($error);
+			}
+			unset($_SESSION['errors']);
 		}
-		unset($_SESSION['errors']);
 
 		// Validate page parameters
                 $app_config = Config::get($appname);
