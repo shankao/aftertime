@@ -99,12 +99,6 @@ abstract class app {
 		return $this->errors;
 	}
 
-	public function print_error($code) {
-		if ($this->has_error($code)) {
-			echo "<div class=\"error\">$code</div>";	// fixme This should be a template
-		}
-	}
-
 	/*
 	Functions for user authentication. 
 	It requires a DB up and running, and DB_DataObject::factory('users') working
