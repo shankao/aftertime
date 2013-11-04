@@ -116,12 +116,12 @@ function validate_page_params (array $page_params, array $request, &$errors) {
 	return true;
 }
 
+// Returns an App object chosen from the config and request params
 final class appFactory {
 	private function __construct () {
 	}
 
 	static public function getApp($request) {
-
 		// Log and check the request URL
 		$url = $_SERVER['PHP_SELF'];
 		$url .= !empty($_SERVER['QUERY_STRING'])? "?{$_SERVER['QUERY_STRING']}" : '';
@@ -241,7 +241,7 @@ class app {
 			return false;
 		}
 
-		keep('user', $user->toArray());
+		$_SESSION['user'] = $user->toArray();
 		if ($save_cookie) {	// Save for 10 days
 			setcookie('us', $email, time()+864000, '/', null, false, true);
 			setcookie('pw', $user->password, time()+864000, '/', null, false, true);
@@ -339,7 +339,12 @@ log_entry(print_r($_SERVER, true), 20000);
 		Log::caller($this->params['app']);
 		if (isset($this->params['page'])) {	// TODO Move to when the method is running
 			Log::caller("{$this->params['app']}/{$this->params['page']}");
+
+		// Recover errors from the last App and remove them from the session
+		foreach ($_SESSION['errors'] as $error) {
+			$this->error_add($error);
 		}
+		unset($_SESSION['errors']);
 
 		$this->page = $this->params['page'];	// Used by 'default' template
 
@@ -361,9 +366,6 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	public function __construct(array $request) {
-		foreach (keep_get_all() as $name => $value) {
-			$this->$name = $value;
-		}
 		$this->params = $request;
 	}
 
@@ -379,13 +381,18 @@ log_entry(print_r($_SERVER, true), 20000);
 	public function logout () {
 		if ($this->is_user_logged()) {
 			log_entry ("Logging out user {$this->user['email']}");
-			keep_remove('user');
+			unset($_SESSION['user']);
 			$this->clean_login_cookies();
 		}
 	}
 
 	public function is_user_logged() {
-		return isset($this->user)? true : false;
+		if (isset($_SESSION['user'])) {
+			$this->user = $_SESSION['user'];
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public function get_css() {
@@ -446,44 +453,13 @@ log_entry(print_r($_SERVER, true), 20000);
 		return $title_tag;
 	}
 
-	protected function redirect($dest) {
-		if (isset($this->errors)) {
-			keep_once('errors', $this->errors);
+	public function redirect($dest) {
+		if ($this->has_error()) {
+			$_SESSION['errors'] = $this->get_all_errors();
 		}
 		redirect($dest);
 		return 'redirect';
 	}
-}
-
-
-
-function keep_once($var, $value) {
-	$_SESSION['keep_once'][$var] = $value;
-}
-
-function keep($var, $value) {
-	$_SESSION['keep'][$var] = $value;
-}
-
-function keep_remove($var) {
-	if (isset($_SESSION['keep_once'][$var])) {
-		unset($_SESSION['keep_once'][$var]);
-	}
-	if (isset($_SESSION['keep'][$var])) {
-		unset($_SESSION['keep'][$var]);
-	}
-}
-
-function keep_get_all() {
-	$vars = array();
-	if (isset($_SESSION['keep'])) {
-		$vars = $_SESSION['keep'];
-	}
-	if (isset($_SESSION['keep_once'])) {
-		$vars = array_merge($vars, $_SESSION['keep_once']);
-		unset ($_SESSION['keep_once']);
-	}
-	return $vars;
 }
 
 // HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
