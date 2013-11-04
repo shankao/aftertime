@@ -6,18 +6,24 @@ require_once 'include/db.php';
 
 // Returns an App object chosen from the config and request params
 final class appFactory {
-	private function __construct () {
-	}
 
-	static public function getApp($request) {
+	private function check_url() {
 		// Log and check the request URL
 		$url = $_SERVER['PHP_SELF'];
 		$url .= !empty($_SERVER['QUERY_STRING'])? "?{$_SERVER['QUERY_STRING']}" : '';
 		if (preg_match('/^\/(index\.php)(\?.*)?$/', $url) === 0) {
 			log_entry("REQUEST FILTERED: $url");
-			return null;
+			return false;
 		} else {
 			log_entry("REQUEST: $url");
+			return true;
+		}
+	}
+
+	public function build($request) {
+	
+		if (self::check_url() === false) {
+			return null;
 		}
 
 		// app default and check

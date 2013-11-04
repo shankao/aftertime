@@ -9,7 +9,8 @@ if (aftertime_init() === false) {
 } else {
 	require_once 'include/app.php';
 
-	$app = appFactory::getApp($_REQUEST);
+	$app_factory = new appFactory;
+	$app = $app_factory->build($_REQUEST);
 	if ($app) {
 		if ($app->run() !== 'redirect') {
 			$app->render_template();
