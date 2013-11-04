@@ -265,11 +265,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		return $this->$pagename();
 	}
 
-	// Used by 'default' template
-	public function current_page() {
-		return $this->params['page'];
-	}
-
+	
 	public function login ($email, $password, $save_cookie=false) {
 		return $this->do_login ($email, $password, $save_cookie);
 	}
@@ -291,6 +287,8 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 	}
 
+	// TODO Move the next three functions out of this class
+	// This files should be specified via config instead
 	public function get_css() {
 		static $css = null;
 		return $css != null? $css : $this->get_app_file('css');
