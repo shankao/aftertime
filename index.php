@@ -5,10 +5,10 @@ ini_set ('include_path', '.' . PATH_SEPARATOR . 'lib/pear/php');	// Add PEAR's f
 require_once 'include/config.php';
 require_once 'include/log.php';
 if (aftertime_init() === false) {
+	require_once 'include/template_log.php';
 	TemplateLog::render('templates/apperror.php');
 } else {
 	require_once 'include/app.php';
-
 	$app_factory = new appFactory;
 	$app = $app_factory->build($_REQUEST);
 	if ($app) {
