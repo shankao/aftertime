@@ -31,17 +31,15 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 			TemplateLog::render("$base_folder/templates/load_css.php");
 			TemplateLog::render("$base_folder/templates/load_js.php");
 		?>
-        </head>
+	</head>
         <body>
-		<?php TemplateLog::render("$base_folder/templates/header.php"); // XXX This header and footer in every page it's becoming as a bad idea ?>
-		<div id="content"><?php 
-			// Load the current page
-			if (!isset($app->page) || TemplateLog::render("$base_folder/{$app->params['app']}/{$app->page}.php") === false) {
-				log_entry("ERROR: unexistent page {$app->page}");
-				TemplateLog::render('templates/apperror.php');
-			} ?>
-		</div>
-		<?php TemplateLog::render("$base_folder/templates/footer.php"); ?>
+		<?php 
+		// Load the current page's template
+		if (!isset($app->page) || TemplateLog::render("$base_folder/{$app->params['app']}/{$app->page}.php") === false) {
+			log_entry("ERROR: unexistent page {$app->page}");
+			TemplateLog::render('templates/apperror.php');
+		} 
+		?>
 	</body>
 	<!-- Rev. <?php echo $config['code_revision']; ?> -->
 </html>
