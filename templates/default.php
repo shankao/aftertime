@@ -18,8 +18,8 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 			if (is_readable($favicon)) { ?>
 				<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php echo $favicon; ?>" /><?php
 			}
-			TemplateLog::render("$base_folder/templates/load_css.php");
-			TemplateLog::render("$base_folder/templates/load_js.php");
+			Template::render("$base_folder/templates/load_css.php");
+			Template::render("$base_folder/templates/load_js.php");
 		?>
 	</head>
         <body>
@@ -27,7 +27,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 		// Load the current page's template
 		if (!isset($app->page) || TemplateLog::render("$base_folder/{$app->params['app']}/{$app->page}.php") === false) {
 			log_entry("ERROR: unexistent page {$app->page}");
-			TemplateLog::render('templates/apperror.php');
+			Template::render('templates/apperror.php');
 		} 
 		?>
 	</body>
