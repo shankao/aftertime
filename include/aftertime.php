@@ -22,20 +22,6 @@ function getParam ($source, $varname, $default=null) {
 	}		
 }
 
-// TODO Store webtitle and pagetitle in the app's object as a property (session)
-function set_webtitle($title) {
-	$c = Config::get();
-	$c['webtitle'] = $title;
-	Config::set($c);
-}
-
-function set_pagetitle($title) {
-	$c = Config::get();
-	$c['pagetitle'] = $title;
-	Config::set($c);
-
-}
-
 function html_value($var) {
         if (isset($var))
                 return htmlspecialchars($var);
