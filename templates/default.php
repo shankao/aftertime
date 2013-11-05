@@ -1,15 +1,13 @@
 <?php
 function get_title_tag($app, $page) {
+	$title_tag = '';
 	$config = Config::get();
-	$app_config = Config::get($app);
 	$page_config = Config::get($app, $page);
-
-	if ($page_config && isset($page_config['title'])) {
+	if (isset($page_config['title'])) {
 		$title_tag = "{$page_config['title']}";
-		if ($app_config && isset($app_config['webtitle'])) {
-			$title_tag .= " - {$app_config['webtitle']}";
+		if (isset($config['webtitle'])) {
+			$title_tag .= " - {$config['webtitle']}";
 		}
-
 	} else if (isset($config['webtitle'])) {
 		$title_tag = "{$config['webtitle']}";
 	}
