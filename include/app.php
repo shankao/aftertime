@@ -314,6 +314,7 @@ log_entry(print_r($_SERVER, true), 20000);
 	public function render_template() {
 		$page_config = Config::get($this->params['app'], $this->params['page']);
 		if (!isset($page_config['template'])) {
+			log_entry('No template specified for this page');
 			return false;
 		}
 		$page_template = $page_config['template'];
