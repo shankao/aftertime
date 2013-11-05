@@ -1,7 +1,7 @@
 <?php
 require_once 'include/titletag.php';
 if (empty(HTMLTitle::get())) {
-	HTMLTitle::set_from_page($app->params['app'], $app->page);
+	HTMLTitle::set_from_page($app->params['app'], $app->params['page']);
 }
 
 $config = Config::get();
@@ -25,8 +25,8 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         <body>
 		<?php 
 		// Load the current page's template
-		if (!isset($app->page) || TemplateLog::render("$base_folder/{$app->params['app']}/{$app->page}.php") === false) {
-			log_entry("ERROR: unexistent page {$app->page}");
+		if (TemplateLog::render("$base_folder/{$app->params['app']}/{$app->params['page']}.php") === false) {
+			log_entry("ERROR: unexistent page template {$app->params['page']}");
 			Template::render('templates/apperror.php');
 		} 
 		?>

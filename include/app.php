@@ -77,7 +77,6 @@ final class appFactory {
 
 abstract class app {
 
-	public $page;		// page to show after the method is run (used by 'default' template)
 	public $template;	// XXX This is only the template name, not a TemplateLog object
 	public $errors;		// Errors from the previous app
 	public $params;		// Params accepted by the app
@@ -260,7 +259,6 @@ log_entry(print_r($_SERVER, true), 20000);
 
 		// Run the page method
 		Log::caller("$appname/$pagename");
-		$this->page = $pagename;		// Used by 'default' template
 		return $this->$pagename();
 	}
 
