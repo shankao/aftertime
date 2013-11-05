@@ -1,6 +1,5 @@
 <?php
 require_once 'include/log.php';
-require_once 'include/template_log.php';
 require_once 'include/config.php';
 require_once 'include/db.php';
 
@@ -77,7 +76,6 @@ final class appFactory {
 
 abstract class app {
 
-	public $template;	// XXX This is only the template name, not a TemplateLog object
 	public $errors;		// Errors from the previous app
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
@@ -329,6 +327,7 @@ log_entry(print_r($_SERVER, true), 20000);
 				break;
 		}
 
+		require_once 'include/template_log.php';
 		return TemplateLog::render($template_filename);
 	}
 
