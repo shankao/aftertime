@@ -5,10 +5,8 @@ The name of the class must be the app's ID
 */
 class example_app extends app {
 
-	// example_page is the only page defined in the app. Its method is called when requesting the page
+	// example_page is the only page defined in the app. This method is called when requesting it
 	function example_page() {
-		// Presents a standard HTML type (templates/default.php)
-		$this->template = 'default';		
 	}
 
 	// Custom validator

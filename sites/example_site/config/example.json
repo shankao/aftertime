@@ -9,6 +9,7 @@
 			"pages": {
 				"example_page": {
 					"title": "Page example",
+					"template": "default",
 					"params": {
 						"int": {
 							"filter": "int",

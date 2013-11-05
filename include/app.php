@@ -255,8 +255,7 @@ log_entry(print_r($_SERVER, true), 20000);
 
 		if ($this->check_http_auth() == false) {
 			$this->error_add('HTTP_AUTH_ERROR');
-			$this->template = 'apperror';
-			return false;
+			return false;	// redirect to a 505 page?
 		}
 
 		// Run the page method
@@ -311,24 +310,27 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 	}
 
+	// Render page's template
 	public function render_template() {
-		if (isset($this->template) && $this->template != false) {
-			switch ($this->template) {	// XXX TemplateLog types
-				case 'default':
-				case 'apperror':
-					$template_filename = "templates/{$this->template}.php";
-					break;
-				default:	// Local app template. XXX Maybe is worth to remove the appname here and let the app choose
-					$config = Config::get();
-					$appname = get_class($this);
-					$template_filename = "sites/{$config['site']}/$appname/{$this->template}.php";
-					break;
-			}
-			return TemplateLog::render($template_filename);
-		} else {
-			log_entry('No template defined');
+		$page_config = Config::get($this->params['app'], $this->params['page']);
+		if (!isset($page_config['template'])) {
 			return false;
 		}
+		$page_template = $page_config['template'];
+
+		switch ($page_template) {	// XXX TemplateLog types
+			case 'default':
+			case 'apperror':
+				$template_filename = "templates/$page_template.php";
+				break;
+			default:	// Local app template. XXX Maybe is worth to remove the appname here and let the app choose
+				$config = Config::get();
+				$appname = get_class($this);
+				$template_filename = "sites/{$config['site']}/$appname/$page_template.php";
+				break;
+		}
+
+		return TemplateLog::render($template_filename);
 	}
 
 	public function redirect($dest) {
