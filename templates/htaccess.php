@@ -1,4 +1,6 @@
 <?php
+// TODO Upgrade to apache 2.4 format: https://httpd.apache.org/docs/current/upgrading.html
+
 global $config;
 $rootfiles = 'index.php';
 if (isset($config['root-content'])) {
