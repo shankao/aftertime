@@ -148,7 +148,9 @@ abstract class app {
 
 			$combined_salt = "\$$code\$$cost\$$salt";
 			$result = crypt($password, $combined_salt);
-		} else {	// TODO To be removed
+		} else {	
+			// TODO To be removed. Needs an upgrade path to safer algorithms:
+			// 1st, not to generate new passwords like this. Then, use your own legacy check_password function
 			$type = 'sha1';
 			$result = sha1($password);
 		}
@@ -250,12 +252,12 @@ log_entry(print_r($_SERVER, true), 20000);
 				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);	// TODO check login result
 			}
 		}
-
+/*		// XXX Commented until fixed
 		if ($this->check_http_auth() == false) {
 			$this->error_add('HTTP_AUTH_ERROR');
 			return false;	// redirect to a 505 page?
 		}
-
+*/
 		// Run the page method
 		Log::caller("$appname/$pagename");
 		return $this->$pagename();
