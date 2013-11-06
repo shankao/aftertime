@@ -233,7 +233,8 @@ log_entry(print_r($_SERVER, true), 20000);
 		} else {
 			require_once 'include/validate.php';
 			$validator = new Validate;
-			if ($validator->check_multiple($page_config['params'], $this->params) === false) {
+			$validator->check_array($this->params, $page_config['params']);
+			if ($validator->has_errors()) {
 				foreach ($validator->errors() as $error) {
 					$this->error_add($error);
 				}
