@@ -135,6 +135,7 @@ abstract class app {
 //------------------------ protected
 
 	// This is the default. Note that apps. are free to override it. XXX Convert to interface?
+	// TODO Check this (PHP 5.5+): http://www.php.net/manual/en/book.password.php
 	protected function encrypt_password ($password) {
 		if (empty($password)) return null;
 
@@ -147,7 +148,7 @@ abstract class app {
 
 			$combined_salt = "\$$code\$$cost\$$salt";
 			$result = crypt($password, $combined_salt);
-		} else {
+		} else {	// TODO To be removed
 			$type = 'sha1';
 			$result = sha1($password);
 		}
@@ -166,7 +167,7 @@ abstract class app {
 		} else {
 			if (CRYPT_BLOWFISH) {
 				$result = (crypt($input, $encrypted) == $encrypted)? true : false;
-			} else {
+			} else {	// TODO to go
 				$result = (sha1($input) == $encrypted)? true : false;
 			}
 		}
@@ -244,7 +245,6 @@ log_entry(print_r($_SERVER, true), 20000);
 			}
 		}
 
-		// fixme _COOKIE should be validated too
 		if (init_db()) {
 			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
 				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);	// TODO check login result
