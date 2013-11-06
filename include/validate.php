@@ -45,7 +45,7 @@ class Validate {
 			if ($fn_errors) {
 				log_entry ("ERROR: callback validator failed");
 				if (is_array($fn_errors)) {
-					$this->errors[] = array_merge($this->errors, $fn_errors);
+					$this->errors = array_merge($this->errors, $fn_errors);
 				} else {
 					$this->errors[] = $fn_errors;
 				}
@@ -81,12 +81,12 @@ class Validate {
 		}
 	}
 
-	public function check_required($value, $spec) {
+	public function check_required($key, $value, $spec) {
 		if (empty($value)) {
 			$param_required = isset($spec['required'])? $spec['required'] : false;
 			if ($param_required) {
-				$this->errors[] = 'PARAM_REQUIRED_'.strtoupper($param_name);
-				log_entry("ERROR: param '$param_name' is required");
+				$this->errors[] = 'PARAM_REQUIRED_'.strtoupper($key);
+				log_entry("ERROR: param '$key' is required");
 			}
 		}
 	}
@@ -95,7 +95,7 @@ class Validate {
 	private function check_value ($key, $spec, array $allvars) {
 		$value = isset($allvars[$key])? $allvars[$key] : null;
 		if (empty($value)) {
-			$this->check_required($value, $spec);
+			$this->check_required($key, $value, $spec);
 		} else {
 			$filter_type = isset($spec['filter'])? $spec['filter'] : null;
 			if ($filter_type) {
