@@ -1,7 +1,4 @@
-<?php /*
-Misc functions
-*/
-require_once 'include/config.php';
+<?php /* Helper functions */
 require_once 'include/log.php';
 
 /*
