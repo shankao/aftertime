@@ -29,23 +29,6 @@ function html_value($var) {
 		return '';
 }
 
-function get_content_folder() {
-	static $folder = false;
-	if (!$folder) {
-		$config = Config::get();
-		if (!isset($config['content'])) {
-			log_entry ('ERROR: the content folder location is not specified in config');
-			return false;
-		}
-		$folder = $config['content'];
-		if (!create_file($folder, true)) {
-			log_entry("ERROR: cannot create the content folder ($folder)");
-			return false;
-		}
-	}
-	return $folder;
-}
-
 // Like array_walk_recursive, but executes the function also on non-leafs
 function walk_recursive (array $array, $function, $extra) {
 	foreach ($array as $key => $value) {
