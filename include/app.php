@@ -61,10 +61,6 @@ final class appFactory {
 			return null;
 		}
 		require_once $app_code_file;
-		if (!is_callable(array($request['app'], $request['page']))) {
-			log_entry("ERROR: page has not method: '{$request['app']}::{$request['page']}'");
-			return null;
-		}
 		log_entry("Checking 'page' for '{$request['page']}': OK");
 
 		log_entry ("Creating app {$request['app']}");
@@ -259,8 +255,13 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 */
 		// Run the page method
-		Log::caller("$appname/$pagename");
-		return $this->$pagename();
+		if (!is_callable(array($this, $pagename))) {
+			log_entry("WARNING: no page method");
+			return true;
+		} else {
+			Log::caller("$appname/$pagename");
+			return $this->$pagename();
+		}
 	}
 
 	
