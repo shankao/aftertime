@@ -257,11 +257,13 @@ log_entry(print_r($_SERVER, true), 20000);
 		// Run the page method
 		if (!is_callable(array($this, $pagename))) {
 			log_entry("WARNING: no page method");
-			return true;
+			$result = true;
 		} else {
 			Log::caller("$appname/$pagename");
-			return $this->$pagename();
+			$result = $this->$pagename();
+			Log::caller("$appname");
 		}
+		return $result;
 	}
 
 	
