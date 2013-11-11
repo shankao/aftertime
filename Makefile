@@ -27,7 +27,9 @@ all:
 	$(MAKE) db-drop
 	$(MAKE) build
 	$(MAKE) db-restore FILE=sites/${CURRENT_SITE}/db/example_data.sql;
-	$(MAKE) -C ${BUILDPATH}/sites/${CURRENT_SITE} all
+	if [ -f ${BUILDPATH}/sites/${CURRENT_SITE}/Makefile ]; then \
+		$(MAKE) -C ${BUILDPATH}/sites/${CURRENT_SITE} all; \
+	fi;
 
 checkenv:
 	@if [ ! "${AVAILABLE_SITES}" ]; then \
