@@ -137,10 +137,14 @@ db-restore:
 
 # TODO Add support to ignore some tables. I.e.: spidey.page_status could duplicate values and they are UNIQUE. Also, is part of the DDL somehow
 db-snap: 
-	@echo Snap DB
-	@(cd ${BUILDPATH}; \
-		./scripts/runmysqldump.sh -o sites/${CURRENT_SITE}/db/snap.sql; \
-	)
+	@if [ ! "${FILE}" ]; then \
+		echo "Please, indicate the file to store the snap to, in the FILE variable"; \
+	else \
+		echo "Storing DB snap on ${FILE}"; \
+		(cd ${BUILDPATH}; \
+			./scripts/runmysqldump.sh -o ../${FILE}; \
+		) \
+	fi;
 
 db-load:
 	@(cd ${BUILDPATH}; \
