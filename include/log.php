@@ -25,17 +25,27 @@ final class Log {
 	}
 
 	static function log_file () {
+		static $logs_folder = null;
 		static $filename = null;
 		static $filedate = null;
 
 		$date = date('Y-m-d');
 		if (!$filename || $date != $filedate) {
-			$config = Config::get();
-			if (!$config || !isset($config['logs'])) {
-				return false;	// Store the error in some private variable
+			if (!isset($logs_folder)) {
+				$config = Config::get();
+				if ($config && isset($config['logs'])) {
+					$logs_folder = $config['logs'];
+				} else {
+					$logs_folder = sys_get_temp_dir().'/logs';
+				}
+				if (!create_file($logs_folder, true, 0777)) {
+					self::out("Cannot create the logs folder: $filename");
+					self::$muted = true;
+					return false;
+				}
 			}
 
-			$filename = "{$config['logs']}/$date.log";
+			$filename = "$logs_folder/$date.log";
 			$filedate = $date;
 
 			if (!create_file($filename, false, 0666)) {

@@ -13,7 +13,7 @@ Available keys:
 	"password" (string): password for the DB connection
 }
 "init_app" (string): ID of the default app
-"logs" (string): path to the logs folder
+"logs" (string): path to the logs folder. Defaults to PHP's sys_get_temp_dir() (i.e. /tmp)
 "content" (string): path to the site's static content folder
 "apps" (object)
 {

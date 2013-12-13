@@ -2,7 +2,6 @@
 	"site": "example_site",
 	"webtitle": "Example site",
 	"init_app": "example_app",
-	"logs": "logs",
 	"apps": {
 		"example_app": {
 			"init_page": "example_page",
