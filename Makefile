@@ -48,7 +48,7 @@ config: config/aftertime.json.in
 build:
 	$(MAKE) clean-build
 	$(MAKE) build-folder
-	$(MAKE) logs-folder content-folder
+	$(MAKE) content-folder
 	$(MAKE) checkenv
 	git add --all
 	git checkout-index -a -f --prefix=${BUILDPATH}/
@@ -61,7 +61,7 @@ build:
 	$(MAKE) ${BUILDPATH}/.htaccess
 
 # Must take this folder name from the config...
-logs-folder content-folder:
+content-folder:
 	mkdir ${BUILDPATH}/$(subst -folder,,$@)
 	chmod uog+w ${BUILDPATH}/$(subst -folder,,$@)
 
@@ -103,7 +103,7 @@ package:
 	(cd ${PACKAGESPATH} && zip -rq ${CURRENT_SITE}_$(CODE_REVNO).zip ${CURRENT_SITE}_$(CODE_REVNO) upgrade.sh)
 	rm -rf ${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
 
-.PHONY: info print-config config clean-packages build-folder clean-build logs-folder content-folder clean all $(AVAILABLE_SITES) package build
+.PHONY: info print-config config clean-packages build-folder clean-build content-folder clean all $(AVAILABLE_SITES) package build
 
 db-drop:
 	if [ "$(DB_DEFINED)" ]; then \
