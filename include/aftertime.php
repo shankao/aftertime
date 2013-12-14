@@ -65,12 +65,12 @@ function create_file($filename, $is_folder = false, $mode = false) {
         	if (file_exists($filename)) {	
 			return false;	// Exists but it cannot write... permissions problem?
 		}
- 		if ($is_folder && !@mkdir($filename)) {
+ 		if ($is_folder && !@mkdir($filename, $mode, true)) {
 			return false;
 		} else if (!@touch($filename)) {
 			return false;
 		}
-		if ($mode) {
+		if (!$is_folder && $mode) {
 			chmod($filename, $mode);	// TODO Check for error here
 		}
 		log_entry ("$filename created");
