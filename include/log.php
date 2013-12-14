@@ -36,7 +36,7 @@ final class Log {
 				if ($config && isset($config['logs'])) {
 					$logs_folder = $config['logs'];
 				} else {
-					$logs_folder = sys_get_temp_dir().'/logs';
+					$logs_folder = sys_get_temp_dir()."/{$config['site']}/logs";
 				}
 				if (!create_file($logs_folder, true, 0777)) {
 					self::out("Cannot create the logs folder: $filename");
