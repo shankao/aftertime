@@ -3,7 +3,7 @@
 # This script allows you to deploy the site and control it after that
 #
 # XXX How to deal with the first install? Just a simple unzip should be enough, but...
-# TODO Check if needs to create a writable content and logs folder
+# TODO Check if needs to create a writable logs folder
 # TODO Use a better command name (deploy?)
 # TODO Call the site-specific install script
 # TODO Define how to deal with whole machine vs. shared hosting installs. One of the objectives that I wanted to pursue is scalability... maybe plan for the former and then try a best-effort for the later
