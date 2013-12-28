@@ -39,7 +39,7 @@ final class Log {
 					$logs_folder = sys_get_temp_dir()."/{$config['site']}/logs";
 				}
 				if (!create_file($logs_folder, true, 0777)) {
-					self::out("Cannot create the logs folder: $filename");
+					self::out("Cannot create the logs folder: $logs_folder");
 					self::$muted = true;
 					return false;
 				}
