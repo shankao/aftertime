@@ -1,7 +1,3 @@
-CODE_REVNO:=$(shell git log | grep "commit " | wc -l)
-BUILDPATH=build
-PACKAGESPATH=packages
-
 # Figure out the site we're working on
 AVAILABLE_SITES:=$(shell ls sites)
 SITE_FILE:=config/.current.site
@@ -19,12 +15,15 @@ ifndef VERBOSE
         MAKEFLAGS += --no-print-directory
 endif
 
+CODE_REVNO:=$(shell git log | grep "commit " | wc -l)
+BUILDPATH=build
+PACKAGESPATH=packages
 ifneq ($(shell (cd ${BUILDPATH} 2>&1 && php ./scripts/getconfig.php) | grep "database.host" | cut -f2 -d"="),)
 	DB_DEFINED := yes
 endif
 
 all:
-	$(MAKE) db-drop
+	$(MAKE) clean
 	$(MAKE) build
 	$(MAKE) db-restore FILE=sites/${CURRENT_SITE}/db/example_data.sql;
 	if [ -f ${BUILDPATH}/sites/${CURRENT_SITE}/Makefile ]; then \
@@ -88,7 +87,6 @@ clean-packages:
 
 clean:
 	$(MAKE) db-drop
-	$(MAKE) clean-build
 	$(MAKE) clean-packages
 
 package: 
