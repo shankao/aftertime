@@ -61,21 +61,28 @@ function get_absolute_url ($url, $parent_url = null) {
 // Checks write permissions if the file exists, or creates it of it doesn't
 // Same thing for folders
 function create_file($filename, $is_folder = false, $mode = false) {
-	if (is_writeable($filename) == false) {
-        	if (file_exists($filename)) {	
-			return false;	// Exists but it cannot write... permissions problem?
+	$result = true;
+
+	if (is_writeable($filename) === false && file_exists($filename)) {
+		$result = false;	// permissions problem?
+	}
+
+	$oldumask = umask(0);
+	if ($is_folder && !@mkdir($filename, $mode, true)) {
+		$result = false;
+	} else if (!@touch($filename)) {
+		$result = false;
+	} else {	// No folder, touch() OK
+		if ($result && $mode) {
+			$result = chmod($filename, $mode);
 		}
- 		if ($is_folder && !@mkdir($filename, $mode, true)) {
-			return false;
-		} else if (!@touch($filename)) {
-			return false;
-		}
-		if (!$is_folder && $mode) {
-			chmod($filename, $mode);	// TODO Check for error here
-		}
+	}
+	if ($result === true) {
 		log_entry ("$filename created");
 	}
-	return true;
+	umask($oldumask);
+
+	return $result;
 }
 
 // Returns an array with the multi-value command line argument specified
