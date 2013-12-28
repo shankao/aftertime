@@ -57,6 +57,9 @@ build:
 	fi;
 	$(MAKE) root-content 
 	$(MAKE) ${BUILDPATH}/.htaccess
+	if [ -f ${BUILDPATH}/sites/${CURRENT_SITE}/Makefile ]; then \
+		$(MAKE) -C ${BUILDPATH}/sites/${CURRENT_SITE} build; \
+	fi;
 
 info:
 	@echo "Available sites: ${AVAILABLE_SITES}"
@@ -86,6 +89,9 @@ clean-packages:
 	fi;
 
 clean:
+	if [ -f ${BUILDPATH}/sites/${CURRENT_SITE}/Makefile ]; then \
+		$(MAKE) -C ${BUILDPATH}/sites/${CURRENT_SITE} clean; \
+	fi;
 	$(MAKE) db-drop
 	$(MAKE) clean-packages
 
