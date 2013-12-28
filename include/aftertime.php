@@ -62,26 +62,26 @@ function get_absolute_url ($url, $parent_url = null) {
 // Same thing for folders
 function create_file($filename, $is_folder = false, $mode = false) {
 	$result = true;
-
-	if (is_writeable($filename) === false && file_exists($filename)) {
-		$result = false;	// permissions problem?
-	}
-
-	$oldumask = umask(0);
-	if ($is_folder && !@mkdir($filename, $mode, true)) {
-		$result = false;
-	} else if (!@touch($filename)) {
-		$result = false;
-	} else {	// No folder, touch() OK
-		if ($result && $mode) {
-			$result = chmod($filename, $mode);
+	if (is_writeable($filename) === false) {
+		if (file_exists($filename)) {
+			$result = false;	// permissions problem?
 		}
-	}
-	if ($result === true) {
-		log_entry ("$filename created");
-	}
-	umask($oldumask);
 
+		$oldumask = umask(0);
+		if ($is_folder && !@mkdir($filename, $mode, true)) {
+			$result = false;
+		} else if (!@touch($filename)) {
+			$result = false;
+		} else {	// No folder, touch() OK
+			if ($result && $mode) {
+				$result = chmod($filename, $mode);
+			}
+		}
+		if ($result === true) {
+			log_entry ("$filename created");
+		}
+		umask($oldumask);
+	}
 	return $result;
 }
 
