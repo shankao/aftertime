@@ -1,10 +1,18 @@
-# Figure out the site we're working on
-AVAILABLE_SITES:=$(shell ls sites)
+# Some build variables
+CODE_REVNO:=$(shell git log | grep "commit " | wc -l)
+CODE_CDUP:=$(shell git rev-parse --show-cdup)
+BUILDPATH=${CODE_CDUP}build
+PACKAGESPATH=${CODE_CDUP}packages
+SITES_FOLDER:=${CODE_CDUP}sites
+CHECKOUT_PATH:=$(subst ${CODE_CDUP},,${BUILDPATH})
+AVAILABLE_SITES:=$(shell ls ${SITES_FOLDER})
 SITE_FILE:=config/.current.site
+
+# Figure out the site we're working on
 ifeq ($(wildcard $(SITE_FILE)),)
 	CURRENT_SITE := $(firstword $(AVAILABLE_SITES))
 else
-  ifeq ($(wildcard $(addprefix sites/, $(shell cat $(SITE_FILE)))),)
+  ifeq ($(wildcard $(addprefix ${SITES_FOLDER}/, $(shell cat $(SITE_FILE)))),)
 	CURRENT_SITE := $(firstword $(AVAILABLE_SITES))
   else
 	CURRENT_SITE := $(shell cat $(SITE_FILE))
@@ -15,9 +23,6 @@ ifndef VERBOSE
         MAKEFLAGS += --no-print-directory
 endif
 
-CODE_REVNO:=$(shell git log | grep "commit " | wc -l)
-BUILDPATH=build
-PACKAGESPATH=packages
 ifneq ($(shell (cd ${BUILDPATH} 2>&1 && php ./scripts/getconfig.php) | grep "database.host" | cut -f2 -d"="),)
 	DB_DEFINED := yes
 endif
@@ -25,9 +30,9 @@ endif
 all:
 	$(MAKE) clean
 	$(MAKE) build
-	$(MAKE) db-restore FILE=sites/${CURRENT_SITE}/db/example_data.sql;
-	if [ -f ${BUILDPATH}/sites/${CURRENT_SITE}/Makefile ]; then \
-		$(MAKE) -C ${BUILDPATH}/sites/${CURRENT_SITE} all; \
+	$(MAKE) db-restore FILE=${SITES_FOLDER}/${CURRENT_SITE}/db/example_data.sql;
+	if [ -f ${BUILDPATH}/${SITES_FOLDER}/${CURRENT_SITE}/Makefile ]; then \
+		$(MAKE) -C ${BUILDPATH}/${SITES_FOLDER}/${CURRENT_SITE} all; \
 	fi;
 
 checkenv:
@@ -49,22 +54,25 @@ build:
 	$(MAKE) build-folder
 	$(MAKE) checkenv
 	git add --all
-	git checkout-index -a -f --prefix=${BUILDPATH}/
+	git checkout-index -a -f --prefix=${CHECKOUT_PATH}/
 	git reset
 	# Remove the rest of the sites from the build folder
 	if [ "${CURRENT_SITE}" != "${AVAILABLE_SITES}" ]; then \
-		rm -r $(addprefix ${BUILDPATH}/sites/,$(filter-out ${CURRENT_SITE}, $(AVAILABLE_SITES))); \
+		rm -r $(addprefix ${BUILDPATH}/${SITES_FOLDER}/,$(filter-out ${CURRENT_SITE}, $(AVAILABLE_SITES))); \
 	fi;
 	$(MAKE) root-content 
 	$(MAKE) ${BUILDPATH}/.htaccess
-	if [ -f ${BUILDPATH}/sites/${CURRENT_SITE}/Makefile ]; then \
-		$(MAKE) -C ${BUILDPATH}/sites/${CURRENT_SITE} build; \
+	if [ -f ${BUILDPATH}/${SITES_FOLDER}/${CURRENT_SITE}/Makefile ]; then \
+		$(MAKE) -C ${BUILDPATH}/${SITES_FOLDER}/${CURRENT_SITE} build; \
 	fi;
 
 info:
 	@echo "Available sites: ${AVAILABLE_SITES}"
 	@echo "Current site: ${CURRENT_SITE}"
 	@echo "Site has DB defined: ${DB_DEFINED}"
+	@echo "Build path: ${BUILDPATH}"
+	@echo "Packages path: ${PACKAGESPATH}"
+	@echo "Checkout path: ${CHECKOUT_PATH}"
 
 print-config:
 	@(cd ${BUILDPATH} && php scripts/getconfig.php)	
@@ -89,8 +97,8 @@ clean-packages:
 	fi;
 
 clean:
-	if [ -f ${BUILDPATH}/sites/${CURRENT_SITE}/Makefile ]; then \
-		$(MAKE) -C ${BUILDPATH}/sites/${CURRENT_SITE} clean; \
+	if [ -f ${BUILDPATH}/${SITES_FOLDER}/${CURRENT_SITE}/Makefile ]; then \
+		$(MAKE) -C ${BUILDPATH}/${SITES_FOLDER}/${CURRENT_SITE} clean; \
 	fi;
 	$(MAKE) db-drop
 	$(MAKE) clean-packages
@@ -121,9 +129,9 @@ db-restore:
 			if [ -f "${FILE}" ]; then \
 				$(MAKE) db-drop; \
 				$(MAKE) db-create; \
-				if [ -f sites/${CURRENT_SITE}/db/schema.sql ]; then \
+				if [ -f ${SITES_FOLDER}/${CURRENT_SITE}/db/schema.sql ]; then \
 					echo "Adding DDLs"; \
-					$(MAKE) db-load FILE=sites/${CURRENT_SITE}/db/schema.sql; \
+					$(MAKE) db-load FILE=${SITES_FOLDER}/${CURRENT_SITE}/db/schema.sql; \
 					echo "Adding example data"; \
 					$(MAKE) db-load FILE=${FILE}; \
 				fi; \
@@ -173,11 +181,11 @@ ${ROOT_CONTENT}:
 			echo "ERROR: $(notdir $@) cannot be overwritten"; \
 			exit 1; \
 		fi; \
-		if [ ! -e sites/${CURRENT_SITE}/$@ ]; then \
-			echo "ERROR: root-content sites/${CURRENT_SITE}/$@ does not exist"; \
+		if [ ! -e ${SITES_FOLDER}/${CURRENT_SITE}/$@ ]; then \
+			echo "ERROR: root-content ${SITES_FOLDER}/${CURRENT_SITE}/$@ does not exist"; \
 			exit 1; \
 		fi; \
-		ln -v -s sites/${CURRENT_SITE}/$@ ./$(notdir $@); \
+		ln -v -s ${SITES_FOLDER}/${CURRENT_SITE}/$@ ./$(notdir $@); \
         fi; \
 	)
 
