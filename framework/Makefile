@@ -106,6 +106,7 @@ clean:
 	fi;
 	$(MAKE) db-drop
 	$(MAKE) clean-packages
+	$(MAKE) clean-build
 
 package: 
 	$(MAKE) build BUILDPATH=${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
