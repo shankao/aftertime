@@ -16,7 +16,7 @@ while getopts "f:n" OPT; do
 	esac
 done
 
-CONFIG=$(php scripts/getconfig.php)
+CONFIG=$(php getconfig.php)
 if [ $? != 0 ]; then
 	echo $CONFIG
 	return $?

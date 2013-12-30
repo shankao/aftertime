@@ -18,7 +18,7 @@ if [ ! ${OUTPUT_FILE:-""} ]; then
         return 255
 fi
 
-CONFIG=$(php scripts/getconfig.php)
+CONFIG=$(php getconfig.php)
 if [ $? != 0 ]; then
 	echo $CONFIG
 	return $?

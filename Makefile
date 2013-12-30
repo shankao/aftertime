@@ -118,12 +118,12 @@ package:
 
 db-drop:
 	if [ "$(DB_DEFINED)" ]; then \
-		echo "DROP SCHEMA IF EXISTS ${CURRENT_SITE}" | (cd ${SCRIPTS_FOLDER}; runmysql.sh -n); \
+		echo "DROP SCHEMA IF EXISTS ${CURRENT_SITE}" | (cd ${SCRIPTS_FOLDER}; ./runmysql.sh -n); \
 	fi; 
 
 db-create: 
 	if [ "$(DB_DEFINED)" ]; then \
-		echo "CREATE SCHEMA IF NOT EXISTS ${CURRENT_SITE} DEFAULT CHARACTER SET utf8" | (cd ${SCRIPTS_FOLDER}; runmysql.sh -n); \
+		echo "CREATE SCHEMA IF NOT EXISTS ${CURRENT_SITE} DEFAULT CHARACTER SET utf8" | (cd ${SCRIPTS_FOLDER}; ./runmysql.sh -n); \
 	fi;
 
 db-restore: 
@@ -153,23 +153,23 @@ db-snap:
 	else \
 		echo "Storing DB snap on ${FILE}"; \
 		(cd ${SCRIPTS_FOLDER}; \
-			runmysqldump.sh -o ../${FILE}; \
+			./runmysqldump.sh -o ../${FILE}; \
 		) \
 	fi;
 
 db-load:
-	@(cd ${BUILDPATH}; \
-		if [ ! "${FILE}" ]; then \
-			echo "Please, indicate the file to load in the FILE variable"; \
+	@if [ ! "${FILE}" ]; then \
+		echo "Please, indicate the file to load in the FILE variable"; \
+	else \
+		if [ -f "${FILE}" ]; then \
+			echo "Loading file ${FILE}"; \
+			(cd ${SCRIPTS_FOLDER}; \
+				./runmysql.sh -f ../../${FILE}; \
+			) \
 		else \
-			if [ -f "${FILE}" ]; then \
-				echo "Loading file ${FILE}"; \
-				./scripts/runmysql.sh -f ${FILE}; \
-			else \
-				echo "File does not exists: ${FILE}"; \
-			fi; \
+			echo "File does not exists: ${FILE}"; \
 		fi; \
-	)
+	fi;
 
 # TODO Backup. Does an snap, compress it and sends it somewhere. Check what we want, this does not differ from a snap so much
 
