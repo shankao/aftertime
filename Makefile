@@ -7,7 +7,7 @@ SITES_FOLDER:=${CODE_CDUP}sites
 SCRIPTS_FOLDER:=${BUILDPATH}/framework/scripts
 CHECKOUT_PATH:=$(subst ${CODE_CDUP},,${BUILDPATH})
 AVAILABLE_SITES:=$(shell ls ${SITES_FOLDER})
-SITE_FILE:=config/.current.site
+SITE_FILE:=framework/config/.current.site
 
 # Figure out the site we're working on
 ifeq ($(wildcard $(SITE_FILE)),)
@@ -43,7 +43,7 @@ checkenv:
 	fi;
 	echo $(CURRENT_SITE) > $(SITE_FILE)
 
-config: config/aftertime.json.in
+config: framework/config/aftertime.json.in
 	mkdir -p ${BUILDPATH}/framework/config
 	mv ${BUILDPATH}/framework/config/aftertime.json.in ${BUILDPATH}/framework/config/aftertime.json
 	sed -i "s/__REVNO__/$(CODE_REVNO)/g" ${BUILDPATH}/framework/config/aftertime.json
@@ -53,7 +53,7 @@ build:
 	$(MAKE) clean-build
 	$(MAKE) build-folder
 	$(MAKE) checkenv
-	(cd ${CODE_CDUP} && \
+	(cd "./${CODE_CDUP}" && \
 		git add --all; \
 		git checkout-index -a -f --prefix=${CHECKOUT_PATH}/; \
 		git reset; \
@@ -196,7 +196,7 @@ ${ROOT_CONTENT}:
 
 .PHONY: root-content 
 
-%.htaccess: templates/htaccess.php
+%.htaccess: framework/templates/htaccess.php
 	@(cd ${SCRIPTS_FOLDER}; \
-		php ctemplate.php -t ../$^ > .htaccess; \
+		php ctemplate.php -t ../../$^ > .htaccess; \
 	)
