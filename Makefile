@@ -101,8 +101,8 @@ clean-packages:
 	fi;
 
 clean:
-	if [ -f ${BUILDPATH}/${SITES_FOLDER}/${CURRENT_SITE}/Makefile ]; then \
-		$(MAKE) -C ${BUILDPATH}/${SITES_FOLDER}/${CURRENT_SITE} clean; \
+	if [ -f ${SITES_FOLDER}/${CURRENT_SITE}/Makefile ]; then \
+		$(MAKE) -C ${SITES_FOLDER}/${CURRENT_SITE} clean; \
 	fi;
 	$(MAKE) db-drop
 	$(MAKE) clean-packages
