@@ -46,8 +46,8 @@ final class Config {
 		self::log("Config::init()");
 		$error = false;
 
-		// Load build config
-		$filename = "$root_folder/config/aftertime.json";
+		// Load aftertime config
+		$filename = "$root_folder/framework/config/aftertime.json";
 		if (self::load_json($filename) === null) {
 			$error = true;
 		}

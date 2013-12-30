@@ -42,13 +42,12 @@ checkenv:
 		return 255; \
 	fi;
 	echo $(CURRENT_SITE) > $(SITE_FILE)
-	$(MAKE) config
 
 config: config/aftertime.json.in
-	mkdir ${BUILDPATH}/config
-	cp config/aftertime.json.in ${BUILDPATH}/config/aftertime.json; \
-	sed -i "s/__REVNO__/$(CODE_REVNO)/g" ${BUILDPATH}/config/aftertime.json; \
-	sed -i "s/__SITE__/`cat ${SITE_FILE}`/g" ${BUILDPATH}/config/aftertime.json; \
+	mkdir -p ${BUILDPATH}/framework/config
+	mv ${BUILDPATH}/framework/config/aftertime.json.in ${BUILDPATH}/framework/config/aftertime.json
+	sed -i "s/__REVNO__/$(CODE_REVNO)/g" ${BUILDPATH}/framework/config/aftertime.json
+	sed -i "s/__SITE__/`cat ${SITE_FILE}`/g" ${BUILDPATH}/framework/config/aftertime.json
 
 build:
 	$(MAKE) clean-build
@@ -59,6 +58,7 @@ build:
 		git checkout-index -a -f --prefix=${CHECKOUT_PATH}/; \
 		git reset; \
 	)
+	$(MAKE) config
 	mv ${BUILDPATH}/framework/controllers/index.php ${BUILDPATH}
 	# Remove the rest of the sites from the build folder
 	if [ "${CURRENT_SITE}" != "${AVAILABLE_SITES}" ]; then \
