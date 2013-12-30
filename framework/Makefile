@@ -59,6 +59,7 @@ build:
 		git checkout-index -a -f --prefix=${CHECKOUT_PATH}/; \
 		git reset; \
 	)
+	mv ${BUILDPATH}/framework/controllers/index.php ${BUILDPATH}
 	# Remove the rest of the sites from the build folder
 	if [ "${CURRENT_SITE}" != "${AVAILABLE_SITES}" ]; then \
 		rm -r $(addprefix ${BUILDPATH}/${SITES_FOLDER}/,$(filter-out ${CURRENT_SITE}, $(AVAILABLE_SITES))); \
