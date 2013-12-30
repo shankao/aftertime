@@ -17,7 +17,7 @@ if (aftertime_init() === false) {
 		}
 	} else {
 		require_once 'include/template_log.php';
-		TemplateLog::render('templates/apperror.php');
+		TemplateLog::render('framework/templates/apperror.php');
 	}
 	log_entry ('=== Page generation time was ' . (microtime(true) - $time_start) . ' ===');
 }
