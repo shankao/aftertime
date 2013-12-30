@@ -11,7 +11,7 @@ function aftertime_init($web_init = true, $root_folder = '') {
 	if (isset($config['timezone'])) {
 		ini_set ('date.timezone', $config['timezone']);
 	}
-	ini_set ('include_path', '.' . PATH_SEPARATOR . 'lib/pear/php' . PATH_SEPARATOR . "sites/{$config['site']}");	// Adds the site folder
+	ini_set ('include_path', 'framework' . PATH_SEPARATOR . 'framework/lib/pear/php' . PATH_SEPARATOR . "sites/{$config['site']}");	// Adds the site folder
 	ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
 
 	if (class_exists('Log')) {
@@ -41,10 +41,10 @@ final class Config {
 	private function __construct() {
 	}
 
-	// Load everything that matches config/*.json
-	static public function init($root_folder = 'config') {
+	static public function init($root_folder = false) {
 		self::log("Config::init()");
 		$error = false;
+		$root_folder = $root_folder? $root_folder : '.';
 
 		// Load aftertime config
 		$filename = "$root_folder/framework/config/aftertime.json";

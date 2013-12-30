@@ -324,7 +324,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		switch ($page_template) {	// XXX TemplateLog types
 			case 'default':
 			case 'apperror':
-				$template_filename = "templates/$page_template.php";
+				$template_filename = "framework/templates/$page_template.php";
 				break;
 			default:	// Local app template. XXX Maybe is worth to remove the appname here and let the app choose
 				$config = Config::get();
