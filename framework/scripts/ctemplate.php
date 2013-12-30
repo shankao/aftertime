@@ -1,6 +1,6 @@
 <?php
-require_once 'include/template.php';
-require_once 'include/config.php';
+require_once '../include/template.php';
+require_once '../include/config.php';
 
 $opts = getopt('t:');
 if (!isset($opts['t'])) {
@@ -8,7 +8,7 @@ if (!isset($opts['t'])) {
 	exit(1);
 }
 
-if (!aftertime_init(false)) {
+if (!aftertime_init(false, '../..')) {
         echo Config::init_log();
         exit (1);
 }

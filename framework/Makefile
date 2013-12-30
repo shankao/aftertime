@@ -4,6 +4,7 @@ CODE_CDUP:=$(shell git rev-parse --show-cdup)
 BUILDPATH=${CODE_CDUP}build
 PACKAGESPATH=${CODE_CDUP}packages
 SITES_FOLDER:=${CODE_CDUP}sites
+SCRIPTS_FOLDER:=${BUILDPATH}/framework/scripts
 CHECKOUT_PATH:=$(subst ${CODE_CDUP},,${BUILDPATH})
 AVAILABLE_SITES:=$(shell ls ${SITES_FOLDER})
 SITE_FILE:=config/.current.site
@@ -23,7 +24,7 @@ ifndef VERBOSE
         MAKEFLAGS += --no-print-directory
 endif
 
-ifneq ($(shell (cd ${BUILDPATH} 2>&1 && php ./scripts/getconfig.php) | grep "database.host" | cut -f2 -d"="),)
+ifneq ($(shell (cd ${SCRIPTS_FOLDER} 2>&1 && php getconfig.php) | grep "database.host" | cut -f2 -d"="),)
 	DB_DEFINED := yes
 endif
 
@@ -53,9 +54,11 @@ build:
 	$(MAKE) clean-build
 	$(MAKE) build-folder
 	$(MAKE) checkenv
-	git add --all
-	git checkout-index -a -f --prefix=${CHECKOUT_PATH}/
-	git reset
+	(cd ${CODE_CDUP} && \
+		git add --all; \
+		git checkout-index -a -f --prefix=${CHECKOUT_PATH}/; \
+		git reset; \
+	)
 	# Remove the rest of the sites from the build folder
 	if [ "${CURRENT_SITE}" != "${AVAILABLE_SITES}" ]; then \
 		rm -r $(addprefix ${BUILDPATH}/${SITES_FOLDER}/,$(filter-out ${CURRENT_SITE}, $(AVAILABLE_SITES))); \
@@ -75,7 +78,7 @@ info:
 	@echo "Checkout path: ${CHECKOUT_PATH}"
 
 print-config:
-	@(cd ${BUILDPATH} && php scripts/getconfig.php)	
+	@(cd ${SCRIPTS_FOLDER} && php getconfig.php)	
 
 $(AVAILABLE_SITES):
 	@echo "Setting site to $@"
@@ -105,7 +108,7 @@ clean:
 
 package: 
 	$(MAKE) build BUILDPATH=${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
-	cp ${BUILDPATH}/scripts/upgrade.sh ${PACKAGESPATH}
+	cp ${SCRIPTS_FOLDER}/upgrade.sh ${PACKAGESPATH}
 	(cd ${PACKAGESPATH} && zip -rq ${CURRENT_SITE}_$(CODE_REVNO).zip ${CURRENT_SITE}_$(CODE_REVNO) upgrade.sh)
 	rm -rf ${PACKAGESPATH}/${CURRENT_SITE}_$(CODE_REVNO)
 
@@ -113,12 +116,12 @@ package:
 
 db-drop:
 	if [ "$(DB_DEFINED)" ]; then \
-		echo "DROP SCHEMA IF EXISTS ${CURRENT_SITE}" | (cd ${BUILDPATH}; ./scripts/runmysql.sh -n); \
+		echo "DROP SCHEMA IF EXISTS ${CURRENT_SITE}" | (cd ${SCRIPTS_FOLDER}; runmysql.sh -n); \
 	fi; 
 
 db-create: 
 	if [ "$(DB_DEFINED)" ]; then \
-		echo "CREATE SCHEMA IF NOT EXISTS ${CURRENT_SITE} DEFAULT CHARACTER SET utf8" | (cd ${BUILDPATH}; ./scripts/runmysql.sh -n); \
+		echo "CREATE SCHEMA IF NOT EXISTS ${CURRENT_SITE} DEFAULT CHARACTER SET utf8" | (cd ${SCRIPTS_FOLDER}; runmysql.sh -n); \
 	fi;
 
 db-restore: 
@@ -147,8 +150,8 @@ db-snap:
 		echo "Please, indicate the file to store the snap to, in the FILE variable"; \
 	else \
 		echo "Storing DB snap on ${FILE}"; \
-		(cd ${BUILDPATH}; \
-			./scripts/runmysqldump.sh -o ../${FILE}; \
+		(cd ${SCRIPTS_FOLDER}; \
+			runmysqldump.sh -o ../${FILE}; \
 		) \
 	fi;
 
@@ -171,7 +174,7 @@ db-load:
 .PHONY: db-create db-restore db-drop db-snap db-load
 
 # TODO Symlinks method should only be used if mod_rewrite is not around
-ROOT_CONTENT:=$(shell (cd ${BUILDPATH} 2>&1 && php scripts/getconfig.php) | grep "root-content" | cut -f2 -d"=")
+ROOT_CONTENT:=$(shell (cd ${SCRIPTS_FOLDER} 2>&1 && php getconfig.php) | grep "root-content" | cut -f2 -d"=")
 root-content: ${ROOT_CONTENT}
 
 ${ROOT_CONTENT}: 
@@ -192,6 +195,6 @@ ${ROOT_CONTENT}:
 .PHONY: root-content 
 
 %.htaccess: templates/htaccess.php
-	@(cd ${BUILDPATH}; \
-		php ./scripts/ctemplate.php -t $^ > .htaccess; \
+	@(cd ${SCRIPTS_FOLDER}; \
+		php ctemplate.php -t ../$^ > .htaccess; \
 	)

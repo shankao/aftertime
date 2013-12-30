@@ -17,8 +17,8 @@ function print_config_values ($config, $prefix = '') {
 	}
 }
 
-require_once 'include/config.php';
-if (aftertime_init(false) === false) {
+require_once '../include/config.php';
+if (aftertime_init(false, '../..') === false) {
 	echo Config::init_log();
 	exit (-1);
 }

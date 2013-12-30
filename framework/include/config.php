@@ -2,8 +2,8 @@
 // TODO Keep the config cached in memory between PHP calls somehow
 
 // Initialization of the framework
-function aftertime_init($web_init = true) {
-	$config = Config::init();
+function aftertime_init($web_init = true, $root_folder = '') {
+	$config = Config::init($root_folder);
 	if ($config === false) {
 		return false;
 	}
@@ -42,34 +42,39 @@ final class Config {
 	}
 
 	// Load everything that matches config/*.json
-	static public function init() {
+	static public function init($root_folder = 'config') {
 		self::log("Config::init()");
 		$error = false;
 
 		// Load build config
-		$filename = 'config/aftertime.json';
+		$filename = "$root_folder/config/aftertime.json";
 		if (self::load_json($filename) === null) {
 			$error = true;
 		}
 
 		// Get site's config files
 		$site = self::$config['active_site'];
-		$files = glob("sites/$site/config/*.json");
-		$hostname_file = "sites/$site/config/hostname_".gethostname().'.json';
+		$files = glob("$root_folder/sites/$site/config/*.json");
+		$hostname_file = "$root_folder/sites/$site/config/hostname_".gethostname().'.json';
 		if (($key = array_search($hostname_file, $files)) !== false) {	// Moves hostname.conf to the end
 			unset($files[$key]);
 			$files[] = $hostname_file;
 		}
 
 		// Load them
-		foreach ($files as $filename) {
-			if (strpos($filename, 'hostname_') !== false && $filename != $hostname_file) {
-				self::log("Skip $filename: not current host");
-				continue;	// Skip hostname config, if not for the current one
+		if (count($files)) {
+			foreach ($files as $filename) {
+				if (strpos($filename, 'hostname_') !== false && $filename != $hostname_file) {
+					self::log("Skip $filename: not current host");
+					continue;	// Skip hostname config, if not for the current one
+				}
+				if (self::load_json($filename) === null) {
+					$error = true;
+				}
 			}
-			if (self::load_json($filename) === null) {
-				$error = true;
-			}
+		} else {
+			self::log("ERROR: there is no site config (path=$root_folder/sites/$site/config/)");
+			$error = true;
 		}
 
 		if ($error) {

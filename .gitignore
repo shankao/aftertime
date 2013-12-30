@@ -1,7 +1,7 @@
 build
 packages
-config/.current.site
-lib/pear/cache
-lib/pear/download
-lib/pear/php/.channels
-lib/pear/php/.registry
+framework/config/.current.site
+framework/lib/pear/cache
+framework/lib/pear/download
+framework/lib/pear/php/.channels
+framework/lib/pear/php/.registry
