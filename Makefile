@@ -153,7 +153,7 @@ db-snap:
 	else \
 		echo "Storing DB snap on ${FILE}"; \
 		(cd ${SCRIPTS_FOLDER}; \
-			./runmysqldump.sh -o ../${FILE}; \
+			./runmysqldump.sh -o ../../../${FILE}; \
 		) \
 	fi;
 
