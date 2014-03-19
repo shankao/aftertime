@@ -34,7 +34,7 @@ final class Log {
 			if (!isset($logs_folder)) {
 				$config = Config::get();
 				if ($config && isset($config['logs'])) {
-					$logs_folder = $config['logs'];
+					$logs_folder = getcwd().'/'.$config['logs'];
 				} else {
 					$logs_folder = sys_get_temp_dir()."/{$config['site']}/logs";
 				}
