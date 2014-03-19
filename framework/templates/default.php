@@ -1,6 +1,7 @@
 <?php
 require_once 'include/titletag.php';
-if (empty(HTMLTitle::get())) {
+$title = HTMLTitle::get();
+if (empty($title)) {
 	HTMLTitle::set_from_page($app->params['app'], $app->params['page']);
 }
 
