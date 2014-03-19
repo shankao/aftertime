@@ -15,7 +15,7 @@ set -o nounset
 
 usage() {
 	echo Usage:
-	echo $0
+	echo $0 [install|config-check|switch|db-init|db-snap] target
 }
 
 if [ $# -ne 2 ]; then
