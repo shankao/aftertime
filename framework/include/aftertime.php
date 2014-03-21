@@ -52,6 +52,9 @@ function get_absolute_url ($url, $parent_url = null) {
 	}
 
 	if (empty($url_components['host'])) {
+		if ($url[0] === '/') {
+			$url = substr($url, 1);
+		}
 		$url = $parent_components['scheme'] .'://'. $parent_components['host'].'/'.$url;
 	}
 
