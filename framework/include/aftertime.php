@@ -21,7 +21,7 @@ function getParam ($source, $varname, $default=null) {
 
 function html_value($var) {
         if (isset($var))
-                return htmlspecialchars($var);
+                return nl2br(htmlspecialchars($var));
         else
 		return '';
 }
