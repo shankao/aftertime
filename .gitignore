@@ -1,7 +1,4 @@
-build
-packages
-framework/config/.current.site
-framework/lib/pear/cache
-framework/lib/pear/download
-framework/lib/pear/php/.channels
-framework/lib/pear/php/.registry
+lib/pear/cache
+lib/pear/download
+lib/pear/php/.channels
+lib/pear/php/.registry
