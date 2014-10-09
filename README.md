@@ -37,6 +37,6 @@ Mission: to be an experimental web framework that implements unconventional idea
 = Example site =
 
 Consider it a "hello world": it simply defines the minimum elements required to show a webpage.
-All the site's code is inside the "sites/example_site" folder.
+All the site's code is inside the "example_site" folder.
 Build the site by running "make" in aftertime's main folder, and point your web browser to the "build" folder to get to the main page.
 You can find some logs under the /tmp/example_site folder

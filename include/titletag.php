@@ -1,5 +1,5 @@
 <?php
-require_once 'include/config.php';
+require_once __DIR__.'/config.php';
 
 class HTMLTitle {
 	static private $title_tag = '';

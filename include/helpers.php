@@ -1,6 +1,6 @@
 <?php /* Helper functions */
-require_once 'include/log.php';
-
+require_once __DIR__.'/log.php';
+// TODO: move where they better correspond
 /*
  * XXX Deprecated
  */

@@ -42,7 +42,7 @@ config_check() {
 	get_siterev
 	echo "Showing differences between $SITE and $SITEREV"
 
-	CONFFILES="config/aftertime.json `(cd $SITE && ls sites/$SITE/config/*.json)` `(cd $SITEREV && ls sites/$SITE/config/*.json)`"
+	CONFFILES="config/aftertime.json `(cd $SITE && ls $SITE/config/*.json)` `(cd $SITEREV && ls $SITE/config/*.json)`"
 	CONFFILES="`echo $CONFFILES | tr \" \" \"\\n\" | sort -u`"
 	for filename in $CONFFILES; do
 		if [ ! -f $SITE/$filename ]; then
@@ -113,15 +113,16 @@ case $ACTION in
 		;;
 	db-init)
 		echo "Initialize the database schema"
-                (cd $SITE
-                        echo "CREATE SCHEMA \"$SITE\" DEFAULT CHARACTER SET utf8;" | ./scripts/runmysql.sh -n
+		get_siterev
+                (cd $SITE/framework/scripts;
+                        echo "CREATE DATABASE $SITE DEFAULT CHARACTER SET utf8;" | ./runmysql.sh -n
 			if [ $? != 0 ]; then
                                 echo ERROR creating the initial DB. Already exists?
                                 exit $?
                         fi
-                        if [ -f $SITE/db/schema.sql ]; then
+                        if [ -f ../../$SITE/db/schema.sql ]; then
                                 echo "Adding initial DDLs";
-                                ./scripts/runmysql.sh -f "$SITE/db/schema.sql"
+                                ./runmysql.sh -f "../../$SITE/db/schema.sql"
                                 if [ $? != 0 ]; then
                                         echo ERROR adding initial DDLs
                                         exit $?
@@ -133,8 +134,8 @@ case $ACTION in
 	db-snap)
 		get_siterev
 		echo "Dumping database from $SITE"
-		(cd $SITE;
-			./scripts/runmysqldump.sh -o ../$SITE.sql
+		(cd $SITE/framework/scripts;
+			./runmysqldump.sh -o ../../../$SITE.sql
 		)
 		;;
 	*)

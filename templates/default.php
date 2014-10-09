@@ -1,12 +1,12 @@
 <?php
-require_once 'include/titletag.php';
+require_once __DIR__.'/../include/titletag.php';
 $title = HTMLTitle::get();
 if (empty($title)) {
 	HTMLTitle::set_from_page($app->params['app'], $app->params['page']);
 }
 
 $config = Config::get();
-$base_folder = "sites/{$config['site']}";	// XXX Investigate if it can be moved to an app class member or function
+$base_folder = "{$config['site']}";	// XXX Investigate if it can be moved to an app class member or function
 echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">

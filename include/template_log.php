@@ -1,6 +1,6 @@
 <?php
-require_once 'include/template.php';
-require_once 'include/log.php';
+require_once __DIR__.'/template.php';
+require_once __DIR__.'/log.php';
 
 // Adds automatic logging
 class TemplateLog extends Template {

@@ -1,5 +1,5 @@
 <?php
-require_once 'include/log.php';
+require_once __DIR__.'/log.php';
 
 class Validate {
 	private $errors = array();

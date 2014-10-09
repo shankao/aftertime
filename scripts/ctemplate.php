@@ -1,6 +1,6 @@
 <?php
-require_once '../include/template.php';
-require_once '../include/config.php';
+require_once __DIR__.'/../include/template.php';
+require_once __DIR__.'/../include/config.php';
 
 $opts = getopt('t:');
 if (!isset($opts['t'])) {

@@ -1,7 +1,8 @@
 <?php
-require_once 'include/log.php';
-require_once 'include/config.php';
-require_once 'include/db.php';
+require_once __DIR__.'/log.php';
+require_once __DIR__.'/config.php';
+require_once __DIR__.'/db.php';
+require_once __DIR__.'/helpers.php';
 
 // Returns an App object chosen from the config and request params
 final class appFactory {
@@ -56,7 +57,7 @@ final class appFactory {
 			log_entry ("ERROR: page '{$request['page']}' invalid");
                         return null;
                 }
-		$app_code_file = "sites/{$config['site']}/{$request['app']}/code.php";
+		$app_code_file = "{$config['site']}/{$request['app']}/code.php";
 		if (!is_readable($app_code_file)) {
 			log_entry ("Cannot load the app's code at $app_code_file");
 			return null;
@@ -175,7 +176,7 @@ abstract class app {
 	}
 
 	protected function db_error() {
-		$error = db_error();	// That's the function in include/aftertime.php
+		$error = db_error();	// That's the function in include/helpers.php
 		if ($error) {
 			$this->error_add('DB_ERROR', $error);
 			return true;
@@ -231,7 +232,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		if (!$page_config || !isset($page_config['params'])) {
 			log_entry("WARNING: params not specified for '$pagename' page. Validation checks will not be performed");
 		} else {
-			require_once 'include/validate.php';
+			require_once __DIR__.'/validate.php';
 			$validator = new Validate;
 			$validator->check_array($this->params, $page_config['params']);
 			if ($validator->has_errors()) {
@@ -305,7 +306,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		$config = Config::get();
 		$sitename = $config['site'];
 		$appname = get_class($this);
-		$filename = "sites/$sitename/$appname/$appname.$type";	// XXX Investigate if sites/$sitename -> smth returned from function
+		$filename = "$sitename/$appname/$appname.$type";	// XXX Investigate if $sitename -> smth returned from function
 		if (is_readable($filename)) {
 			return "$filename?{$config['code_revision']}";
 		} else {
@@ -325,16 +326,16 @@ log_entry(print_r($_SERVER, true), 20000);
 		switch ($page_template) {	// XXX TemplateLog types
 			case 'default':
 			case 'apperror':
-				$template_filename = "framework/templates/$page_template.php";
+				$template_filename = __DIR__."/../templates/$page_template.php";
 				break;
 			default:	// Local app template. XXX Maybe is worth to remove the appname here and let the app choose
 				$config = Config::get();
 				$appname = get_class($this);
-				$template_filename = "sites/{$config['site']}/$appname/$page_template.php";
+				$template_filename = "{$config['site']}/$appname/$page_template.php";
 				break;
 		}
 
-		require_once 'include/template_log.php';
+		require_once __DIR__.'/template_log.php';
 		return TemplateLog::render($template_filename);
 	}
 

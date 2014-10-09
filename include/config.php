@@ -1,39 +1,5 @@
 <?php
 // TODO Keep the config cached in memory between PHP calls somehow
-
-// Initialization of the framework
-function aftertime_init($web_init = true, $root_folder = '') {
-	$config = Config::init($root_folder);
-	if ($config === false) {
-		return false;
-	}
-
-	if (isset($config['timezone'])) {
-		ini_set ('date.timezone', $config['timezone']);
-	}
-	ini_set ('include_path', 'framework' . PATH_SEPARATOR . 'framework/lib/pear/php' . PATH_SEPARATOR . "sites/{$config['site']}");	// Adds the site folder
-	ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
-
-	if (class_exists('Log')) {
-		log_entry(Config::init_log());
-		ini_set ('error_log', Log::log_file());
-		set_error_handler(array('Log', 'php_errors'));
-		set_exception_handler(array('Log', 'php_errors'));
-		register_shutdown_function(array('Log', 'log_shutdown'));
-	}
-
-	if ($web_init) {
-		ob_start(null, 4096);
-		ini_set ('arg_separator.output', '&amp;');
-		if (!session_start()) {
-			log_entry('ERROR: Cannot start session');
-			return false;
-		}
-	}
-
-	return true;
-}
-
 final class Config {
 	static private $config = null;
 	static private $log = '';
@@ -41,50 +7,54 @@ final class Config {
 	private function __construct() {
 	}
 
-	static public function init($root_folder = false) {
-		self::log("Config::init()");
-		$error = false;
-		$root_folder = $root_folder? $root_folder : '.';
-
-		// Load aftertime config
-		$filename = "$root_folder/framework/config/aftertime.json";
-		if (self::load_json($filename) === null) {
-			$error = true;
-		}
-
-		// Get site's config files
-		$site = self::$config['active_site'];
-		$files = glob("$root_folder/sites/$site/config/*.json");
-		$hostname_file = "$root_folder/sites/$site/config/hostname_".gethostname().'.json';
-		if (($key = array_search($hostname_file, $files)) !== false) {	// Moves hostname.conf to the end
+	// Loads all the config files in the folder
+	static public function load($folder) {
+		// Get config files' list
+		$files = glob("$folder/*.json");
+		$host_config = "$folder/hostname_".gethostname().'.json';
+		if (($key = array_search($host_config, $files)) !== false) {
+			// Moves host config to the end for overriding
 			unset($files[$key]);
-			$files[] = $hostname_file;
+			$files[] = $host_config;
 		}
 
 		// Load them
+		$return = true;
 		if (count($files)) {
 			foreach ($files as $filename) {
-				if (strpos($filename, 'hostname_') !== false && $filename != $hostname_file) {
+				if (strpos($filename, 'hostname_') !== false && $filename != $host_config) {
+					// Skip hostname config, if not for the current one
 					self::log("Skip $filename: not current host");
-					continue;	// Skip hostname config, if not for the current one
+					continue;
 				}
 				if (self::load_json($filename) === null) {
-					$error = true;
+					$return = false;
 				}
 			}
 		} else {
-			self::log("ERROR: there is no site config (path=$root_folder/sites/$site/config/)");
-			$error = true;
+			self::log("ERROR: no config files found in folder: $folder");
+			$return = false;
 		}
 
-		if ($error) {
+		return $return;
+	}
+
+	static public function init($root_folder = false) {
+		self::log("Config::init()");
+		$root_folder = $root_folder? $root_folder : '.';
+
+		// Load aftertime config
+		if (self::load(__DIR__.'/../config') === false) {
 			return false;
-		} else {
-			// Config initialized
-			self::log('SUCCESS: all config loaded');
-			unset(self::$config['active_site']);
-			return self::$config;
 		}
+
+		// Get indicated config
+		if (self::load($root_folder) === false) {
+			return false;
+		}
+
+		self::log('SUCCESS: all config loaded');
+		return self::$config;
 	}
 
 	private function load_json($file) {

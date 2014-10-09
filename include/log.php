@@ -1,6 +1,5 @@
 <?php
-require_once 'include/aftertime.php';
-require_once 'include/config.php';
+require_once __DIR__.'/helpers.php';
 
 function log_entry ($text, $sizelimit = 2000) {
 	return Log::log_entry ($text, $sizelimit);
