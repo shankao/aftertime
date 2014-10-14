@@ -1,6 +1,6 @@
 <?php
-if (isset($app) && $app->has_error()) {
-	foreach($app->get_all_errors() as $error) {
+if (isset($errors)) {
+	foreach($errors as $error) {
 		echo "<div class=\"error\">$error</div>";
 	}
 }

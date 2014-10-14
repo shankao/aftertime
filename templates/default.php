@@ -2,7 +2,7 @@
 require_once __DIR__.'/../include/titletag.php';
 $title = HTMLTitle::get();
 if (empty($title)) {
-	HTMLTitle::set_from_page($app->params['app'], $app->params['page']);
+	HTMLTitle::set_from_page($params['app'], $params['page']);
 }
 
 $config = Config::get();
@@ -19,15 +19,15 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 			if (is_readable($favicon)) { ?>
 				<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php echo $favicon; ?>" /><?php
 			}
-			Template::render("$base_folder/templates/load_css.php");
-			Template::render("$base_folder/templates/load_js.php");
+			Template::render("$base_folder/templates/load_css.php", array('app' => $params['app']));
+			Template::render("$base_folder/templates/load_js.php", array('app' => $params['app']));
 		?>
 	</head>
         <body>
 		<?php 
 		// Load the current page's template
-		if (TemplateLog::render("$base_folder/{$app->params['app']}/{$app->params['page']}.php") === false) {
-			log_entry("ERROR: unexistent page template {$app->params['page']}");
+		if (TemplateLog::render("$base_folder/{$params['app']}/{$params['page']}.php", $template_vars, true) === false) {
+			log_entry("ERROR: unexistent page template {$params['page']}");
 			Template::render('templates/apperror.php');
 		} 
 		?>

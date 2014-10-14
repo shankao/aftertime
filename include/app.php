@@ -336,7 +336,16 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 
 		require_once __DIR__.'/template_log.php';
-		return TemplateLog::render($template_filename);
+		if (isset($this->params)) {
+			$vars['params'] = $this->params;
+		}
+		if (isset($this->errors)) {
+			$vars['errors'] = $this->errors;
+		}
+		if ($this->is_user_logged()) {
+			$vars['user'] = $this->user;
+		}
+		return TemplateLog::render($template_filename, $vars);
 	}
 
 	public function redirect($dest) {
