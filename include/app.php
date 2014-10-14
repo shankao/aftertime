@@ -345,6 +345,9 @@ log_entry(print_r($_SERVER, true), 20000);
 		if ($this->is_user_logged()) {
 			$vars['user'] = $this->user;
 		}
+		$config = Config::get();
+		$vars['config']['site'] = $config['site'];
+		$vars['config']['code_revision'] = $config['code_revision'];
 		return TemplateLog::render($template_filename, $vars);
 	}
 
