@@ -290,30 +290,6 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 	}
 
-	// TODO Move the next three functions out of this class
-	// This files should be specified via config instead
-	public function get_css() {
-		static $css = null;
-		return $css != null? $css : $this->get_app_file('css');
-	}
-
-	public function get_js() {
-		static $js = null;
-		return $js != null? $js : $this->get_app_file('js');
-	}
-
-	private function get_app_file($type) {
-		$config = Config::get();
-		$sitename = $config['site'];
-		$appname = get_class($this);
-		$filename = "$sitename/$appname/$appname.$type";	// XXX Investigate if $sitename -> smth returned from function
-		if (is_readable($filename)) {
-			return "$filename?{$config['code_revision']}";
-		} else {
-			return false;
-		}
-	}
-
 	// Render page's template
 	public function render_template() {
 		$page_config = Config::get($this->params['app'], $this->params['page']);
