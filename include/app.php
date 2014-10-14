@@ -322,6 +322,7 @@ log_entry(print_r($_SERVER, true), 20000);
 			return false;
 		}
 		$page_template = $page_config['template'];
+		$config = Config::get();
 
 		switch ($page_template) {	// XXX TemplateLog types
 			case 'default':
@@ -329,7 +330,6 @@ log_entry(print_r($_SERVER, true), 20000);
 				$template_filename = __DIR__."/../templates/$page_template.php";
 				break;
 			default:	// Local app template. XXX Maybe is worth to remove the appname here and let the app choose
-				$config = Config::get();
 				$appname = get_class($this);
 				$template_filename = "{$config['site']}/$appname/$page_template.php";
 				break;
@@ -345,7 +345,6 @@ log_entry(print_r($_SERVER, true), 20000);
 		if ($this->is_user_logged()) {
 			$vars['user'] = $this->user;
 		}
-		$config = Config::get();
 		$vars['config']['site'] = $config['site'];
 		$vars['config']['code_revision'] = $config['code_revision'];
 		return TemplateLog::render($template_filename, $vars);
