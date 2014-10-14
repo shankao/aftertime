@@ -10,13 +10,24 @@ class Template {
 		}
 	}
 
-	static public function render($template_filename, array $vars = null) {	// TODO Add support for template vars
+	static public function render($template_filename, array $template_vars = null) {
                 if (!is_readable($template_filename)) {
                         return false;
                 }
 
+		// TODO import *only* the template vars
 		$app = self::clone_app();	// Each template can only access to this clone of the app object. Unless they use global...
-                return include_once($template_filename);			// TODO import only the template vars
+		if (isset($template_vars)) {
+			foreach ($template_vars as $template_varname => $template_value) {
+				if ($template_varname == 'template_varname' || $template_varname == 'template_varvalue') {
+					return false;
+				}
+				$$template_varname = $template_value;
+			}
+			unset($template_varname);
+			unset($template_value);
+		}
+                return include($template_filename);
 	}
 }
 ?>
