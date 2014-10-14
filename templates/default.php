@@ -30,7 +30,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 		// Load the current page's template
 		if (TemplateLog::render("{$config['site']}/{$params['app']}/{$params['page']}.php", $template_vars, true) === false) {
 			log_entry("ERROR: unexistent page template {$params['page']}");
-			Template::render('templates/apperror.php');
+			TemplateLog::render(__DIR__.'/apperror.php');
 		} 
 		?>
 	</body>
