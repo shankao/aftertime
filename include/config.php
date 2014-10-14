@@ -134,6 +134,25 @@ final class Config {
 	static public function set(array $config = null) {
 		self::$config = $config;
 	}
+
+	static public function print_values($prefix = '') {
+		self::print_config_values(self::$config, $prefix);
+	}
+
+	static private function print_config_values ($config, $prefix = '') {
+		if (empty($config)) {
+			$prefix = substr($prefix, 0, -1);
+			echo "$prefix=\n";
+		} else {
+			foreach ($config as $key => $value) {
+				if (is_array($value)) {
+					self::print_config_values($value, "$prefix$key.");
+				} else {
+					echo "$prefix$key=$value\n";
+				}
+			}
+		}
+	}
 }
 
 /**
