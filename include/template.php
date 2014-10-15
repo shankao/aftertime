@@ -6,25 +6,14 @@ class Template {
 
 	private $filename;	
 	private $vars;	
-	private $use_app;	
 
-        private function clone_app() {
-                global $app;
-                if (isset($app)) {
-                        return clone($app);
-                } else {
-                        return null;
-                }
-        }
-
-	public function __construct($filename, array $vars = null, $use_app = false) {
+	public function __construct($filename, array $vars = null) {
 		if (!is_readable($filename)) {
 			return false;
 		}
 
 		$this->filename = $filename;
 		$this->vars = $vars;
-		$this->use_app = $use_app;
 	}
 	
 	public function set_var ($name, $value) {
@@ -34,11 +23,6 @@ class Template {
         public function render() {
 		if (!$this->filename) {
 			return false;
-		}
-
-		// TODO import *only* the template vars
-		if ($this->use_app === true) {
-			$app = $this->clone_app();       // Each template can only access to this clone of the app object. Unless they use global
 		}
 
 		if (isset($this->vars)) {
@@ -62,9 +46,9 @@ class TemplateLog {
 	private $filename;
 	private $template;
 
-	public function __construct($filename, array $vars = null, $use_app = false) {
+	public function __construct($filename, array $vars = null) {
 		$this->filename = $filename;
-		$this->template = new Template ($filename, $vars, $use_app);
+		$this->template = new Template ($filename, $vars);
 	}
 
 	public function render() {
@@ -82,11 +66,11 @@ class TemplateLog {
 }
 
 // One liners for lazyness
-function template_render($filename, array $vars = null, $logging = true, $use_app = false) {
+function template_render($filename, array $vars = null, $logging = true) {
 	if ($logging) {
-		$t = new TemplateLog($filename, $vars, $use_app);
+		$t = new TemplateLog($filename, $vars);
 	} else {
-		$t = new Template($filename, $vars, $use_app);
+		$t = new Template($filename, $vars);
 	}
 	return $t->render();
 }  
