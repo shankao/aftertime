@@ -67,9 +67,6 @@ class Aftertime {
 	public function run_app() {
 		if ($this->is_ready && $this->app) {
 			if ($this->app->run() !== 'redirect') {
-				if ($this->app->init_template() === false) {
-					return false;
-				}
 				return $this->app->render_template();
 			}
 		} else {

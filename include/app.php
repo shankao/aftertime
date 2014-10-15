@@ -79,7 +79,6 @@ abstract class app {
 	public $user;		// User information. Not every site has it
 	public $template;	// Rendering page
 
-
 	/*
 	Functions for user authentication. 
 	It requires a DB up and running, and DB_DataObject::factory('users') working
@@ -244,6 +243,9 @@ log_entry(print_r($_SERVER, true), 20000);
 			return false;	// redirect to a 505 page?
 		}
 */
+
+		$this->init_template();
+
 		// Run the page method
 		if (!is_callable(array($this, $pagename))) {
 			log_entry("WARNING: no page method");
@@ -277,8 +279,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 	}
 
-	// Render page's template
-	final public function init_template() {
+	private function init_template() {
 		$page_config = Config::get($this->params['app'], $this->params['page']);
 		if (!isset($page_config['template'])) {
 			log_entry('No template specified for this page');
@@ -311,7 +312,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		$vars['config']['site'] = $config['site'];
 		$vars['config']['code_revision'] = $config['code_revision'];
 		$this->template = new TemplateLog($template_filename, $vars);
-		return $this->template;
+		return true;
 	}
 
 	final public function render_template() {
