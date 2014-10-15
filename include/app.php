@@ -62,10 +62,10 @@ final class appFactory {
 			log_entry ("Cannot load the app's code at $app_code_file");
 			return null;
 		}
-		require_once $app_code_file;
 		log_entry("Checking 'page' for '{$request['page']}': OK");
 
 		log_entry ("Creating app {$request['app']}");
+		require_once $app_code_file;
 		$app = new $request['app'];
 		$app->params = $request;
 		return $app;
@@ -311,7 +311,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 		$vars['config']['site'] = $config['site'];
 		$vars['config']['code_revision'] = $config['code_revision'];
-		$this->template = new TemplateLog($template_filename, $vars);
+		$this->template = new Template($template_filename, $vars);
 		return true;
 	}
 
