@@ -26,6 +26,10 @@ class Template {
 		$this->vars = $vars;
 		$this->use_app = $use_app;
 	}
+	
+	public function set_var ($name, $value) {
+		$this->vars[$name] = $value;
+	}
 
         public function render() {
 		if (!$this->filename) {
@@ -70,6 +74,10 @@ class TemplateLog {
 			log_entry("ERROR rendering {$this->filename}");
 		} 
 		return $result;
+	}
+
+	public function set_var ($name, $value) {
+		$this->template->set_var($name, $value);
 	}
 }
 
