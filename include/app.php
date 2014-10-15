@@ -79,21 +79,6 @@ abstract class app {
 	public $user;		// User information. Not every site has it
 	public $template;	// Rendering page
 
-	public function error_add($code) {
-		$this->errors[] = $code;
-	}
-
-	public function has_error($code = null) {
-		if ($code === null) {
-			return count($this->errors);
-		} else {
-			return in_array($code, $this->errors)? true : false;
-		}
-	}
-
-	public function get_all_errors() {
-		return $this->errors;
-	}
 
 	/*
 	Functions for user authentication. 
@@ -129,6 +114,34 @@ abstract class app {
 	private function clean_login_cookies() {
 		setcookie('us', '', time()-3600, '/', null, false, true);
 		setcookie('pw', '', time()-3600, '/', null, false, true);
+	}
+
+	// Basic auth. code taken from http://www.php.net/manual/en/features.http-auth.php
+	private function check_http_auth() {
+		$c = Config::get(get_class($this));
+		if (isset($c['user']) && isset($c['passwd'])) {
+			// TODO Check better auth. ways instead of "Basic". Maybe autogenerating .htaccess and .htpasswd files
+			// See http://pear.php.net/manual/en/package.filesystem.file-htaccess.intro.php
+log_entry(print_r($_SERVER, true), 20000);
+
+			$user = false;
+			if (isset($_SERVER['PHP_AUTH_USER'])) {
+				$user = $_SERVER['PHP_AUTH_USER'];
+				$passwd = $_SERVER['PHP_AUTH_PW'];
+			} else {
+				// fixme This does not work when PHP is working as CGI/FastCGI
+			}
+
+			if ($user === $c['user'] && $passwd === $c['passwd']) {
+				log_entry("HTTP auth OK");
+			} else {
+				header('WWW-Authenticate: Basic realm="Login please"');
+				header('HTTP/1.0 401 Unauthorized');
+				log_entry("HTTP auth failed");
+				return false;
+			}
+		}
+		return true;
 	}
 
 //------------------------ protected
@@ -186,34 +199,8 @@ abstract class app {
 		}
 	}
 
-	// Basic auth. code taken from http://www.php.net/manual/en/features.http-auth.php
-	private function check_http_auth() {
-		$c = Config::get(get_class($this));
-		if (isset($c['user']) && isset($c['passwd'])) {
-			// TODO Check better auth. ways instead of "Basic". Maybe autogenerating .htaccess and .htpasswd files
-			// See http://pear.php.net/manual/en/package.filesystem.file-htaccess.intro.php
-log_entry(print_r($_SERVER, true), 20000);
-
-			$user = false;
-			if (isset($_SERVER['PHP_AUTH_USER'])) {
-				$user = $_SERVER['PHP_AUTH_USER'];
-				$passwd = $_SERVER['PHP_AUTH_PW'];
-			} else {
-				// fixme This does not work when PHP is working as CGI/FastCGI
-			}
-
-			if ($user === $c['user'] && $passwd === $c['passwd']) {
-				log_entry("HTTP auth OK");
-			} else {
-				header('WWW-Authenticate: Basic realm="Login please"');
-				header('HTTP/1.0 401 Unauthorized');
-				log_entry("HTTP auth failed");
-				return false;
-			}
-		}
-		return true;
-	}
-
+//------------------------ public
+	
 	public function run() {
 		$appname = $this->params['app'];
 		$pagename = $this->params['page'];
@@ -341,6 +328,22 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 		redirect($dest);
 		return 'redirect';
+	}
+
+	public function error_add($code) {
+		$this->errors[] = $code;
+	}
+
+	public function has_error($code = null) {
+		if ($code === null) {
+			return count($this->errors);
+		} else {
+			return in_array($code, $this->errors)? true : false;
+		}
+	}
+
+	public function get_all_errors() {
+		return $this->errors;
 	}
 }
 
