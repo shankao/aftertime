@@ -9,9 +9,7 @@ class Aftertime {
 	private $is_web = true;
 	private $is_ready = false;
 
-	public $app;
-
-	function __construct ($config_folder) {
+	public function __construct ($config_folder) {
 		$this->time_start = microtime(true);
 	
 		ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
@@ -50,30 +48,27 @@ class Aftertime {
 		$this->is_ready = true;
 	}
 
-	function __destruct () {
+	public function __destruct () {
 		log_entry ('=== Page generation time was ' . (microtime(true) - $this->time_start) . ' ===');
 	}
 
-	public function get_app() {
-		if (!$this->is_ready) {
-			return false;
+	public function run_app() {
+		if (!$this->is_ready) {	// Something failed on the constructor
+			return false;	
 		}
 		require_once __DIR__.'/app.php';
 		$app_factory = new appFactory;
 		$this->app = $app_factory->build($_REQUEST);
-		return $this->app;
-	}
-
-	public function run_app() {
-		if ($this->is_ready && $this->app) {
+		if ($this->app) {
 			if ($this->app->run() !== 'redirect') {
 				return $this->app->render_template();
 			}
 		} else {
 			require_once __DIR__.'/template.php';
-			template_render(__DIR__."/../templates/apperror.php");
+			template_render(__DIR__.'/../templates/apperror.php');
 			return false;
 		}
+		return true;
 	}
 }
 ?>
