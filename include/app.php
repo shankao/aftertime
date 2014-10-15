@@ -309,8 +309,7 @@ log_entry(print_r($_SERVER, true), 20000);
 		if ($this->is_user_logged()) {
 			$vars['user'] = $this->user;
 		}
-		$vars['config']['site'] = $config['site'];
-		$vars['config']['code_revision'] = $config['code_revision'];
+		$vars['config'] = $config;
 		$this->template = new Template($template_filename, $vars);
 		return true;
 	}
