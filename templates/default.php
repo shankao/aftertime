@@ -13,16 +13,13 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
                 <meta http-equiv="Content-Language" content="en" />
 		<title><?php echo HTMLTitle::get(); ?></title>
 		<?php
-			$favicon = "{$config['site']}/img/favicon.ico";
-			if (is_readable($favicon)) { ?>
-				<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="<?php echo $favicon; ?>" /><?php
-			}
+			template_render(__DIR__.'/favicon.php', array('filename' => $config['favicon']), false);
 			$vars = array(
 				'app' => $params['app'],
 				'rev' => $config['code_revision']
 			);
-			template_render("{$config['site']}/templates/load_css.php", $vars, false);
-			template_render("{$config['site']}/templates/load_js.php", $vars, false);
+			template_render(__DIR__.'/load_css.php', $vars, false);
+			template_render(__DIR__.'/load_js.php', $vars, false);
 		?>
 	</head>
         <body>
