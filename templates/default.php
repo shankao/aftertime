@@ -21,16 +21,16 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 				'app' => $params['app'],
 				'rev' => $config['code_revision']
 			);
-			Template::render("{$config['site']}/templates/load_css.php", $vars);
-			Template::render("{$config['site']}/templates/load_js.php", $vars);
+			template_render("{$config['site']}/templates/load_css.php", $vars, false);
+			template_render("{$config['site']}/templates/load_js.php", $vars, false);
 		?>
 	</head>
         <body>
 		<?php 
 		// Load the current page's template
-		if (TemplateLog::render("{$config['site']}/{$params['app']}/{$params['page']}.php", $template_vars, true) === false) {
+		if (template_render("{$config['site']}/{$params['app']}/{$params['page']}.php", $template_vars, true, true) === false) {
 			log_entry("ERROR: unexistent page template {$params['page']}");
-			TemplateLog::render(__DIR__.'/apperror.php');
+			template_render(__DIR__.'/apperror.php');
 		} 
 		?>
 	</body>

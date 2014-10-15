@@ -13,6 +13,6 @@ if (!aftertime_init(false, '../..')) {
         exit (1);
 }
 $config = Config::get();
-$result = Template::render($opts['t']);
+$result = template_render($opts['t'], null, false);
 exit($result? 0 : 1);
 ?>

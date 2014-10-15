@@ -67,11 +67,14 @@ class Aftertime {
 	public function run_app() {
 		if ($this->is_ready && $this->app) {
 			if ($this->app->run() !== 'redirect') {
+				if ($this->app->init_template() === false) {
+					return false;
+				}
 				return $this->app->render_template();
 			}
 		} else {
-			require_once __DIR__.'/template_log.php';
-			TemplateLog::render(__DIR__."/../templates/apperror.php");
+			require_once __DIR__.'/template.php';
+			template_render(__DIR__."/../templates/apperror.php");
 			return false;
 		}
 	}

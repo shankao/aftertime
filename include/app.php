@@ -77,6 +77,7 @@ abstract class app {
 	public $errors;		// Errors from the previous app
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
+	public $template;	// Rendering page
 
 	public function error_add($code) {
 		$this->errors[] = $code;
@@ -267,7 +268,6 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 		return $result;
 	}
-
 	
 	public function login ($email, $password, $save_cookie=false) {
 		return $this->do_login ($email, $password, $save_cookie);
@@ -291,7 +291,7 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	// Render page's template
-	public function render_template() {
+	final public function init_template() {
 		$page_config = Config::get($this->params['app'], $this->params['page']);
 		if (!isset($page_config['template'])) {
 			log_entry('No template specified for this page');
@@ -311,7 +311,7 @@ log_entry(print_r($_SERVER, true), 20000);
 				break;
 		}
 
-		require_once __DIR__.'/template_log.php';
+		require_once __DIR__.'/template.php';
 		if (isset($this->params)) {
 			$vars['params'] = $this->params;
 		}
@@ -323,7 +323,16 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 		$vars['config']['site'] = $config['site'];
 		$vars['config']['code_revision'] = $config['code_revision'];
-		return TemplateLog::render($template_filename, $vars);
+		$this->template = new TemplateLog($template_filename, $vars);
+		return $this->template;
+	}
+
+	final public function render_template() {
+		if (!$this->template) {
+			return false;
+		} else {
+			return $this->template->render();
+		}
 	}
 
 	public function redirect($dest) {
