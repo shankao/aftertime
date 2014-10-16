@@ -37,7 +37,7 @@ final class appFactory {
 				$request['app'] = $config['init_app'];
 			}
 		}
-                $app_config = Config::get($request['app']);
+                $app_config = Config::get("apps.{$request['app']}");
 		if ($app_config === false) {
 			log_entry("ERROR: application '{$request['app']}' invalid");
 			return null;
@@ -117,7 +117,7 @@ abstract class app {
 
 	// Basic auth. code taken from http://www.php.net/manual/en/features.http-auth.php
 	private function check_http_auth() {
-		$c = Config::get(get_class($this));
+		$c = Config::get('apps.'.get_class($this));
 		if (isset($c['user']) && isset($c['passwd'])) {
 			// TODO Check better auth. ways instead of "Basic". Maybe autogenerating .htaccess and .htpasswd files
 			// See http://pear.php.net/manual/en/package.filesystem.file-htaccess.intro.php
@@ -214,8 +214,8 @@ log_entry(print_r($_SERVER, true), 20000);
 		}
 
 		// Validate page parameters
-                $app_config = Config::get($appname);
-		$page_config = Config::get($appname, $pagename);
+                $app_config = Config::get("apps.$appname");
+		$page_config = Config::get("apps.$appname.pages.$pagename");
 		if (!$page_config || !isset($page_config['params'])) {
 			log_entry("WARNING: params not specified for '$pagename' page. Validation checks will not be performed");
 		} else {
@@ -280,7 +280,7 @@ log_entry(print_r($_SERVER, true), 20000);
 	}
 
 	private function init_template() {
-		$page_config = Config::get($this->params['app'], $this->params['page']);
+		$page_config = Config::get("apps.{$this->params['app']}.pages.{$this->params['page']}");
 		if (!isset($page_config['template'])) {
 			log_entry('No template specified for this page');
 			return false;

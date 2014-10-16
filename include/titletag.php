@@ -6,7 +6,7 @@ class HTMLTitle {
 
 	static public function set_from_page($app, $page) {
 		$config = Config::get();
-		$page_config = Config::get($app, $page);
+		$page_config = Config::get("apps.$app.pages.$page");
 		if (isset($page_config['title'])) {
 			self::$title_tag = "{$page_config['title']}";
 			if (isset($config['webtitle'])) {
