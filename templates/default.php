@@ -16,6 +16,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 			template_render(__DIR__.'/favicon.php', array('filename' => $config['favicon']), false);
 			$vars = array(
 				'app' => $params['app'],
+				'page' => $params['page'],
 				'rev' => $config['code_revision']
 			);
 			template_render(__DIR__.'/load_css.php', $vars, false);
