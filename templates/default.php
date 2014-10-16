@@ -1,24 +1,17 @@
-<?php
-require_once __DIR__.'/../include/titletag.php';
-$title = HTMLTitle::get();
-if (empty($title)) {
-	HTMLTitle::set_from_page($params['app'], $params['page']);
-}
-
-echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
+<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
                 <meta charset="UTF-8" />
                 <meta http-equiv="Content-Language" content="en" />
-		<title><?php echo HTMLTitle::get(); ?></title>
-		<?php
-			template_render(__DIR__.'/favicon.php', array('filename' => $config['favicon']), false);
+		<?php 
 			$vars = array(
 				'app' => $params['app'],
 				'page' => $params['page'],
 				'rev' => $config['code_revision']
 			);
+			template_render(__DIR__.'/html_title.php', $vars, false);
+			template_render(__DIR__.'/favicon.php', array('filename' => $config['favicon']), false);
 			template_render(__DIR__.'/load_css.php', $vars, false);
 			template_render(__DIR__.'/load_js.php', $vars, false);
 		?>
