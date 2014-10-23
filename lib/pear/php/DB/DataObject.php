@@ -15,7 +15,7 @@
  * @author     Alan Knowles <alan@akbkhome.com>
  * @copyright  1997-2006 The PHP Group
  * @license    http://www.php.net/license/3_01.txt  PHP License 3.01
- * @version    CVS: $Id: DataObject.php 329992 2013-04-03 11:38:43Z alan_k $
+ * @version    CVS: $Id: DataObject.php 320069 2011-11-28 04:34:08Z alan_k $
  * @link       http://pear.php.net/package/DB_DataObject
  */
   
@@ -219,7 +219,7 @@ class DB_DataObject extends DB_DataObject_Overload
     * @access   private
     * @var      string
     */
-    var $_DB_DataObject_version = "1.11.0";
+    var $_DB_DataObject_version = "1.11.3";
 
     /**
      * The Database table (used by table extends)
@@ -1096,7 +1096,9 @@ class DB_DataObject extends DB_DataObject_Overload
            
            
             // Ignore variables which aren't set to a value
-        	if ( !isset($this->$k) && $ignore_null) {
+            if ( (!isset($this->$k) || ($v == 1 && $this->$k == ''))
+                    && $ignore_null
+            ) {
                 continue;
             }
             // dont insert data into mysql timestamps 
@@ -1313,7 +1315,7 @@ class DB_DataObject extends DB_DataObject_Overload
                 $this->raiseError("update: trying to perform an update without 
                         the key set, and argument to update is not 
                         DB_DATAOBJECT_WHEREADD_ONLY
-                    ", DB_DATAOBJECT_ERROR_INVALIDARGS);
+                    ". print_r(array('seq' => $seq , 'keys'=>$keys), true), DB_DATAOBJECT_ERROR_INVALIDARGS);
                 return false;  
             }
         } else {
@@ -1339,11 +1341,13 @@ class DB_DataObject extends DB_DataObject_Overload
                     || !is_string($options['disable_null_strings'])
                     || strtolower($options['disable_null_strings']) !== 'full' ;
                     
-        
+      
         foreach($items as $k => $v) {
             
-            if (!isset($this->$k) && $ignore_null) {
-                continue;
+            if ((!isset($this->$k) || ($v == 1 && $this->$k == ''))
+                    && $ignore_null
+            ) {
+                 continue;
             }
             // ignore stuff thats 
           
@@ -1414,7 +1418,7 @@ class DB_DataObject extends DB_DataObject_Overload
             // - V2 may store additional data about float/int
             $settings .= "$kSql = " . intval($this->$k) . ' ';
         }
-
+         
         
         if (!empty($_DB_DATAOBJECT['CONFIG']['debug'])) {
             $this->debug("got keys as ".serialize($keys),3);
@@ -2527,8 +2531,11 @@ class DB_DataObject extends DB_DataObject_Overload
             $this->debug($string,$log="QUERY");
             
         }
-       
-	if (strtoupper($string) == 'BEGIN' || strtoupper($string) == 'START TRANSACTION') {    // shankao accepts start transaction 
+        
+        if (
+            strtoupper($string) == 'BEGIN' ||
+            strtoupper($string) == 'START TRANSACTION'
+        ) {
             if ($_DB_driver == 'DB') {
                 $DB->autoCommit(false);
                 $DB->simpleQuery('BEGIN');
@@ -2537,6 +2544,7 @@ class DB_DataObject extends DB_DataObject_Overload
             }
             return true;
         }
+        
         if (strtoupper($string) == 'COMMIT') {
             $res = $DB->commit();
             if ($_DB_driver == 'DB') {
@@ -3810,7 +3818,7 @@ class DB_DataObject extends DB_DataObject_Overload
             }
             // apply our filtered version, which excludes the distinct column.
             
-            $selectAs = empty($cols) ?  array() : array(array(  $cols , '%s', false)) ;
+            $selectAs = empty($cols) ?  array() : array(array(array(  $cols) , '%s', false)) ;
             
             
             
@@ -3910,9 +3918,8 @@ class DB_DataObject extends DB_DataObject_Overload
         if ($has_distinct) {
             $this->selectAdd($has_distinct);
         }
-         
-        foreach($selectAs as $ar) {
-            
+       
+        foreach($selectAs as $ar) {            
             $this->selectAs($ar[0], $ar[1], $ar[2]);
         }
         // restore links..
@@ -4604,7 +4611,7 @@ class DB_DataObject extends DB_DataObject_Overload
     /**
      * Last Error that has occured
      * - use $this->_lastError or
-     * $last_error = &PEAR::getStaticProperty('DB_DataObject','lastError');
+     * $last_error = PEAR::getStaticProperty('DB_DataObject','lastError');
      *
      * @access  public
      * @var     object PEAR_Error (or false)
@@ -4629,7 +4636,8 @@ class DB_DataObject extends DB_DataObject_Overload
         if ($behaviour == PEAR_ERROR_DIE && !empty($_DB_DATAOBJECT['CONFIG']['dont_die'])) {
             $behaviour = null;
         }
-        $error = PEAR::getStaticProperty('DB_DataObject','lastError');
+        
+        $error = &PEAR::getStaticProperty('DB_DataObject','lastError');
         
       
         // no checks for production here?....... - we log  errors before we throw them.
@@ -4701,7 +4709,13 @@ class DB_DataObject extends DB_DataObject_Overload
 
         if (is_array($this->_link_loaded)) {
             foreach ($this->_link_loaded as $do) {
-                $do->free();
+                if (
+                        !empty($this->{$do}) &&
+                        is_object($this->{$do}) &&
+                        method_exists($this->{$do}, 'free')
+                    ) {
+                    $this->{$do}->free();
+                }
             }
         }
 
