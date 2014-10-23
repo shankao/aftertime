@@ -16,12 +16,12 @@ if test "x$PHP_PEAR_INSTALL_DIR" != "x"; then
   INCDIR=$PHP_PEAR_INSTALL_DIR
   INCARG="-d include_path=$PHP_PEAR_INSTALL_DIR"
 else
-  if test "/home/shankao/www/aftertime/lib/pear/php" = '@'php_dir'@'; then
+  if test "/home/shankao/www/sites/aftertime/lib/pear/php" = '@'php_dir'@'; then
     INCDIR=`dirname $0`
     INCARG=""
   else
-    INCDIR="/home/shankao/www/aftertime/lib/pear/php"
-    INCARG="-d include_path=/home/shankao/www/aftertime/lib/pear/php"
+    INCDIR="/home/shankao/www/sites/aftertime/lib/pear/php"
+    INCARG="-d include_path=/home/shankao/www/sites/aftertime/lib/pear/php"
   fi
 fi
 

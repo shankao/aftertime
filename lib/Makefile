@@ -1,8 +1,9 @@
+# Requires php-pear.deb package 
 # TODO: Get the dependencies per-project
 
 MDB2:=MDB2-2.5.0b5
 MDB2_MYSQLI:=MDB2_Driver_mysqli-1.5.0b4
-DATAOBJECT:=DB_DataObject-1.9.6
+DATAOBJECT:=DB_DataObject-1.10.0
 JQUERY_VERSION=1.9.1
 SYSTEM_DAEMON=System_Daemon-1.0.0
 

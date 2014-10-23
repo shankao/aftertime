@@ -14,11 +14,11 @@ $dirs = array();
 $dirs['tests'] = realpath(__DIR__);
 
 // Determine path to the MDB2 classes to be tested.
-if ('/home/shankao/www/aftertime/lib/pear/php' == '@'.'php_dir'.'@') {
+if ('/home/shankao/www/sites/aftertime/lib/pear/php' == '@'.'php_dir'.'@') {
     // This package hasn't been installed, use parent of this dir.
     $dirs['mdb2'] = realpath((dirname(__DIR__)));
 } else {
-    $dirs['mdb2'] = '/home/shankao/www/aftertime/lib/pear/php';
+    $dirs['mdb2'] = '/home/shankao/www/sites/aftertime/lib/pear/php';
 }
 /**
  * Path to the MDB2 files we are testing

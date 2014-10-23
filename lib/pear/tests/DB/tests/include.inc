@@ -50,7 +50,7 @@ if (!defined('PATH_SEPARATOR')) {
  * Therefore, we'll assume the tests should use the version of
  * DB that has come from there as well.
  */
-if ('/home/shankao/www/aftertime/lib/pear/php' != '@'.'include_path'.'@') {
+if ('/home/shankao/www/sites/aftertime/lib/pear/php' != '@'.'include_path'.'@') {
     ini_set('include_path', ini_get('include_path')
             . PATH_SEPARATOR . '.'
     );
