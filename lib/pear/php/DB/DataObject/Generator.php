@@ -15,7 +15,7 @@
  * @author     Alan Knowles <alan@akbkhome.com>
  * @copyright  1997-2006 The PHP Group
  * @license    http://www.php.net/license/3_01.txt  PHP License 3.01
- * @version    CVS: $Id: Generator.php 322158 2012-01-13 01:20:51Z alan_k $
+ * @version    CVS: $Id: Generator.php 327926 2012-10-08 02:42:09Z alan_k $
  * @link       http://pear.php.net/package/DB_DataObject
  */
  
@@ -268,10 +268,13 @@ class DB_DataObject_Generator extends DB_DataObject
                 continue;
             }
             
-            
+            $strip = empty($options['generator_strip_schema']) ? false : $options['generator_strip_schema'];
+            $strip = is_numeric($strip) ? (bool) $strip : $strip;
+            $strip = (is_string($strip) && strtolower($strip) == 'true') ? true : $strip;
+        
             // postgres strip the schema bit from the
-            if (!empty($options['generator_strip_schema'])) {
-                $strip = $options['generator_strip_schema'];
+            if (!empty($strip) ) {
+                
                 if (!is_string($strip) || preg_match($strip, $table)) { 
                     $bits = explode('.', $table,2);
                     $table = $bits[0];
@@ -408,7 +411,7 @@ class DB_DataObject_Generator extends DB_DataObject
     
     function _createForiegnKeys()
     {
-          $options = PEAR::getStaticProperty('DB_DataObject','options');
+        $options = PEAR::getStaticProperty('DB_DataObject','options');
         if (empty($options['generate_links'])) {
             return false;
         }
@@ -995,7 +998,6 @@ class DB_DataObject_Generator extends DB_DataObject
         
         $body .= "    {$var} \$__table = '{$this->table}';  {$p}// table name\n";
     
-        
         // if we are using the option database_{databasename} = dsn
         // then we should add var $_database = here
         // as database names may not always match.. 
@@ -1007,7 +1009,7 @@ class DB_DataObject_Generator extends DB_DataObject
          // Only include the $_database property if the omit_database_var is unset or false
         
         if (isset($options["database_{$this->_database}"]) && empty($GLOBALS['_DB_DATAOBJECT']['CONFIG']['generator_omit_database_var'])) {
-            $p = str_repeat(' ',   max(2, (16 - strlen($this->table))));
+            $p = str_repeat(' ',   max(2, (16 - strlen($this->_database))));
             $body .= "    {$var} \$_database = '{$this->_database}';  {$p}// database name (used with database_{*} config)\n";
         }
         
@@ -1055,18 +1057,23 @@ class DB_DataObject_Generator extends DB_DataObject
         // grep -r __clone * to find all it's uses
         // and replace them with $x = clone($y);
         // due to the change in the PHP5 clone design.
-        
+        $static = 'static';
         if ( substr(phpversion(),0,1) < 5) {
             $body .= "\n";
             $body .= "    /* ZE2 compatibility trick*/\n";
             $body .= "    function __clone() { return \$this;}\n";
         }
-
-        // simple creation tools ! (static stuff!)
-        $body .= "\n";
-        $body .= "    /* Static get */\n";
-        $body .= "    function staticGet(\$k,\$v=NULL) { return DB_DataObject::staticGet('{$this->classname}',\$k,\$v); }\n";
         
+        
+        // depricated - in here for BC...
+        if (!empty($options['static_get'])) {
+            
+            // simple creation tools ! (static stuff!)
+            $body .= "\n";
+            $body .= "    /* Static get */\n";
+            $body .= "    $static  function staticGet(\$k,\$v=NULL) { " .
+                    "return DB_DataObject::staticGet('{$this->classname}',\$k,\$v = null); }\n";
+        }
         // generate getter and setter methods
         $body .= $this->_generateGetters($input);
         $body .= $this->_generateSetters($input);
@@ -1342,14 +1349,14 @@ class DB_DataObject_Generator extends DB_DataObject
             $defs =  $__DB->tableInfo($quotedTable);
         } else {
             $defs =  $__DB->reverse->tableInfo($quotedTable);
-	  if (!PEAR::isError($defs)) {    // shankao
+	  if (!PEAR::isError($defs)) {	// shankao
             foreach ($defs as $k => $v) {
                 if (!isset($defs[$k]['length'])) {
                     continue;
                 }
                 $defs[$k]['len'] = $defs[$k]['length'];
             }
-	  }                               // shankao
+	  }				// shankao
         }
         
          
@@ -1450,16 +1457,16 @@ class DB_DataObject_Generator extends DB_DataObject
         
         
         if  (empty($options['generate_link_methods'])) {
-            echo "skip lm? - not set";
+            //echo "skip lm? - not set";
             return '';
         }
         
         if (empty($this->_fkeys)) {
-             echo "skip lm? - fkyes empty";
+            // echo "skip lm? - fkyes empty";
             return '';
         }
         if (empty($this->_fkeys[$this->table])) {
-            echo "skip lm? - no fkeys for {$this->table}";
+            //echo "skip lm? - no fkeys for {$this->table}";
             return '';
         }
             
@@ -1468,9 +1475,7 @@ class DB_DataObject_Generator extends DB_DataObject
 
         $setters .= "\n";
         $defs     = $this->_fkeys[$this->table];
-        
-        
-        
+         
         
         // $fk[$this->table][$tref[1]] = $tref[2] . ":" . $tref[3];
 
@@ -1498,8 +1503,7 @@ class DB_DataObject_Generator extends DB_DataObject
             $setters .= "        return \$this->link('$k', func_get_args());\n";
             $setters .= "    }\n\n";
         }
-        
-
+         
         return $setters;
     }
 
