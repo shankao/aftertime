@@ -6,7 +6,6 @@ class Aftertime {
 
 	private $time_start;
 	private $debug = true;
-	private $is_web = true;
 	private $is_ready = false;
 
 	public function __construct ($config_folder) {
@@ -32,13 +31,11 @@ class Aftertime {
 			set_exception_handler(array('Log', 'php_errors'));
 			register_shutdown_function(array('Log', 'log_shutdown'));
 
-			if ($this->is_web) {
-				ob_start(null, 4096);
-				ini_set ('arg_separator.output', '&amp;');
-				if (!session_start()) {
-					log_entry('ERROR: Cannot start session');
-					return;
-				}
+			ob_start(null, 4096);
+			ini_set ('arg_separator.output', '&amp;');
+			if (!session_start()) {
+				log_entry('ERROR: Cannot start session');
+				return;
 			}
 
 			// Adds PEAR and the site folder
