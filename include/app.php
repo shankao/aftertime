@@ -74,6 +74,8 @@ final class appFactory {
 
 abstract class app {
 
+	private $debug = false;
+
 	public $errors;		// Errors from the previous app
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
@@ -310,6 +312,7 @@ log_entry(print_r($_SERVER, true), 20000);
 			$vars['user'] = $this->user;
 		}
 		$vars['config'] = $config;
+		$vars['debug'] = $this->debug();
 		$this->template = new Template($template_filename, $vars);
 		return true;
 	}
@@ -345,6 +348,13 @@ log_entry(print_r($_SERVER, true), 20000);
 	public function get_all_errors() {
 		return $this->errors;
 	}
+	
+	public function debug($debug = null) {
+                if ($debug !== null) {
+                        $this->debug = $debug;
+                }
+                return $this->debug;
+        }
 }
 
 // HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")

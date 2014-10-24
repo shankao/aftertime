@@ -5,8 +5,15 @@ require_once __DIR__.'/log.php';
 class Aftertime {
 
 	private $time_start;
-	private $debug = true;
+	private $debug = false;
 	private $is_ready = false;
+
+	public function debug($debug = null) {
+		if ($debug !== null) {
+			$this->debug = $debug;
+		}
+		return $this->debug;
+	}
 
 	public function __construct ($config_folder) {
 		$this->time_start = microtime(true);
@@ -15,13 +22,17 @@ class Aftertime {
 
 		$config = Config::init($config_folder);
 		if ($config === false) {
-			if ($this->debug) {
+			if ($this->debug()) {
 				echo nl2br(Config::init_log());
 			}
 			return;
 		} else {
 			if (isset($config['timezone'])) {
 				ini_set ('date.timezone', $config['timezone']);
+			}
+			if (is_bool($config['debug'])) {
+				$this->debug($config['debug']);
+				log_entry("Debug mode: {$this->debug()}");
 			}
 
 			// Log initialization
@@ -57,6 +68,7 @@ class Aftertime {
 		$app_factory = new appFactory;
 		$this->app = $app_factory->build($_REQUEST);
 		if ($this->app) {
+			$this->app->debug($this->debug());
 			if ($this->app->run() !== 'redirect') {
 				return $this->app->render_template();
 			}
