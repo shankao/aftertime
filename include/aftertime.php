@@ -51,7 +51,7 @@ class Aftertime {
 
 			// Adds PEAR and the site folder
 			// XXX Should remove the site folder here?
-			ini_set ('include_path', __DIR__ . '/../lib/pear/php' . PATH_SEPARATOR . $config['site']);
+			ini_set ('include_path', __DIR__ . '/../vendor/pear/php' . PATH_SEPARATOR . $config['site']);
 		}
 		$this->is_ready = true;
 	}
