@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/config.php';
 require_once __DIR__.'/log.php';
 
@@ -17,7 +18,6 @@ class Aftertime {
 
 	public function __construct ($config_folder) {
 		$this->time_start = microtime(true);
-	
 		ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
 
 		$config = Config::init($config_folder);
@@ -51,9 +51,19 @@ class Aftertime {
 
 			// Adds PEAR and the site folder
 			// XXX Should remove the site folder here?
-			ini_set ('include_path', __DIR__ . '/../vendor/pear/php' . PATH_SEPARATOR . $config['site']);
+			ini_set ('include_path', $this->pear_paths() . PATH_SEPARATOR . $config['site']);
 		}
 		$this->is_ready = true;
+	}
+
+	// For all the PEAR require_* hell, that got worse with composer not following the usual PEAR folder structure
+	private function pear_paths() {
+		$pear_composer = __DIR__ . '/../vendor/pear-pear.php.net/';
+		foreach (glob($pear_composer.'*', GLOB_ONLYDIR) as $folder) {
+			$paths[] = $folder;
+		}
+		$paths[] = $pear_composer . 'MDB2_Driver_mysqli/MDB2_Driver_mysqli-1.5.0b4';	// Crap
+		return implode(PATH_SEPARATOR, $paths);
 	}
 
 	public function __destruct () {

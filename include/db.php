@@ -3,7 +3,6 @@ Handy DB related functions
 */
 require_once __DIR__.'/config.php';
 require_once __DIR__.'/log.php';
-require_once 'DB/DataObject.php';	// PEAR
 
 function init_db($log_function = 'log_entry_db') {
         static $done = false;
