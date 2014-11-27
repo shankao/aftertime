@@ -1,0 +1,25 @@
+{
+	"repositories": [
+		{
+			"type": "pear",
+			"url": "http://pear.php.net"
+		},
+		{
+			"type": "package",
+			"package": {
+				"name": "pear-pear.php.net/MDB2_Driver_mysqli",
+				"version": "1.5.0b4",
+				"dist": {
+					"url": "http://download.pear.php.net/package/MDB2_Driver_mysqli-1.5.0b4.tgz",
+					"type": "tar"
+				}
+			}
+		}
+	],
+	"require": {
+		"pear-pear.php.net/DB_DataObject": "1.11.3",
+		"pear-pear.php.net/MDB2": "2.5.0b5",
+		"pear-pear.php.net/MDB2_Driver_mysqli": "1.5.0b4",
+		"pear-pear.php.net/System_Daemon" : "1.0.0"
+	}
+}
