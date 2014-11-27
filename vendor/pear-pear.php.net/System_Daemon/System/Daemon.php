@@ -148,6 +148,7 @@ class System_Daemon
         E_USER_ERROR => array(self::LOG_ERR, 'User Error'),
         E_USER_WARNING => array(self::LOG_WARNING, 'User Warning'),
         E_USER_NOTICE => array(self::LOG_DEBUG, 'User Notice'),
+        E_STRICT => array(self::LOG_DEBUG, 'Strict'),	// shankao
         'E_RECOVERABLE_ERROR' => array(self::LOG_WARNING, 'Recoverable Error'),
         'E_DEPRECATED' => array(self::LOG_NOTICE, 'Deprecated'),
         'E_USER_DEPRECATED' => array(self::LOG_NOTICE, 'User Deprecated'),
@@ -347,7 +348,15 @@ class System_Daemon
             'example' => '/etc/init.d/skeleton',
             'detail' => 'Sometimes it\'s better to stick with the OS default,
                 and use something like /etc/default/<name> for customization',
-        ),
+	),
+	'noTicks' => array(
+		'type' => 'boolean',
+		'default' => true,
+		'punch' => 'Do not use ticks for daemon signalling (PHP >= 5.3)',
+		'detail' => 'If you set this option, signals will not work unless
+			you use the iterate method, or call pcntl_signal_dispatch()
+			manually in your daemon\'s main loop'
+	)
     );
 
 
@@ -419,9 +428,9 @@ class System_Daemon
         'SIGPWR' => array('System_Daemon', 'defaultSigHandler'),
         'SIGSYS' => array('System_Daemon', 'defaultSigHandler'),
         SIGBABY => array('System_Daemon', 'defaultSigHandler'),
-        'SIG_BLOCK' => array('System_Daemon', 'defaultSigHandler'),
-        'SIG_UNBLOCK' => array('System_Daemon', 'defaultSigHandler'),
-        'SIG_SETMASK' => array('System_Daemon', 'defaultSigHandler'),
+     #   'SIG_BLOCK' => array('System_Daemon', 'defaultSigHandler'),	shankao
+     #   'SIG_UNBLOCK' => array('System_Daemon', 'defaultSigHandler'),
+     #   'SIG_SETMASK' => array('System_Daemon', 'defaultSigHandler'),
     );
 
 
@@ -633,8 +642,9 @@ class System_Daemon
         clearstatcache();
 
         // Garbage Collection (PHP >= 5.3)
-        if (function_exists('gc_collect_cycles')) {
-            gc_collect_cycles();
+	if (function_exists('gc_collect_cycles')) {
+		pcntl_signal_dispatch();
+        	gc_collect_cycles();
         }
 
         return true;
@@ -1352,8 +1362,10 @@ class System_Daemon
         }
 
         // Important for daemons
-        // See http://www.php.net/manual/en/function.pcntl-signal.php
-        declare(ticks = 1);
+	// See http://www.php.net/manual/en/function.pcntl-signal.php
+	if (self::opt('noTicks') == false) {
+		declare(ticks = 1);
+	}
 
         // Setup signal handlers
         // Handlers for individual signals can be overrulled with
@@ -1396,9 +1408,7 @@ class System_Daemon
             );
         }
 
-        $pidDirPath = dirname($pidFilePath);
-        $parts      = explode('/', $pidDirPath);
-        if (count($parts) <= 3 || end($parts) != self::opt('appName')) {
+	if(basename(dirname($pidFilePath)) !== self::opt('appName')) {// shankao: cherry pick last code from git master
             // like: /var/run/x.pid
             return self::err(
                 'Since version 0.6.3, the pidfile needs to be ' .
