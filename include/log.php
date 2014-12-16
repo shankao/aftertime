@@ -121,6 +121,11 @@ final class Log {
 		return false;
 	}
 
+	static function php_exceptions(Exception $ex) {
+		self::log_entry('Exception: ' . $ex->getMessage());
+		self::log_entry($ex->getTraceAsString());
+	}
+
 	static function log_shutdown () {
 		$error = error_get_last();
 		if ($error && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
