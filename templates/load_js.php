@@ -17,7 +17,7 @@ $all_files = array_unique(array_merge($files, $files_app, $files_page));
 <script type="text/javascript" charset="utf-8">
 	$LAB
 	.setOptions({Debug: true})
-	.script("aftertime/vendor/jquery-1.9.1.min.js").wait() <?php
+	.script("aftertime/vendor/yiisoft/jquery/jquery.min.js").wait() <?php
 	foreach ($all_files as $file) {
 		if (is_readable($file)) { ?>
 			.script("<?php echo "$file?$rev"; ?>") <?php

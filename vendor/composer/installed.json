@@ -289,5 +289,30 @@
         },
         "type": "library",
         "installation-source": "dist"
+    },
+    {
+        "name": "yiisoft/jquery",
+        "version": "1.9.1",
+        "version_normalized": "1.9.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/yiisoft/jquery.git",
+            "reference": "410a63b9f5bd1fad33c3f74cc829d525072e0ec7"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/yiisoft/jquery/zipball/410a63b9f5bd1fad33c3f74cc829d525072e0ec7",
+            "reference": "410a63b9f5bd1fad33c3f74cc829d525072e0ec7",
+            "shasum": ""
+        },
+        "time": "2013-11-06 00:14:26",
+        "type": "library",
+        "installation-source": "dist",
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "description": "jQuery JavaScript Library",
+        "homepage": "http://jquery.com"
     }
 ]

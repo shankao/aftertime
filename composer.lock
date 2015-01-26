@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "dfe884deb5d57b3c02592c6aee206b39",
+    "hash": "177a02b49cb620c61b27e87607adb15f",
     "packages": [
         {
             "name": "pear-pear.php.net/Archive_Tar",
@@ -276,6 +276,29 @@
                 "/"
             ],
             "description": "Selection of methods that are often needed when working with XML documents.  Functionality includes creating of attribute lists from arrays, creation of tags, validation of XML names and more."
+        },
+        {
+            "name": "yiisoft/jquery",
+            "version": "1.9.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/jquery.git",
+                "reference": "410a63b9f5bd1fad33c3f74cc829d525072e0ec7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/jquery/zipball/410a63b9f5bd1fad33c3f74cc829d525072e0ec7",
+                "reference": "410a63b9f5bd1fad33c3f74cc829d525072e0ec7",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "jQuery JavaScript Library",
+            "homepage": "http://jquery.com",
+            "time": "2013-11-06 00:14:26"
         }
     ],
     "packages-dev": [],
@@ -286,6 +309,7 @@
         "pear-pear.php.net/mdb2_driver_mysqli": 10
     },
     "prefer-stable": false,
+    "prefer-lowest": false,
     "platform": [],
     "platform-dev": []
 }
