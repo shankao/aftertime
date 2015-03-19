@@ -75,11 +75,13 @@ final class appFactory {
 abstract class app {
 
 	private $debug = false;
+	private $use_pdo = false;
 
 	public $errors;		// Errors from the previous app
 	public $params;		// Params accepted by the app
 	public $user;		// User information. Not every site has it
 	public $template;	// Rendering page
+	public $db;		// Database connection
 
 	/*
 	Functions for user authentication. 
@@ -91,22 +93,32 @@ abstract class app {
 
 		$this->clean_login_cookies();
 
-		$user = DB_DataObject::factory('users');
-		$user->email = $email;
-		if (!$user->find(true)) {
+		// Get user for the given email
+		if (is_a($this->db, 'PDO')) {
+			$db_get_mail = $this->db->prepare('SELECT * FROM users WHERE email = :email');
+			$db_get_mail->execute(array('email' => $email));
+			$user = $db_get_mail->fetch();
+		} else {
+			$user = DB_DataObject::factory('users');
+			$user->email = $email;
+			$user->find(true);
+			$user = $user->toArray();
+		}
+
+		if (!$user) {
 			$this->error_add('NO_USER_FOUND');
 			log_entry ("User not found for email '$email'");
 			return false;
-		} else if (!$this->check_password($password, $user->password, $password_is_encrypted)) {
+		} else if (!$this->check_password($password, $user['password'], $password_is_encrypted)) {
 			$this->error_add('WRONG_PASSWD');
 			log_entry ("Wrong password for email '$email'");
 			return false;
 		}
 
-		$_SESSION['user'] = $user->toArray();
+		$_SESSION['user'] = $user;
 		if ($save_cookie) {	// Save for 10 days
 			setcookie('us', $email, time()+864000, '/', null, false, true);
-			setcookie('pw', $user->password, time()+864000, '/', null, false, true);
+			setcookie('pw', $user['password'], time()+864000, '/', null, false, true);
 		}
 		log_entry ("User logged in successfully: $email");
 		return true;
@@ -234,7 +246,8 @@ log_entry(print_r($_SERVER, true), 20000);
 			}
 		}
 
-		if (init_db()) {
+		$this->db = init_db();
+		if ($this->db) {
 			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
 				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);	// TODO check login result
 			}

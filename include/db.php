@@ -4,44 +4,82 @@ Handy DB related functions
 require_once __DIR__.'/config.php';
 require_once __DIR__.'/log.php';
 
+class PDOLog extends PDO {
+	function __construct($dsn, $username='', $password='', $driver_options=array()) {
+		parent::__construct ($dsn, $username, $password, $driver_options);
+		$this->setAttribute (PDO::ATTR_STATEMENT_CLASS, array('PDOStatementLog', array($this)));
+	}
+}
+
+class PDOStatementLog extends PDOStatement {
+	protected $dbh;
+
+	protected function __construct($dbh) {
+		$this->dbh = $dbh;
+	}
+
+	public function execute (array $params = NULL) {
+		log_entry("PDOquery: {$this->queryString}");
+		if ($params) {
+			log_entry('PDOquery values: '.print_r($params, true));
+		}
+		parent::execute($params);
+	}
+}
+
 function init_db($log_function = 'log_entry_db') {
         static $done = false;
-        if (!$done) {
+	if (!$done) {
 		$config = Config::get();
-                if (!isset($config['database'])) {
-                        return false;
-                }
-
-                // Note we force a UTF8 connection
-                $dbconfig = $config['database'];
-                $dsn = "{$dbconfig['protocol']}://{$dbconfig['user']}:{$dbconfig['password']}@{$dbconfig['host']}/{$dbconfig['dbname']}?charset=utf8";
-                $options = &PEAR::getStaticProperty('DB_DataObject', 'options');
-                $options = array(
-                                'database' => $dsn,
-                                'db_driver' => 'MDB2',
-                                'proxy' => 'full',
-                                'quote_identifiers' => 1,
-                                'class_prefix' => 'db_',
-				'dont_die' => 1
-                                );
-
-                if ($log_function) {
-                        DB_DataObject::debugLevel($log_function);
-                }
-
-		// Check/start the connection
-		$d = new DB_DataObject;
-		$c = $d->getDatabaseConnection();
-		if (db_error()) {
+		if (!isset($config['database'])) {
 			return false;
 		}
 
-                // Site specific DB config (like O/R mapping classes)
-                $site = $config['site'];
-                if (is_readable("{$site}/db/db.php")) {
-                        include_once "{$site}/db/db.php";
-                        log_entry('No site specific DB config defined');
-                }
+		$dbconfig = $config['database'];
+		if ($dbconfig['use_pdo']) {
+			// Note we force a UTF8 connection
+			$dsn = "{$dbconfig['protocol']}:host={$dbconfig['host']};dbname={$dbconfig['dbname']};charset=utf8";
+			try {
+				$debug = true;	// XXX
+				if ($debug) {
+					return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password']);
+				} else {
+					return new PDO($dsn, $dbconfig['user'], $dbconfig['password']);
+				}
+			} catch (PDOException $e) {
+				return false;
+			}
+		} else {
+			// Note we force a UTF8 connection
+			$dsn = "{$dbconfig['protocol']}://{$dbconfig['user']}:{$dbconfig['password']}@{$dbconfig['host']}/{$dbconfig['dbname']}?charset=utf8";
+			$options = &PEAR::getStaticProperty('DB_DataObject', 'options');
+			$options = array(
+					'database' => $dsn,
+					'db_driver' => 'MDB2',
+					'proxy' => 'full',
+					'quote_identifiers' => 1,
+					'class_prefix' => 'db_',
+					'dont_die' => 1
+					);
+
+			if ($log_function) {
+				DB_DataObject::debugLevel($log_function);
+			}
+
+			// Check/start the connection
+			$d = new DB_DataObject;
+			$c = $d->getDatabaseConnection();
+			if (db_error()) {
+				return false;
+			}
+
+			// Site specific DB config (like O/R mapping classes)
+			$site = $config['site'];
+			if (is_readable("{$site}/db/db.php")) {
+				log_entry('DEPRECATED: site specific DB config defined');	// XXX
+				include_once "{$site}/db/db.php";
+			}
+		}
 
                 $done = true;
         }
