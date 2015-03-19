@@ -75,7 +75,6 @@ final class appFactory {
 abstract class app {
 
 	private $debug = false;
-	private $use_pdo = false;
 
 	public $errors;		// Errors from the previous app
 	public $params;		// Params accepted by the app
