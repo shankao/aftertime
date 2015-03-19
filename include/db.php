@@ -37,6 +37,10 @@ class PDOClass {
 		if (!is_a($db, 'PDO')) return false;
 		$sql = $db->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
 		$sql->execute(array('id' => $id));
+		if (!$sql) {
+                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+			return false;
+                }
 		$data = $sql->fetch(PDO::FETCH_ASSOC);
 		if ($data) {
 			foreach ($this->_fields as $var) {
