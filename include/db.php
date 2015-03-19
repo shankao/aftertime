@@ -27,6 +27,52 @@ class PDOStatementLog extends PDOStatement {
 	}
 }
 
+// Limited O/R mapping
+class PDOClass {
+	protected $_table;	// Override 
+	protected $_fields;	// Override 
+	protected $_key;	// Override 
+
+	function get($db, $id) {
+		if (!is_a($db, 'PDO')) return false;
+		$sql = $db->prepare("SELECT * FROM {$this->_table} WHERE {$this->_id} = :id");
+		$sql->execute(array('id' => $id));
+		$data = $sql->fetch(PDO::FETCH_ASSOC);
+		if ($data) {
+			foreach ($this->_fields as $var) {
+				$this->$var = $data[$var];
+			}
+		}
+		return $data;
+	}
+
+	function insert($db) {
+		$first = true;
+		foreach ($this->_fields as $var) {
+			if (!$first) {
+				$query_fields .= ', ';
+				$query_values .= ', ';
+			} else {
+				$first = false;
+			}
+			$query_fields .= $var;
+			$query_values_place .= ":$var";
+		}
+		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
+		$sql = $db->prepare($query);
+		foreach ($this->_fields as $var) {
+			$sql->bindValue(":$var", $this->$var);
+		}
+		return $sql->execute();
+	}
+
+	function update() {
+	}
+
+	function delete() {
+	}
+}
+
 function init_db($log_function = 'log_entry_db') {
         static $done = false;
 	if (!$done) {
