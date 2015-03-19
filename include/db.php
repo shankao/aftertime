@@ -19,9 +19,9 @@ class PDOStatementLog extends PDOStatement {
 	}
 
 	public function execute (array $params = NULL) {
-		log_entry("PDOquery: {$this->queryString}");
+		log_entry("PDO query: {$this->queryString}");
 		if ($params) {
-			log_entry('PDOquery values: '.print_r($params, true));
+			log_entry('PDO query values: '.print_r($params, true));
 		}
 		parent::execute($params);
 	}
@@ -35,7 +35,7 @@ class PDOClass {
 
 	function get($db, $id) {
 		if (!is_a($db, 'PDO')) return false;
-		$sql = $db->prepare("SELECT * FROM {$this->_table} WHERE {$this->_id} = :id");
+		$sql = $db->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
 		$sql->execute(array('id' => $id));
 		$data = $sql->fetch(PDO::FETCH_ASSOC);
 		if ($data) {
@@ -48,10 +48,11 @@ class PDOClass {
 
 	function insert($db) {
 		$first = true;
+		$query_fields = $query_values_place = ''; 
 		foreach ($this->_fields as $var) {
 			if (!$first) {
 				$query_fields .= ', ';
-				$query_values .= ', ';
+				$query_values_place .= ', ';
 			} else {
 				$first = false;
 			}
@@ -60,10 +61,21 @@ class PDOClass {
 		}
 		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
 		$sql = $db->prepare($query);
-		foreach ($this->_fields as $var) {
-			$sql->bindValue(":$var", $this->$var);
+		if (!$sql) {
+			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
 		}
-		return $sql->execute();
+		foreach ($this->_fields as $var) {
+			if (isset($this->$var)) {
+				$sql->bindValue(":$var", $this->$var);
+			} else {
+				$sql->bindValue(":$var", NULL);
+			}
+		}
+		$result = $sql->execute();
+		if (!$result) {
+			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		}
+		return $result;
 	}
 
 	function update() {
