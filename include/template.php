@@ -37,7 +37,7 @@ class Template {
 		if (isset($this->vars)) {
 			$template_vars = $this->vars;
 			foreach ($template_vars as $template_varname => $template_value) {
-				if ($template_varname == 'template_varname' || $template_varname == 'template_varvalue') {
+				if ($template_varname === 'template_varname' || $template_varname === 'template_varvalue') {
 					if ($this->logging === true) {
 						log_entry("ERROR rendering {$this->filename}: forbidden var name '$template_varname'");
 					}
