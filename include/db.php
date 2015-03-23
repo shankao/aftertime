@@ -96,6 +96,10 @@ class PDOClass {
 	}
 
 	function update() {
+		$key = $this->_key;
+		if (!isset($this->$key)) {
+			return null;
+		}
 		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
 		$query = "UPDATE {$this->_table} SET $update_values WHERE {$this->_key} = :key";
 		$sql = $this->_pdo->prepare($query);
@@ -113,14 +117,18 @@ class PDOClass {
 	function upsert() {
 	}
 
-	function delete($id = NULL) {
-		$query = "DELETE FROM {$this->_table} WHERE {$this->_key} = :key";
+	function delete() {
+		$keyname = $this->_key;
+		if (!isset($this->$keyname)) {
+			return null;
+		}
+		$query = "DELETE FROM {$this->_table} WHERE $keyname = :value";
 		$sql = $this->_pdo->prepare($query);
 		if (!$sql) {
                         log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
 			return false;
                 }
-		$result = $sql->execute([$this->_key => $id]);
+		$result = $sql->execute([':value' => $this->$keyname]);
 		if ($result === false) {
 			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
 		}
