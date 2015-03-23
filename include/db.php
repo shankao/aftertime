@@ -37,26 +37,33 @@ class PDOClass {
 	protected $_key;	// Override 
 
 	function __construct(PDO $pdo) {
-		if (!isset($this->_table) || !isset($this->_fields) || !isset($this->_key)) {
-			return false;
+		if (!is_string($this->_table) || !is_array($this->_fields) || !is_string($this->_key)) {
+			return NULL;
 		}
 		$this->_pdo = $pdo;
 	}
 
 	function get($id) {
-		$sql = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
-		$sql->execute(array(':id' => $id));
-		if (!$sql) {
-                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
+		$statement->execute(array(':id' => $id));
+		if (!$statement) {
+                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
                 }
-		$data = $sql->fetch(PDO::FETCH_ASSOC);
+		$data = $statement->fetch(PDO::FETCH_ASSOC);
 		if ($data) {
 			foreach ($this->_fields as $var) {
 				$this->$var = $data[$var];
 			}
 		}
 		return $data;
+	}
+	
+	public function toArray() {
+		foreach ($this->_fields as $var) {
+			$result[$var] = $this->$var;
+		}
+		return $result;
 	}
 
 	private function get_query_parts() {
@@ -83,14 +90,14 @@ class PDOClass {
 	function insert() {
 		list($query_fields, $query_values_place, $query_values) = $this->get_query_parts();
 		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
-		$sql = $this->_pdo->prepare($query);
-		if (!$sql) {
-                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		$statement = $this->_pdo->prepare($query);
+		if (!$statement) {
+                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
                 }
-		$result = $sql->execute($query_values);
-		if ($sql->errorCode() != PDO::ERR_NONE) {
-			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		$result = $statement->execute($query_values);
+		if ($statement->errorCode() != PDO::ERR_NONE) {
+			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 		}
 		return $result;
 	}
@@ -102,14 +109,14 @@ class PDOClass {
 		}
 		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
 		$query = "UPDATE {$this->_table} SET $update_values WHERE {$this->_key} = :key";
-		$sql = $this->_pdo->prepare($query);
-		if (!$sql) {
-                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		$statement = $this->_pdo->prepare($query);
+		if (!$statement) {
+                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
                 }
-		$result = $sql->execute($query_values);
-		if ($sql->errorCode() != PDO::ERR_NONE) {
-			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		$result = $statement->execute($query_values);
+		if ($statement->errorCode() != PDO::ERR_NONE) {
+			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 		}
 		return $result;
 	}
@@ -123,14 +130,14 @@ class PDOClass {
 			return null;
 		}
 		$query = "DELETE FROM {$this->_table} WHERE $keyname = :value";
-		$sql = $this->_pdo->prepare($query);
-		if (!$sql) {
-                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		$statement = $this->_pdo->prepare($query);
+		if (!$statement) {
+                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
                 }
-		$result = $sql->execute([':value' => $this->$keyname]);
-		if ($sql->errorCode() != PDO::ERR_NONE) {
-			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		$result = $statement->execute([':value' => $this->$keyname]);
+		if ($statement->errorCode() != PDO::ERR_NONE) {
+			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 		}
 		return $result;
 	}
@@ -139,25 +146,25 @@ class PDOClass {
 	public function find($key, $value) {
                 $statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE $key = :value");
                 $rows = $statement->execute([':value' => $value]);
-		if ($sql->errorCode() != PDO::ERR_NONE) {
-			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		if ($statement->errorCode() != PDO::ERR_NONE) {
+			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 		}
                 return $rows;
         }
 
 	// TODO Unfiltered: this is a bad idea, don't use
 	function get_all () {
-		$sql = $this->_pdo->prepare("SELECT * FROM {$this->_table}");
-		if (!$sql) {
-                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table}");
+		if (!$statement) {
+                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
                         return false;
                 }
-                $result = $sql->execute();
+                $result = $statement->execute();
 		if ($result === false) {
-                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return $result;
                 }
-                return $sql->fetchAll();
+                return $statement->fetchAll();
 	}
 }
 
