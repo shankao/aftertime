@@ -89,7 +89,7 @@ class PDOClass {
 			return false;
                 }
 		$result = $sql->execute($query_values);
-		if ($result === false) {
+		if ($sql->errorCode() != PDO::ERR_NONE) {
 			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
 		}
 		return $result;
@@ -108,7 +108,7 @@ class PDOClass {
 			return false;
                 }
 		$result = $sql->execute($query_values);
-		if ($result === false) {
+		if ($sql->errorCode() != PDO::ERR_NONE) {
 			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
 		}
 		return $result;
@@ -129,7 +129,7 @@ class PDOClass {
 			return false;
                 }
 		$result = $sql->execute([':value' => $this->$keyname]);
-		if ($result === false) {
+		if ($sql->errorCode() != PDO::ERR_NONE) {
 			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
 		}
 		return $result;
@@ -139,6 +139,9 @@ class PDOClass {
 	public function find($key, $value) {
                 $statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE $key = :value");
                 $rows = $statement->execute([':value' => $value]);
+		if ($sql->errorCode() != PDO::ERR_NONE) {
+			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		}
                 return $rows;
         }
 
