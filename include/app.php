@@ -250,6 +250,8 @@ log_entry(print_r($_SERVER, true), 20000);
 			if (!$this->is_user_logged() && isset($_COOKIE['us']) && isset($_COOKIE['pw'])) {	// Autologin from cookies
 				$this->do_login($_COOKIE['us'], $_COOKIE['pw'], true, true);	// TODO check login result
 			}
+		} else {
+			log_entry('Error initializing DB');
 		}
 /*		// XXX Commented until fixed
 		if ($this->check_http_auth() == false) {
