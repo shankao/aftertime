@@ -30,24 +30,22 @@ class PDOStatementLog extends PDOStatement {
 // Limited O/R mapping
 // TODO change to SimplePDOClass
 class PDOClass {
+
+	protected $_pdo;	// PDO instance
 	protected $_table;	// Override 
 	protected $_fields;	// Override 
 	protected $_key;	// Override 
 
-	private function precheck($db) {
-		if (!is_a($db, 'PDO')) return false;
-
+	function __construct(PDO $pdo) {
 		if (!isset($this->_table) || !isset($this->_fields) || !isset($this->_key)) {
 			return false;
 		}
-		return true;
+		$this->_pdo = $pdo;
 	}
 
-	function get($db, $id) {
-		if (!$precheck($db)) return false;
-
-		$sql = $db->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
-		$sql->execute(array('id' => $id));
+	function get($id) {
+		$sql = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
+		$sql->execute(array(':id' => $id));
 		if (!$sql) {
                         log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
 			return false;
@@ -61,9 +59,7 @@ class PDOClass {
 		return $data;
 	}
 
-	function insert($db) {
-		if (!$precheck($db)) return false;
-
+	private function get_query_parts() {
 		$first = true;
 		$query_fields = $query_values_place = ''; 
 		foreach ($this->_fields as $var) {
@@ -78,38 +74,79 @@ class PDOClass {
 			}
 			$query_fields .= $var;
 			$query_values_place .= ":$var";
+			$query_values[":$var"] = $this->$var;
+			$update_values .= "$var = :$var";
 		}
-		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
+		return array($query_fields, $query_values_place, $query_values, $update_values);
+	}
 
-		$sql = $db->prepare($query);
+	function insert() {
+		list($query_fields, $query_values_place, $query_values) = $this->get_query_parts();
+		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
+		$sql = $this->_pdo->prepare($query);
 		if (!$sql) {
                         log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
 			return false;
                 }
-
-		foreach ($this->_fields as $var) {
-			if (!isset($this->$var)) {
-				continue;
-			}
-			$sql->bindValue(":$var", $this->$var);
-		}
-		$result = $sql->execute();
-		if (!$result) {
+		$result = $sql->execute($query_values);
+		if ($result === false) {
 			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
-			return false;
 		}
+		return $result;
 	}
 
-	function update($db) {
-		if (!$precheck($db)) return false;
+	function update() {
+		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
+		$query = "UPDATE {$this->_table} SET $update_values WHERE {$this->_key} = :key";
+		$sql = $this->_pdo->prepare($query);
+		if (!$sql) {
+                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+			return false;
+                }
+		$result = $sql->execute($query_values);
+		if ($result === false) {
+			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		}
+		return $result;
 	}
 
-	function upsert($db) {
-		if (!$precheck($db)) return false;
+	function upsert() {
 	}
 
-	function delete($db, $id = NULL) {
-		if (!$precheck($db)) return false;
+	function delete($id = NULL) {
+		$query = "DELETE FROM {$this->_table} WHERE {$this->_key} = :key";
+		$sql = $this->_pdo->prepare($query);
+		if (!$sql) {
+                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+			return false;
+                }
+		$result = $sql->execute([$this->_key => $id]);
+		if ($result === false) {
+			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+		}
+		return $result;
+	}
+
+	// get() is a specific case of this method, with key hardcoded to this->_key and this returns an array of rows
+	public function find($key, $value) {
+                $statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE $key = :value");
+                $rows = $statement->execute([':value' => $value]);
+                return $rows;
+        }
+
+	// TODO Unfiltered: this is a bad idea, don't use
+	function get_all () {
+		$sql = $this->_pdo->prepare("SELECT * FROM {$this->_table}");
+		if (!$sql) {
+                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+                        return false;
+                }
+                $result = $sql->execute();
+		if ($result === false) {
+                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+			return $result;
+                }
+                return $sql->fetchAll();
 	}
 }
 
