@@ -28,13 +28,24 @@ class PDOStatementLog extends PDOStatement {
 }
 
 // Limited O/R mapping
+// TODO change to SimplePDOClass
 class PDOClass {
 	protected $_table;	// Override 
 	protected $_fields;	// Override 
 	protected $_key;	// Override 
 
-	function get($db, $id) {
+	private function precheck($db) {
 		if (!is_a($db, 'PDO')) return false;
+
+		if (!isset($this->_table) || !isset($this->_fields) || !isset($this->_key)) {
+			return false;
+		}
+		return true;
+	}
+
+	function get($db, $id) {
+		if (!$precheck($db)) return false;
+
 		$sql = $db->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
 		$sql->execute(array('id' => $id));
 		if (!$sql) {
@@ -51,9 +62,14 @@ class PDOClass {
 	}
 
 	function insert($db) {
+		if (!$precheck($db)) return false;
+
 		$first = true;
 		$query_fields = $query_values_place = ''; 
 		foreach ($this->_fields as $var) {
+			if (!isset($this->$var)) {
+				continue;
+			}
 			if (!$first) {
 				$query_fields .= ', ';
 				$query_values_place .= ', ';
@@ -64,28 +80,36 @@ class PDOClass {
 			$query_values_place .= ":$var";
 		}
 		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
+
 		$sql = $db->prepare($query);
 		if (!$sql) {
-			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
-		}
+                        log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+			return false;
+                }
+
 		foreach ($this->_fields as $var) {
-			if (isset($this->$var)) {
-				$sql->bindValue(":$var", $this->$var);
-			} else {
-				$sql->bindValue(":$var", NULL);
+			if (!isset($this->$var)) {
+				continue;
 			}
+			$sql->bindValue(":$var", $this->$var);
 		}
 		$result = $sql->execute();
 		if (!$result) {
 			log_entry('PDO ERROR: '.$sql->errorInfo()[2]);
+			return false;
 		}
-		return $result;
 	}
 
-	function update() {
+	function update($db) {
+		if (!$precheck($db)) return false;
 	}
 
-	function delete() {
+	function upsert($db) {
+		if (!$precheck($db)) return false;
+	}
+
+	function delete($db, $id = NULL) {
+		if (!$precheck($db)) return false;
 	}
 }
 
@@ -99,16 +123,19 @@ function init_db($log_function = 'log_entry_db') {
 
 		$dbconfig = $config['database'];
 		if ($dbconfig['use_pdo']) {
+			log_entry('Using PDO');
 			// Note we force a UTF8 connection
 			$dsn = "{$dbconfig['protocol']}:host={$dbconfig['host']};dbname={$dbconfig['dbname']};charset=utf8";
 			try {
 				$debug = true;	// XXX
+				$options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING);
 				if ($debug) {
-					return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password']);
+					return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password'], $options);
 				} else {
-					return new PDO($dsn, $dbconfig['user'], $dbconfig['password']);
+					return new PDO($dsn, $dbconfig['user'], $dbconfig['password'], $options);
 				}
 			} catch (PDOException $e) {
+				log_entry("PDO Exception: ".$e->getMessage());
 				return false;
 			}
 		} else {
