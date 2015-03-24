@@ -99,8 +99,9 @@ class PDOClass {
 		$result = $statement->execute($query_values);
 		if ($statement->errorCode() != PDO::ERR_NONE) {
 			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
+			return false;
 		}
-		return $result;
+		return true;
 	}
 
 	function update() {
@@ -118,8 +119,9 @@ class PDOClass {
 		$result = $statement->execute($query_values);
 		if ($statement->errorCode() != PDO::ERR_NONE) {
 			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
+			return false;
 		}
-		return $result;
+		return true;
 	}
 
 	function upsert() {
