@@ -101,6 +101,9 @@ class PDOClass {
 			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
 		}
+		if (!isset($this->{$this->_key})) {
+			$this->{$this->_key} = $this->_pdo->lastInsertId();
+		}
 		return true;
 	}
 
