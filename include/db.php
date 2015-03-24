@@ -68,7 +68,7 @@ class PDOClass {
 
 	private function get_query_parts() {
 		$first = true;
-		$query_fields = $query_values_place = ''; 
+		$query_fields = $query_values_place = $query_values = $update_values = ''; 
 		foreach ($this->_fields as $var) {
 			if (!isset($this->$var)) {
 				continue;
@@ -76,6 +76,7 @@ class PDOClass {
 			if (!$first) {
 				$query_fields .= ', ';
 				$query_values_place .= ', ';
+				$update_values .= ', ';
 			} else {
 				$first = false;
 			}
@@ -108,7 +109,7 @@ class PDOClass {
 			return null;
 		}
 		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
-		$query = "UPDATE {$this->_table} SET $update_values WHERE {$this->_key} = :key";
+		$query = "UPDATE {$this->_table} SET $update_values WHERE {$this->_key} = :{$this->_key}";
 		$statement = $this->_pdo->prepare($query);
 		if (!$statement) {
                         log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
