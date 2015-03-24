@@ -46,7 +46,7 @@ class PDOClass {
 	function get($id) {
 		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
 		$statement->execute(array(':id' => $id));
-		if (!$statement) {
+		if ($statement->errorCode() != PDO::ERR_NONE) {
                         log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
                 }
