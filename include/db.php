@@ -186,7 +186,6 @@ function init_db($log_function = 'log_entry_db') {
 
 		$dbconfig = $config['database'];
 		if ($dbconfig['use_pdo']) {
-			log_entry('Using PDO');
 			// Note we force a UTF8 connection
 			$dsn = "{$dbconfig['protocol']}:host={$dbconfig['host']};dbname={$dbconfig['dbname']};charset=utf8";
 			try {
