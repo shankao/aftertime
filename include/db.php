@@ -13,22 +13,43 @@ class PDOLog extends PDO {
 
 class PDOStatementLog extends PDOStatement {
 	protected $dbh;
+	private $binds = array();
 
 	protected function __construct($dbh) {
 		$this->dbh = $dbh;
 	}
 
 	public function execute (array $params = NULL) {
-		log_entry("PDO query: {$this->queryString}");
-		if ($params) {
-			log_entry('PDO query values: '.print_r($params, true));
+		$query = $this->queryString;
+		if (!$params && !empty($this->binds)) {
+			$params = $this->binds;
 		}
-		parent::execute($params);
+		if ($params) {
+			$query = str_replace(array_keys($params), $params, $query);
+		}
+		log_entry("PDO query: $query");
+		$result = parent::execute($params);
+		if ($this->errorCode() != PDO::ERR_NONE) {
+                        log_entry('PDO ERROR: '.$this->errorInfo()[2]);
+                }
+		return $result;
+	}
+
+	public function prepare (string $statement, array $driver_options = array()) {
+		$result = parent::prepare($statement, $driver_options);
+		if ($this->errorCode() != PDO::ERR_NONE) {
+                        log_entry('PDO ERROR: '.$this->errorInfo()[2]);
+                }
+		return $result;
+	}
+
+	public function bindValue ($parameter, $value, $data_type = PDO::PARAM_STR) {
+		$this->binds[$parameter] = $value;
+		return parent::bindValue($parameter, $value, $data_type);
 	}
 }
 
 // Limited O/R mapping
-// TODO change to SimplePDOClass
 class PDOClass {
 
 	protected $_pdo;	// PDO instance
