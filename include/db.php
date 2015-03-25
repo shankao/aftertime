@@ -64,21 +64,6 @@ class PDOClass {
 		$this->_pdo = $pdo;
 	}
 
-	public function get($id) {
-		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
-		if ($statement->execute(array(':id' => $id)) === false) {
-			return false;
-		} else {
-			$data = $statement->fetch(PDO::FETCH_ASSOC);
-			if ($data) {
-				foreach ($this->_fields as $var) {
-					$this->$var = $data[$var];
-				}
-			}
-			return $data;
-		}
-	}
-	
 	public function toArray() {
 		foreach ($this->_fields as $var) {
 			$result[$var] = $this->$var;
@@ -144,6 +129,7 @@ class PDOClass {
 	function upsert() {
 	}
 
+	// TODO: allow id argument to delete directly
 	function delete() {
 		$keyname = $this->_key;
 		if (!isset($this->$keyname)) {
@@ -157,13 +143,32 @@ class PDOClass {
 		return $statement->execute([':value' => $this->$keyname]);
 	}
 
+	public function get($id) {
+		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
+		if ($statement->execute(array(':id' => $id)) === false) {
+			return false;
+		} else {
+			$data = $statement->fetch(PDO::FETCH_ASSOC);
+			if ($data) {
+				foreach ($this->_fields as $var) {
+					$this->$var = $data[$var];
+				}
+			}
+			return $data;
+		}
+	}
+
 	// get() is a specific case of this method, with key hardcoded to this->_key and this returns an array of rows
 	public function find($key, $value) {
                 $statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE $key = :value");
-                return $statement->execute([':value' => $value]);
+                if ($statement->execute([':value' => $value]) === false) {
+			return false;
+		} else {
+			return $statement->fetchAll(PDO::FETCH_ASSOC);
+		}
         }
 
-	// TODO Unfiltered: this is generally a bad idea, don't use
+	// TODO Unfiltered query: this is generally a bad idea, don't use
 	function get_all () {
 		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table}");
 		if (!$statement) {
