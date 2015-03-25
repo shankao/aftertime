@@ -142,43 +142,48 @@ class PDOClass {
                 }
 		return $statement->execute([':value' => $this->$keyname]);
 	}
-
-	public function get($id) {
-		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
-		if ($statement->execute(array(':id' => $id)) === false) {
-			return false;
-		} else {
-			$data = $statement->fetch(PDO::FETCH_ASSOC);
-			if ($data) {
-				foreach ($this->_fields as $var) {
-					$this->$var = $data[$var];
-				}
+	
+	public function find($key = NULL, $value = NULL) {
+		$query = "SELECT * FROM {$this->_table}";
+		if (isset($key)) {
+			if (!isset($value)) {
+				return false;
 			}
-			return $data;
+			$query .= " WHERE $key = :value";
 		}
-	}
-
-	// get() is a specific case of this method, with key hardcoded to this->_key and this returns an array of rows
-	public function find($key, $value) {
-                $statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE $key = :value");
-                if ($statement->execute([':value' => $value]) === false) {
+                $statement = $this->_pdo->prepare($query);
+		if (!$statement) {
 			return false;
 		} else {
-			return $statement->fetchAll(PDO::FETCH_ASSOC);
+			if (isset($value)) {
+				$statement->bindValue(':value', $value);
+			}
+			if ($statement->execute() === false) {
+				return false;
+			} else {
+				return $statement->fetchAll(PDO::FETCH_ASSOC);
+			}
 		}
         }
 
-	// TODO Unfiltered query: this is generally a bad idea, don't use
-	function get_all () {
-		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table}");
-		if (!$statement) {
-                        return false;
-                }
-                if ($statement->execute() === false) {
+	// Gets an element selected by the class' key
+	public function get($id) {
+		$data = $this->find($this->_key, $id);
+		$data = $data[0];
+		if ($data === false) {
 			return false;
-                } else {
-	                return $statement->fetchAll(PDO::FETCH_ASSOC);
 		}
+		foreach ($this->_fields as $var) {
+			if (isset($data[$var])) {
+				$this->$var = $data[$var];
+			}
+		}
+		return $data;
+	}
+
+	// TODO Unfiltered query: this is generally a bad idea, don't use
+	public function get_all () {
+		return $this->find();
 	}
 }
 
