@@ -191,11 +191,10 @@ function init_db($log_function = 'log_entry_db') {
 			$dsn = "{$dbconfig['protocol']}:host={$dbconfig['host']};dbname={$dbconfig['dbname']};charset=utf8";
 			try {
 				$debug = true;	// XXX
-				$options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING);
 				if ($debug) {
-					return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password'], $options);
+					return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password']);
 				} else {
-					return new PDO($dsn, $dbconfig['user'], $dbconfig['password'], $options);
+					return new PDO($dsn, $dbconfig['user'], $dbconfig['password']);
 				}
 			} catch (PDOException $e) {
 				log_entry("PDO Exception: ".$e->getMessage());
