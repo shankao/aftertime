@@ -151,20 +151,18 @@ class PDOClass {
 			}
 			$query .= " WHERE $key = :value";
 		}
-                $statement = $this->_pdo->prepare($query);
+		$statement = $this->_pdo->prepare($query);
 		if (!$statement) {
 			return false;
-		} else {
-			if (isset($value)) {
-				$statement->bindValue(':value', $value);
-			}
-			if ($statement->execute() === false) {
-				return false;
-			} else {
-				return $statement->fetchAll(PDO::FETCH_ASSOC);
-			}
 		}
-        }
+		if (isset($value)) {
+			$statement->bindValue(':value', $value);
+		}
+		if ($statement->execute() === false) {
+			return false;
+		}
+		return $statement->fetchAll(PDO::FETCH_ASSOC);
+	}
 
 	// Gets an element selected by the class' key
 	public function get($id) {
