@@ -177,7 +177,7 @@ class PDOClass {
                 if ($statement->execute() === false) {
 			return false;
                 } else {
-	                return $statement->fetchAll();
+	                return $statement->fetchAll(PDO::FETCH_ASSOC);
 		}
 	}
 }
