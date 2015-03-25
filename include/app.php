@@ -76,11 +76,11 @@ abstract class app {
 
 	private $debug = false;
 
-	public $errors;		// Errors from the previous app
-	public $params;		// Params accepted by the app
-	public $user;		// User information. Not every site has it
-	public $template;	// Rendering page
-	public $db;		// Database connection
+	public $errors = array();	// Errors from the previous app
+	public $params;			// Params accepted by the app
+	public $user;			// User information. Not every site has it
+	public $template;		// Rendering page
+	public $db;			// Database connection
 
 	/*
 	Functions for user authentication. 
