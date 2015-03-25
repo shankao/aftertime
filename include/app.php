@@ -57,16 +57,25 @@ final class appFactory {
 			log_entry ("ERROR: page '{$request['page']}' invalid");
                         return null;
                 }
-		$app_code_file = "{$config['site']}/{$request['app']}/code.php";
+		if (isset($app_config['class_location'])) {
+			$app_code_file = "{$config['site']}/{$app_config['class_location']}";
+		} else {
+			$app_code_file = "{$config['site']}/{$request['app']}/code.php";
+		}
 		if (!is_readable($app_code_file)) {
 			log_entry ("Cannot load the app's code at $app_code_file");
 			return null;
 		}
+		require_once $app_code_file;
+		if (isset($app_config['class_name'])) {
+			$app_class_name = $app_config['class_name'];
+		} else {
+			$app_class_name = $request['app'];
+		}
 		log_entry("Checking 'page' for '{$request['page']}': OK");
 
-		log_entry ("Creating app {$request['app']}");
-		require_once $app_code_file;
-		$app = new $request['app'];
+		log_entry ("Creating app $app_class_name");
+		$app = new $app_class_name;
 		$app->params = $request;
 		return $app;
 	}
