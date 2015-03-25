@@ -88,7 +88,8 @@ class PDOClass {
 
 	private function get_query_parts() {
 		$first = true;
-		$query_fields = $query_values_place = $query_values = $update_values = ''; 
+		$query_fields = $query_values_place = $update_values = '';
+		$query_values = array();
 		foreach ($this->_fields as $var) {
 			if (!isset($this->$var)) {
 				continue;
