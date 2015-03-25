@@ -11,7 +11,9 @@
 				'rev' => $config['code_revision']
 			);
 			template_render(__DIR__.'/html_title.php', $vars, false);
-			template_render(__DIR__.'/favicon.php', array('filename' => $config['favicon']), false);
+			if (isset($config['favicon'])) {
+				template_render(__DIR__.'/favicon.php', array('filename' => $config['favicon']), false);
+			}
 			template_render(__DIR__.'/load_css.php', $vars, false);
 			template_render(__DIR__.'/load_js.php', $vars, false);
 		?>
