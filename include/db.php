@@ -57,27 +57,26 @@ class PDOClass {
 	protected $_fields;	// Override 
 	protected $_key;	// Override 
 
-	function __construct(PDO $pdo) {
+	public function __construct(PDO $pdo) {
 		if (!is_string($this->_table) || !is_array($this->_fields) || !is_string($this->_key)) {
 			return NULL;
 		}
 		$this->_pdo = $pdo;
 	}
 
-	function get($id) {
+	public function get($id) {
 		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE {$this->_key} = :id");
-		$statement->execute(array(':id' => $id));
-		if ($statement->errorCode() != PDO::ERR_NONE) {
-                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
+		if ($statement->execute(array(':id' => $id)) === false) {
 			return false;
-                }
-		$data = $statement->fetch(PDO::FETCH_ASSOC);
-		if ($data) {
-			foreach ($this->_fields as $var) {
-				$this->$var = $data[$var];
+		} else {
+			$data = $statement->fetch(PDO::FETCH_ASSOC);
+			if ($data) {
+				foreach ($this->_fields as $var) {
+					$this->$var = $data[$var];
+				}
 			}
+			return $data;
 		}
-		return $data;
 	}
 	
 	public function toArray() {
@@ -109,43 +108,36 @@ class PDOClass {
 		return array($query_fields, $query_values_place, $query_values, $update_values);
 	}
 
-	function insert() {
+	public function insert() {
 		list($query_fields, $query_values_place, $query_values) = $this->get_query_parts();
 		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
 		$statement = $this->_pdo->prepare($query);
 		if (!$statement) {
-                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
-                }
-		$result = $statement->execute($query_values);
-		if ($statement->errorCode() != PDO::ERR_NONE) {
-			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
-			return false;
+		} else {
+			if ($statement->execute($query_values) === false) {
+				return false;
+			} else {
+				if (!isset($this->{$this->_key})) {
+					$this->{$this->_key} = $this->_pdo->lastInsertId();
+				}
+				return true;
+			}
 		}
-		if (!isset($this->{$this->_key})) {
-			$this->{$this->_key} = $this->_pdo->lastInsertId();
-		}
-		return true;
 	}
 
-	function update() {
+	public function update() {
 		$key = $this->_key;
 		if (!isset($this->$key)) {
-			return null;
+			return false;
 		}
 		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
 		$query = "UPDATE {$this->_table} SET $update_values WHERE {$this->_key} = :{$this->_key}";
 		$statement = $this->_pdo->prepare($query);
 		if (!$statement) {
-                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
                 }
-		$result = $statement->execute($query_values);
-		if ($statement->errorCode() != PDO::ERR_NONE) {
-			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
-			return false;
-		}
-		return true;
+		return $statement->execute($query_values);
 	}
 
 	function upsert() {
@@ -159,39 +151,28 @@ class PDOClass {
 		$query = "DELETE FROM {$this->_table} WHERE $keyname = :value";
 		$statement = $this->_pdo->prepare($query);
 		if (!$statement) {
-                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
 			return false;
                 }
-		$result = $statement->execute([':value' => $this->$keyname]);
-		if ($statement->errorCode() != PDO::ERR_NONE) {
-			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
-		}
-		return $result;
+		return $statement->execute([':value' => $this->$keyname]);
 	}
 
 	// get() is a specific case of this method, with key hardcoded to this->_key and this returns an array of rows
 	public function find($key, $value) {
                 $statement = $this->_pdo->prepare("SELECT * FROM {$this->_table} WHERE $key = :value");
-                $rows = $statement->execute([':value' => $value]);
-		if ($statement->errorCode() != PDO::ERR_NONE) {
-			log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
-		}
-                return $rows;
+                return $statement->execute([':value' => $value]);
         }
 
-	// TODO Unfiltered: this is a bad idea, don't use
+	// TODO Unfiltered: this is generally a bad idea, don't use
 	function get_all () {
 		$statement = $this->_pdo->prepare("SELECT * FROM {$this->_table}");
 		if (!$statement) {
-                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
                         return false;
                 }
-                $result = $statement->execute();
-		if ($result === false) {
-                        log_entry('PDO ERROR: '.$statement->errorInfo()[2]);
-			return $result;
-                }
-                return $statement->fetchAll();
+                if ($statement->execute() === false) {
+			return false;
+                } else {
+	                return $statement->fetchAll();
+		}
 	}
 }
 
