@@ -178,11 +178,6 @@ class PDOClass {
 		}
 		return $data;
 	}
-
-	// TODO Unfiltered query: this is generally a bad idea, don't use
-	public function get_all () {
-		return $this->find();
-	}
 }
 
 function init_db($log_function = 'log_entry_db') {
