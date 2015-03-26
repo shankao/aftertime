@@ -129,18 +129,20 @@ class PDOClass {
 	function upsert() {
 	}
 
-	// TODO: allow id argument to delete directly
-	function delete() {
+	function delete($key_value = NULL) {
 		$keyname = $this->_key;
-		if (!isset($this->$keyname)) {
-			return null;
+		if ($key_value === NULL) {
+			if (!isset($this->$keyname)) {
+				return null;
+			}
+			$key_value = $this->$keyname;
 		}
 		$query = "DELETE FROM {$this->_table} WHERE $keyname = :value";
 		$statement = $this->_pdo->prepare($query);
 		if (!$statement) {
 			return false;
                 }
-		return $statement->execute([':value' => $this->$keyname]);
+		return $statement->execute([':value' => $key_value]);
 	}
 	
 	public function find($key = NULL, $value = NULL) {
