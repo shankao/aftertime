@@ -52,7 +52,9 @@ class PDOStatementLog extends PDOStatement {
 // Limited O/R mapping
 class PDOClass {
 
+	private $_statement;	// Last PDOStatement instance
 	protected $_pdo;	// PDO instance
+
 	protected $_table;	// Override 
 	protected $_fields;	// Override 
 	protected $_key;	// Override 
@@ -97,11 +99,11 @@ class PDOClass {
 	public function insert() {
 		list($query_fields, $query_values_place, $query_values) = $this->get_query_parts();
 		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
-		$statement = $this->_pdo->prepare($query);
-		if (!$statement) {
+		$this->_statement = $this->_pdo->prepare($query);
+		if (!$this->_statement) {
 			return false;
 		} else {
-			if ($statement->execute($query_values) === false) {
+			if ($this->_statement->execute($query_values) === false) {
 				return false;
 			} else {
 				if (!isset($this->{$this->_key})) {
@@ -119,11 +121,11 @@ class PDOClass {
 		}
 		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
 		$query = "UPDATE {$this->_table} SET $update_values WHERE {$this->_key} = :{$this->_key}";
-		$statement = $this->_pdo->prepare($query);
-		if (!$statement) {
+		$this->_statement = $this->_pdo->prepare($query);
+		if (!$this->_statement) {
 			return false;
                 }
-		return $statement->execute($query_values);
+		return $this->_statement->execute($query_values);
 	}
 
 	function upsert() {
@@ -138,11 +140,11 @@ class PDOClass {
 			$key_value = $this->$keyname;
 		}
 		$query = "DELETE FROM {$this->_table} WHERE $keyname = :value";
-		$statement = $this->_pdo->prepare($query);
-		if (!$statement) {
+		$this->_statement = $this->_pdo->prepare($query);
+		if (!$this->_statement) {
 			return false;
                 }
-		return $statement->execute([':value' => $key_value]);
+		return $this->_statement->execute([':value' => $key_value]);
 	}
 	
 	public function find($key = NULL, $value = NULL) {
@@ -153,17 +155,17 @@ class PDOClass {
 			}
 			$query .= " WHERE $key = :value";
 		}
-		$statement = $this->_pdo->prepare($query);
-		if (!$statement) {
+		$this->_statement = $this->_pdo->prepare($query);
+		if (!$this->_statement) {
 			return false;
 		}
 		if (isset($value)) {
-			$statement->bindValue(':value', $value);
+			$this->_statement->bindValue(':value', $value);
 		}
-		if ($statement->execute() === false) {
+		if ($this->_statement->execute() === false) {
 			return false;
 		}
-		return $statement->fetchAll(PDO::FETCH_ASSOC);
+		return $this->_statement->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 	// Gets an element selected by the class' key
@@ -179,6 +181,10 @@ class PDOClass {
 			}
 		}
 		return $data;
+	}
+
+	public function errorInfo() {
+		return $this->_statement->errorInfo();
 	}
 }
 
@@ -242,6 +248,7 @@ function init_db($log_function = 'log_entry_db') {
         return $done;
 }
 
+// Note that only works with PEAR DB::DataObject
 function db_error() {
         $error = PEAR::getStaticProperty('DB_DataObject','lastError');
         if (PEAR::isError($error)) {
@@ -260,6 +267,7 @@ function db_error() {
 }
 
 // Very simple multiquery implementation. Will have parsing problems.
+// Note that only works with PEAR DB::DataObject
 function multiquery($sql_code) {
 	$sql_code = explode(';', $sql_code);
 	foreach ($sql_code as $statement) { 
