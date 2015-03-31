@@ -93,7 +93,7 @@ abstract class app {
 
 	/*
 	Functions for user authentication. 
-	It requires a DB up and running, and DB_DataObject::factory('users') working
+	It requires a PDO connection up and running with a table called 'users'
 	*/
 	private function do_login ($email, $password, $save_cookie=false, $password_is_encrypted=false) {
 
@@ -102,16 +102,9 @@ abstract class app {
 		$this->clean_login_cookies();
 
 		// Get user for the given email
-		if (is_a($this->db, 'PDO')) {
-			$db_get_mail = $this->db->prepare('SELECT * FROM users WHERE email = :email');
-			$db_get_mail->execute(array('email' => $email));
-			$user = $db_get_mail->fetch();
-		} else {
-			$user = DB_DataObject::factory('users');
-			$user->email = $email;
-			$user->find(true);
-			$user = $user->toArray();
-		}
+		$db_get_mail = $this->db->prepare('SELECT * FROM users WHERE email = :email');
+		$db_get_mail->execute(array('email' => $email));
+		$user = $db_get_mail->fetch();
 
 		if (!$user) {
 			$this->error_add('NO_USER_FOUND');

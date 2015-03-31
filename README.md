@@ -23,7 +23,7 @@ Mission: to be an experimental web framework that implements unconventional idea
 
 * Build / deploy: GNU Make + git / Unix shell 
 * Testing: none yet (planned: PEAR::PHP_Unit)
-* DB interface: PEAR::DB_DataObject with MDB2 backend
+* DB interface: PDO
 * Input validation: PHP filter functions (planned: PEAR::Validate / PEAR::Akismet2)
 * Caching: none (planned: PEAR::Cache_Lite / Zend opcache)
 * Template system: PHP files (planned: mustache)
