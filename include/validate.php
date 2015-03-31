@@ -36,19 +36,13 @@ class Validate {
 
 	// Checks a custom callback validator and adds up the errors found
 	public function check_callback (callable $fn, $value, array $extra_data = null) {
-		$callable_name = '';
-		if (!is_callable($fn, $callable_name)) {
-			log_entry ("ERROR: cannot find validator function '$callable_name'");
-			$this->errors[] = 'VALIDATOR_FUNCTION_NOT_CALLABLE';
-		} else {
-			$fn_errors = $fn($value, $extra_data);
-			if ($fn_errors) {
-				log_entry ("ERROR: callback validator failed");
-				if (is_array($fn_errors)) {
-					$this->errors = array_merge($this->errors, $fn_errors);
-				} else {
-					$this->errors[] = $fn_errors;
-				}
+		$fn_errors = call_user_func($fn, $value, $extra_data);
+		if ($fn_errors) {
+			log_entry ("ERROR: callback validator failed");
+			if (is_array($fn_errors)) {
+				$this->errors = array_merge($this->errors, $fn_errors);
+			} else {
+				$this->errors[] = $fn_errors;
 			}
 		}
 	}
@@ -105,13 +99,13 @@ class Validate {
 						log_entry ("ERROR: validator function not specified");
 						$this->errors[] = 'VALIDATOR_FUNCTION_NOT_FOUND_'.strtoupper($key);
 					} else {
-						// Don't allow methods out of the App's class
-						if (isset($allvars['app'])) {	// XXX looks flacky
-							$fn = array($allvars['app'], $spec['filter_options']['callback']);
+						$fn = $spec['filter_options']['callback'];
+						if (!is_callable($fn)) {
+							log_entry ("ERROR: cannot find validator function '$fn'");
+							$this->errors[] = 'VALIDATOR_FUNCTION_NOT_CALLABLE';
 						} else {
-							$fn = $spec['filter_options']['callback'];
+							$this->check_callback($fn, $value, $allvars);
 						}
-						$this->check_callback($fn, $value, $allvars);
 					}
 				} else {
 					$this->check_filter($key, $value, $spec);
