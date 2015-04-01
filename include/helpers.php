@@ -22,31 +22,6 @@ function walk_recursive (array $array, $function, $extra) {
 	}
 }
 
-function get_absolute_url ($url, $parent_url = null) {
-	if (!isset($parent_url)) {
-		return $url;
-	}
-	$parent_components = array();
-	if (($parent_components = parse_url($parent_url)) === false) {
-		log_entry("ERROR: malformed parent url");
-		return false;
-	}
-
-	if (($url_components = parse_url($url)) === false) {
-		log_entry("ERROR: malformed url");
-		return false;
-	}
-
-	if (empty($url_components['host'])) {
-		if ($url[0] === '/') {
-			$url = substr($url, 1);
-		}
-		$url = $parent_components['scheme'] .'://'. $parent_components['host'].'/'.$url;
-	}
-
-	return filter_var($url, FILTER_VALIDATE_URL);
-}
-
 // Checks write permissions if the file exists, or creates it of it doesn't
 // Same thing for folders
 function create_file($filename, $is_folder = false, $mode = false) {
