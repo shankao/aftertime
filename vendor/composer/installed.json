@@ -1,36 +1,5 @@
 [
     {
-        "name": "pear-pear.php.net/System_Daemon",
-        "version": "1.0.0",
-        "version_normalized": "1.0.0.0",
-        "dist": {
-            "type": "file",
-            "url": "http://pear.php.net/get/System_Daemon-1.0.0.tgz",
-            "reference": null,
-            "shasum": null
-        },
-        "require": {
-            "php": ">=5.1.2.0"
-        },
-        "replace": {
-            "pear-pear/system_daemon": "== 1.0.0.0"
-        },
-        "type": "pear-library",
-        "installation-source": "dist",
-        "autoload": {
-            "classmap": [
-                ""
-            ]
-        },
-        "include-path": [
-            "/"
-        ],
-        "license": [
-            "New BSD License"
-        ],
-        "description": "System_Daemon is a PHP class that allows developers to create their own daemon \napplications on Linux systems. The class is focussed entirely on creating & \nspawning standalone daemons, and for example includes:\n\n   1. Methods to generate OS-specific startup-files (init.d) (currently only \n      Debian/Ubuntu are supported), so that your application gets started on \n      reboot as well.\n   2. Methods for logging purposes, also support for PEAR's Log package \n   3. Simple syntax\n   5. Can run with or without PEAR (PEAR adds more elegance & functionality, \n      no-PEAR offers functionality like including system_daemon with svn:externals\n      and reduced dependencies)\n   6. Default signal handlers, but optionally reroute signals to your own \n      handlers. \n   7. Set options like max RAM usage"
-    },
-    {
         "name": "yiisoft/jquery",
         "version": "1.9.1",
         "version_normalized": "1.9.1.0",
@@ -55,36 +24,5 @@
         "description": "jQuery JavaScript Library",
         "homepage": "http://jquery.com",
         "abandoned": true
-    },
-    {
-        "name": "pear-pear.php.net/PEAR_Exception",
-        "version": "1.0.0",
-        "version_normalized": "1.0.0.0",
-        "dist": {
-            "type": "file",
-            "url": "http://pear.php.net/get/PEAR_Exception-1.0.0.tgz",
-            "reference": null,
-            "shasum": null
-        },
-        "require": {
-            "php": ">=5.4.0.0"
-        },
-        "replace": {
-            "pear-pear/pear_exception": "== 1.0.0.0"
-        },
-        "type": "pear-library",
-        "installation-source": "dist",
-        "autoload": {
-            "classmap": [
-                ""
-            ]
-        },
-        "include-path": [
-            "/"
-        ],
-        "license": [
-            "New BSD License"
-        ],
-        "description": "PEAR_Exception PHP5 error handling mechanism\n\n Consider using PEAR2_Exception from http://pear2.php.net if you are developing for PHP 5.3+"
     }
 ]

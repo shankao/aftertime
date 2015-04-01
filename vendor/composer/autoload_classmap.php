@@ -6,18 +6,4 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'PEAR_Exception' => $vendorDir . '/pear-pear.php.net/PEAR_Exception/PEAR/Exception.php',
-    'System_Daemon' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon.php',
-    'System_Daemon_Exception' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/Exception.php',
-    'System_Daemon_OS' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS.php',
-    'System_Daemon_OS_Arch' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/Arch.php',
-    'System_Daemon_OS_BSD' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/BSD.php',
-    'System_Daemon_OS_Debian' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/Debian.php',
-    'System_Daemon_OS_Exception' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/Exception.php',
-    'System_Daemon_OS_Fedora' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/Fedora.php',
-    'System_Daemon_OS_Linux' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/Linux.php',
-    'System_Daemon_OS_RedHat' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/RedHat.php',
-    'System_Daemon_OS_Ubuntu' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/Ubuntu.php',
-    'System_Daemon_OS_Windows' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/OS/Windows.php',
-    'System_Daemon_Options' => $vendorDir . '/pear-pear.php.net/System_Daemon/System/Daemon/Options.php',
 );

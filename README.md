@@ -22,10 +22,10 @@ Mission: to be an experimental web framework that implements unconventional idea
 = Server-side components =
 
 * Build / deploy: GNU Make + git / Unix shell 
-* Testing: none yet (planned: PEAR::PHP_Unit)
+* Testing: none yet (planned: PHP_Unit)
 * DB interface: PDO
-* Input validation: PHP filter functions (planned: PEAR::Validate / PEAR::Akismet2)
-* Caching: none (planned: PEAR::Cache_Lite / Zend opcache)
+* Input validation: PHP filter functions
+* Caching: none
 * Template system: PHP files (planned: mustache)
 
 = Client-side components =

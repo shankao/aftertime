@@ -143,16 +143,6 @@ final class Config {
 			}
 		}
 	}
-
-	// For all the PEAR require_* hell, that got worse with composer not following the usual PEAR folder structure
-        static public function pear_paths() {
-                $pear_composer = __DIR__ . '/../vendor/pear-pear.php.net/';
-                foreach (glob($pear_composer.'*', GLOB_ONLYDIR) as $folder) {
-                        $paths[] = $folder;
-                }
-                $paths[] = $pear_composer . 'MDB2_Driver_mysqli/MDB2_Driver_mysqli-1.5.0b4';    // Crap
-                return implode(PATH_SEPARATOR, $paths);
-        }
 }
 
 /**

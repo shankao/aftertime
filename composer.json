@@ -1,13 +1,5 @@
 {
-	"repositories": [
-		{
-			"type": "pear",
-			"url": "http://pear.php.net"
-		}
-	],
 	"require": {
-		"pear-pear.php.net/PEAR_Exception" : "*",
-		"pear-pear.php.net/System_Daemon" : "1.0.0",
 		"yiisoft/jquery": "1.9.1"
 	}
 }
