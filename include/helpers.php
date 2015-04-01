@@ -6,10 +6,7 @@ require_once __DIR__.'/log.php';
 // TODO: move where they better correspond
 
 function html_value($var) {
-        if (isset($var))
-                return nl2br(htmlspecialchars($var));
-        else
-		return '';
+	return nl2br(htmlspecialchars($var));
 }
 
 // Checks write permissions if the file exists, or creates it of it doesn't
