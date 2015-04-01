@@ -1,17 +1,20 @@
-<?php /* 
+<?php
+namespace Aftertime;
+
+/* 
 Handy DB related functions 
 */
 require_once __DIR__.'/config.php';
 require_once __DIR__.'/log.php';
 
-class PDOLog extends PDO {
+class PDOLog extends \PDO {
 	function __construct($dsn, $username='', $password='', $driver_options=array()) {
 		parent::__construct ($dsn, $username, $password, $driver_options);
-		$this->setAttribute (PDO::ATTR_STATEMENT_CLASS, array('PDOStatementLog', array($this)));
+		$this->setAttribute (\PDO::ATTR_STATEMENT_CLASS, array('PDOStatementLog', array($this)));
 	}
 }
 
-class PDOStatementLog extends PDOStatement {
+class PDOStatementLog extends \PDOStatement {
 	protected $dbh;
 	private $binds = array();
 
@@ -29,7 +32,7 @@ class PDOStatementLog extends PDOStatement {
 		}
 		log_entry("PDO query: $query");
 		$result = parent::execute($params);
-		if ($this->errorCode() != PDO::ERR_NONE) {
+		if ($this->errorCode() != \PDO::ERR_NONE) {
                         log_entry('PDO ERROR: '.$this->errorInfo()[2]);
                 }
 		return $result;
@@ -37,13 +40,13 @@ class PDOStatementLog extends PDOStatement {
 
 	public function prepare (string $statement, array $driver_options = array()) {
 		$result = parent::prepare($statement, $driver_options);
-		if ($this->errorCode() != PDO::ERR_NONE) {
+		if ($this->errorCode() != \PDO::ERR_NONE) {
                         log_entry('PDO ERROR: '.$this->errorInfo()[2]);
                 }
 		return $result;
 	}
 
-	public function bindValue ($parameter, $value, $data_type = PDO::PARAM_STR) {
+	public function bindValue ($parameter, $value, $data_type = \PDO::PARAM_STR) {
 		$this->binds[$parameter] = $value;
 		return parent::bindValue($parameter, $value, $data_type);
 	}
@@ -59,7 +62,7 @@ class PDOClass {
 	protected $_fields;	// Override 
 	protected $_key;	// Override 
 
-	public function __construct(PDO $pdo) {
+	public function __construct(\PDO $pdo) {
 		if (!is_string($this->_table) || !is_array($this->_fields) || !is_string($this->_key)) {
 			return NULL;
 		}
@@ -165,7 +168,7 @@ class PDOClass {
 		if ($this->_statement->execute() === false) {
 			return false;
 		}
-		return $this->_statement->fetchAll(PDO::FETCH_ASSOC);
+		return $this->_statement->fetchAll(\PDO::FETCH_ASSOC);
 	}
 
 	// Gets an element selected by the class' key
@@ -203,7 +206,7 @@ function init_db() {
 		if ($debug) {
 			return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password']);
 		} else {
-			return new PDO($dsn, $dbconfig['user'], $dbconfig['password']);
+			return new \PDO($dsn, $dbconfig['user'], $dbconfig['password']);
 		}
 	} catch (PDOException $e) {
 		log_entry("PDO Exception: ".$e->getMessage());

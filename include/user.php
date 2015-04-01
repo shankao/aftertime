@@ -1,4 +1,6 @@
 <?php
+namespace Aftertime;
+
 /*
    User management 
    It requires a PDO connection up and running with a table called 'users'

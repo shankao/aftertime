@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__.'/../include/titletag.php';
-$title = HTMLTitle::get();
+$title = Aftertime\HTMLTitle::get();
 if (empty($title)) {
-	HTMLTitle::set_from_page($app, $page);
+	Aftertime\HTMLTitle::set_from_page($app, $page);
 }
 ?>
-<title><?php echo HTMLTitle::get(); ?></title>
+<title><?php echo Aftertime\HTMLTitle::get(); ?></title>

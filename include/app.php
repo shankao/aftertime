@@ -1,9 +1,13 @@
 <?php
+namespace Aftertime;
+
 require_once __DIR__.'/log.php';
 require_once __DIR__.'/config.php';
 require_once __DIR__.'/db.php';
 require_once __DIR__.'/helpers.php';
 require_once __DIR__.'/user.php';
+require_once __DIR__.'/validate.php';
+require_once __DIR__.'/template.php';
 
 // Returns an App object chosen from the config and request params
 final class appFactory {
@@ -123,7 +127,6 @@ abstract class app {
 		if (!$page_config || !isset($page_config['params'])) {
 			log_entry("WARNING: params not specified for '$pagename' page. Validation checks will not be performed");
 		} else {
-			require_once __DIR__.'/validate.php';
 			$validator = new Validate;
 			$validator->check_array($this->params, $page_config['params']);
 			if ($validator->has_errors()) {
@@ -184,7 +187,6 @@ abstract class app {
 				break;
 		}
 
-		require_once __DIR__.'/template.php';
 		if (isset($this->params)) {
 			$vars['params'] = $this->params;
 		}

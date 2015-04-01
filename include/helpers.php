@@ -1,4 +1,7 @@
-<?php /* Helper functions */
+<?php
+namespace Aftertime;
+
+/* Helper functions */
 require_once __DIR__.'/log.php';
 // TODO: move where they better correspond
 /*

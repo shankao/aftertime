@@ -1,4 +1,6 @@
 <?php
+namespace Aftertime;
+
 require_once __DIR__.'/helpers.php';
 
 function log_entry ($text, $sizelimit = 2000) {

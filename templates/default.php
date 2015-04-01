@@ -10,20 +10,20 @@
 				'page' => $params['page'],
 				'rev' => $config['code_revision']
 			);
-			template_render(__DIR__.'/html_title.php', $vars, false);
+			Aftertime\template_render(__DIR__.'/html_title.php', $vars, false);
 			if (isset($config['favicon'])) {
-				template_render(__DIR__.'/favicon.php', array('filename' => $config['favicon']), false);
+				Aftertime\template_render(__DIR__.'/favicon.php', array('filename' => $config['favicon']), false);
 			}
-			template_render(__DIR__.'/load_css.php', $vars, false);
-			template_render(__DIR__.'/load_js.php', $vars, false);
+			Aftertime\template_render(__DIR__.'/load_css.php', $vars, false);
+			Aftertime\template_render(__DIR__.'/load_js.php', $vars, false);
 		?>
 	</head>
         <body>
 		<?php 
 		// Load the current page's template
-		if (template_render("{$config['site']}/{$params['app']}/{$params['page']}.php", $template_vars, true) === false) {
+		if (Aftertime\template_render("{$config['site']}/{$params['app']}/{$params['page']}.php", $template_vars, true) === false) {
 			log_entry("ERROR: unexistent page template {$params['page']}");
-			template_render(__DIR__.'/apperror.php');
+			Aftertime\template_render(__DIR__.'/apperror.php');
 		} 
 		?>
 	</body>

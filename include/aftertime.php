@@ -1,7 +1,11 @@
 <?php
+namespace Aftertime;
+
 require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/config.php';
 require_once __DIR__.'/log.php';
+require_once __DIR__.'/app.php';
+require_once __DIR__.'/template.php';
 
 class Aftertime {
 
@@ -31,6 +35,7 @@ class Aftertime {
 			}
 			return;
 		} else {
+			log_entry(Config::init_log());
 			if (isset($config['timezone'])) {
 				ini_set ('date.timezone', $config['timezone']);
 			}
@@ -40,7 +45,6 @@ class Aftertime {
 			}
 
 			// Log initialization
-			log_entry(Config::init_log());
 			ini_set ('error_log', Log::log_file());
 			set_error_handler(array('Log', 'php_errors'));
 			set_exception_handler(array('Log', 'php_exceptions'));
@@ -68,7 +72,6 @@ class Aftertime {
 		if (!$this->is_ready) {	// Something failed on the constructor
 			return false;	
 		}
-		require_once __DIR__.'/app.php';
 		$app_factory = new appFactory;
 		$this->app = $app_factory->build($_REQUEST);
 		if ($this->app) {
@@ -77,7 +80,6 @@ class Aftertime {
 				return $this->app->render_template();
 			}
 		} else {
-			require_once __DIR__.'/template.php';
 			template_render(__DIR__.'/../templates/apperror.php');
 			return false;
 		}

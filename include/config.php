@@ -1,4 +1,6 @@
 <?php
+namespace Aftertime;
+
 // TODO Keep the config cached in memory between PHP calls somehow
 final class Config {
 	static private $config = null;

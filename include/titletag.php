@@ -1,4 +1,5 @@
 <?php
+namespace Aftertime;
 require_once __DIR__.'/config.php';
 
 class HTMLTitle {
