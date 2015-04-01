@@ -4,23 +4,6 @@ namespace Aftertime;
 /* Helper functions */
 require_once __DIR__.'/log.php';
 // TODO: move where they better correspond
-/*
- * XXX Deprecated
- */
-function getParam ($source, $varname, $default=null) {
-	log_entry('DEPRECATED: getParam()');
-	if (!isset($source[$varname])) {
-		return $default;
-	} else {
-		// Special case for boolean encoded as strings
-		if ($source[$varname] == 'true')
-			return true;
-		elseif ($source[$varname] == 'false')
-			return false;			
-		else
-			return ($source[$varname]);
-	}		
-}
 
 function html_value($var) {
         if (isset($var))
