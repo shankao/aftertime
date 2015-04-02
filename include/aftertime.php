@@ -46,9 +46,9 @@ class Aftertime {
 
 			// Log initialization
 			ini_set ('error_log', Log::log_file());
-			set_error_handler(array('Log', 'php_errors'));
-			set_exception_handler(array('Log', 'php_exceptions'));
-			register_shutdown_function(array('Log', 'log_shutdown'));
+			set_error_handler(array('Aftertime\Log', 'php_errors'));
+			set_exception_handler(array('Aftertime\Log', 'php_exceptions'));
+			register_shutdown_function(array('Aftertime\Log', 'log_shutdown'));
 
 			ob_start(null, 4096);
 			ini_set ('arg_separator.output', '&amp;');
