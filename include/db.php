@@ -71,7 +71,9 @@ class PDOClass {
 
 	public function toArray() {
 		foreach ($this->_fields as $var) {
-			$result[$var] = $this->$var;
+			if (isset($this->$var)) {
+				$result[$var] = $this->$var;
+			}
 		}
 		return $result;
 	}
