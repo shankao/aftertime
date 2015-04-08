@@ -102,6 +102,9 @@ class PDOClass {
 	}
 
 	public function insert() {
+		if (!$this->_pdo) {
+			return false;
+		}
 		list($query_fields, $query_values_place, $query_values) = $this->get_query_parts();
 		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
 		$this->_statement = $this->_pdo->prepare($query);
@@ -120,6 +123,9 @@ class PDOClass {
 	}
 
 	public function update() {
+		if (!$this->_pdo) {
+			return false;
+		}
 		$key = $this->_key;
 		if (!isset($this->$key)) {
 			return false;
@@ -137,6 +143,9 @@ class PDOClass {
 	}
 
 	function delete($key_value = NULL) {
+		if (!$this->_pdo) {
+                        return false;
+                }
 		$keyname = $this->_key;
 		if ($key_value === NULL) {
 			if (!isset($this->$keyname)) {
@@ -153,6 +162,9 @@ class PDOClass {
 	}
 	
 	public function find($key = NULL, $value = NULL) {
+		if (!$this->_pdo) {
+                        return false;
+                }
 		$query = "SELECT * FROM {$this->_table}";
 		if (isset($key)) {
 			if (!isset($value)) {
