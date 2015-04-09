@@ -222,7 +222,7 @@ function init_db() {
 		} else {
 			return new \PDO($dsn, $dbconfig['user'], $dbconfig['password']);
 		}
-	} catch (PDOException $e) {
+	} catch (\PDOException $e) {
 		log_entry("PDO Exception: ".$e->getMessage());
 		return false;
 	}

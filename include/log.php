@@ -123,7 +123,7 @@ final class Log {
 		return false;
 	}
 
-	static function php_exceptions(Exception $ex) {
+	static function php_exceptions(\Exception $ex) {
 		self::log_entry('Exception: ' . $ex->getMessage());
 		self::log_entry($ex->getTraceAsString());
 	}
