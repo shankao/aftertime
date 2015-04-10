@@ -218,10 +218,7 @@ abstract class app {
 		
 		$parts = explode('/', $dest);
 
-		$url = "index.php?app={$parts[0]}";
-		if (isset($parts[1])) {
-			$url .= "&page={$parts[1]}";
-		}
+		$url = "index.php?app={$parts[0]}&page={$parts[1]}";
 
 		log_entry ("HTTP redirecting to $url");
 		header("Location: $url", true, $response);
