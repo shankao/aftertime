@@ -211,7 +211,7 @@ abstract class app {
 	}
 
 	// HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
-	public function redirect($dest, array $params = null) {
+	public function redirect($dest, array $params = null, $response = 303) {
 		if ($this->has_error()) {
 			$_SESSION['errors'] = $this->get_all_errors();
 		}
