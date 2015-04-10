@@ -217,8 +217,10 @@ abstract class app {
 		}
 		
 		$parts = explode('/', $dest);
-
-		$url = "index.php?app={$parts[0]}&page={$parts[1]}";
+		$params2['app'] = $parts[0];
+		$params2['page'] = $parts[1];
+		$params2 = array_merge($params2, $params);
+		$url = 'index.php?' . http_build_query($params2, '_', '&');
 
 		log_entry ("HTTP redirecting to $url");
 		header("Location: $url", true, $response);
