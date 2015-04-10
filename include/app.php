@@ -210,11 +210,22 @@ abstract class app {
 		}
 	}
 
-	public function redirect($dest) {
+	// HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
+	public function redirect($dest, array $params = null) {
 		if ($this->has_error()) {
 			$_SESSION['errors'] = $this->get_all_errors();
 		}
-		redirect($dest);
+		
+		$parts = explode('/', $dest);
+
+		$url = "index.php?app={$parts[0]}";
+		if (isset($parts[1])) {
+			$url .= "&page={$parts[1]}";
+		}
+
+		log_entry ("HTTP redirecting to $url");
+		header("Location: $url", true, $response);
+
 		return 'redirect';
 	}
 
@@ -241,18 +252,4 @@ abstract class app {
                 return $this->debug;
         }
 }
-
-// HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
-function redirect($dest, $response = 303) {
-	$parts = explode('/', $dest);
-
-	$url = "index.php?app={$parts[0]}";
-	if (isset($parts[1])) {
-		$url .= "&page={$parts[1]}";
-	}
-
-	log_entry ("HTTP redirecting to $url");
-	header("Location: $url", true, $response);
-}
-
 ?>
