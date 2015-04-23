@@ -137,19 +137,20 @@ class User extends PDOClass {
 			}
 			$user = $user[0];
 
+			// Copy the found user's fields on top of this object
 			foreach ($this->_fields as $var) {
-				if (isset($user[$var])) {
-					$this->$var = $user[$var];
+				if (isset($user->$var)) {
+					$this->$var = $user->$var;
 				}
 			}
 
-			if (!$this->check_password($password, $user['password'], $password_is_encrypted)) {
+			if (!$this->check_password($password, $this->password, $password_is_encrypted)) {
 				return User::WRONG_PASSWD;
 			}
 
 			$this->put_user_in_session();
 			if ($set_cookies) {	
-				$this->set_cookies($user['email'], $user['password']);	// Note that it's the encrypted passwd
+				$this->set_cookies($this->email, $this->password);	// Note that it's the encrypted passwd
 			}
 		}
 		return User::OK;

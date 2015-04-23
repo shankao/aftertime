@@ -62,6 +62,27 @@ class PDOClass {
 	protected $_fields;	// Override 
 	protected $_key;	// Override 
 
+	// Runs the given SQL binded with the variables in the array, and returns an associative array with the results
+	// Used to extend find()
+	protected function query($sql, array $vars = null) {
+		if (!$this->_pdo) {
+                        return false;
+                }
+		$this->_statement = $this->_pdo->prepare($sql);
+		if (!$this->_statement) {
+			return false;
+		}
+		if ($vars) {
+			foreach ($vars as $name => $value) {
+				$this->_statement->bindValue(":$name", $value);
+			}
+		}
+		if ($this->_statement->execute() === false) {
+			return false;
+		}
+		return $this->_statement->fetchAll(\PDO::FETCH_CLASS, get_class($this), [$this->_pdo]);
+	}
+
 	public function __construct(\PDO $pdo) {
 		if (!is_string($this->_table) || !is_array($this->_fields) || !is_string($this->_key)) {
 			return NULL;
@@ -160,11 +181,8 @@ class PDOClass {
                 }
 		return $this->_statement->execute([':value' => $key_value]);
 	}
-	
+
 	public function find($key = NULL, $value = NULL) {
-		if (!$this->_pdo) {
-                        return false;
-                }
 		$query = "SELECT * FROM {$this->_table}";
 		if (isset($key)) {
 			if (!isset($value)) {
@@ -172,32 +190,22 @@ class PDOClass {
 			}
 			$query .= " WHERE $key = :value";
 		}
-		$this->_statement = $this->_pdo->prepare($query);
-		if (!$this->_statement) {
-			return false;
-		}
-		if (isset($value)) {
-			$this->_statement->bindValue(':value', $value);
-		}
-		if ($this->_statement->execute() === false) {
-			return false;
-		}
-		return $this->_statement->fetchAll(\PDO::FETCH_ASSOC);
+		return $this->query($query, ["value" => $value]);
 	}
 
 	// Gets an element selected by the class' key
 	public function get($id) {
-		$data = $this->find($this->_key, $id);
-		$data = $data[0];
-		if ($data === false) {
+		$objects = $this->find($this->_key, $id);
+		if ($objects === false) {
 			return false;
 		}
+		$object = $objects[0];
 		foreach ($this->_fields as $var) {
-			if (isset($data[$var])) {
-				$this->$var = $data[$var];
+			if (isset($object->$var)) {
+				$this->$var = $object->$var;
 			}
 		}
-		return $data;
+		return true;
 	}
 
 	public function errorInfo() {
