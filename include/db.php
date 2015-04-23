@@ -196,7 +196,7 @@ class PDOClass {
 	// Gets an element selected by the class' key
 	public function get($id) {
 		$objects = $this->find($this->_key, $id);
-		if ($objects === false) {
+		if ($objects === false || count($objects) == 0) {
 			return false;
 		}
 		$object = $objects[0];
