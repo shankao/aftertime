@@ -94,7 +94,7 @@ class User extends PDOClass {
 
 		$type = 'blowfish';
 		$code = '2y'; 	// Blowfish code from php 5.3.7
-		$cost = '05';	// range [04,31]
+		$cost = '11';	// range [04,31]
 		for ($i=0, $salt=''; $i<22; $i++)		// [./0-9A-Za-z]{22} more chars are ignored
 			$salt .= rand(0, 9);
 
