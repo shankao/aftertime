@@ -30,10 +30,10 @@ class PDOStatementLog extends \PDOStatement {
 		if ($params) {
 			$query = str_replace(array_keys($params), $params, $query);
 		}
-		log_entry("PDO query: $query");
+//		log_entry("PDO query: $query");		// XXX too verbose
 		$result = parent::execute($params);
 		if ($this->errorCode() != \PDO::ERR_NONE) {
-                        log_entry('PDO ERROR: '.$this->errorInfo()[2]);
+                        log_entry('PDO ERROR: '.$this->errorInfo()[2].' running: '.$query);
                 }
 		return $result;
 	}
@@ -41,7 +41,7 @@ class PDOStatementLog extends \PDOStatement {
 	public function prepare (string $statement, array $driver_options = array()) {
 		$result = parent::prepare($statement, $driver_options);
 		if ($this->errorCode() != \PDO::ERR_NONE) {
-                        log_entry('PDO ERROR: '.$this->errorInfo()[2]);
+                        log_entry('PDO ERROR: '.$this->errorInfo()[2].' preparing: '.$statement);
                 }
 		return $result;
 	}
