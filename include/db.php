@@ -199,13 +199,16 @@ class PDOClass {
 		if ($objects === false || count($objects) == 0) {
 			return false;
 		}
-		$object = $objects[0];
+		$this->copy($objects[0]);
+		return true;
+	}
+
+	public function copy($object) {
 		foreach ($this->_fields as $var) {
 			if (isset($object->$var)) {
 				$this->$var = $object->$var;
 			}
 		}
-		return true;
 	}
 
 	public function errorInfo() {
