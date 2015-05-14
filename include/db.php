@@ -64,7 +64,7 @@ class PDOClass {
 
 	// Runs the given SQL binded with the variables in the array, and returns an associative array with the results
 	// Used to extend find()
-	protected function query($sql, array $vars = null) {
+	protected function query($sql, array $vars = null, $remap_keys = false) {
 		if (!$this->_pdo) {
                         return false;
                 }
@@ -80,7 +80,16 @@ class PDOClass {
 		if ($this->_statement->execute() === false) {
 			return false;
 		}
-		return $this->_statement->fetchAll(\PDO::FETCH_CLASS, get_class($this), [$this->_pdo]);
+		$results = $this->_statement->fetchAll(\PDO::FETCH_CLASS, get_class($this), [$this->_pdo]);
+		if ($remap_keys) {
+			$results2 = array();
+			foreach ($results as $result) {
+				$key = $result->{$result->_key};
+				$results2[$key] = $result;
+			}
+			$results = $results2;
+		}
+		return $results;
 	}
 
 	public function __construct(\PDO $pdo) {
