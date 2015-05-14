@@ -185,7 +185,7 @@ class PDOClass {
 	public function find($key = NULL, $value = NULL) {
 		$query = "SELECT * FROM {$this->_table}";
 		if (isset($key)) {
-			if (!isset($value)) {
+			if (!in_array($key, $this->_fields) || !isset($value)) {
 				return false;
 			}
 			$query .= " WHERE $key = :value";
