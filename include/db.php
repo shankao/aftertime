@@ -169,9 +169,6 @@ class PDOClass {
 		return $this->_statement->execute($query_values);
 	}
 
-	function upsert() {
-	}
-
 	function delete($key_value = NULL) {
 		if (!$this->_pdo) {
                         return false;
