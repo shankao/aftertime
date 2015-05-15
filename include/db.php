@@ -57,7 +57,7 @@ class PDOStatementLog extends \PDOStatement {
 // Limited O/R mapping for CRUD operations
 // XXX unify select() and get()?
 // TODO Add "...WHERE bla IN ()" support when sent an array of values
-// TODO better support for querying for NULL values
+// TODO better support for queries with NULL values
 // XXX Support for tables without a _key field?
 class PDOClass {
 
@@ -68,7 +68,6 @@ class PDOClass {
 	protected $_fields;	// Override 
 	protected $_key;	// Override 
 
-	// This looks class-cacheable
 	private function get_query_parts() {
 		$first = true;
 		$query_fields = $query_values_place = $update_values = '';
