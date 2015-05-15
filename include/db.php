@@ -14,6 +14,8 @@ class PDOLog extends \PDO {
 	}
 }
 
+// TODO add optional per-query logging
+// TODO add optional per-query benchmarking
 class PDOStatementLog extends \PDOStatement {
 	protected $dbh;
 	private $binds = array();
@@ -52,7 +54,11 @@ class PDOStatementLog extends \PDOStatement {
 	}
 }
 
-// Limited O/R mapping
+// Limited O/R mapping for CRUD operations
+// XXX unify find() and get()?
+// TODO Add "...WHERE bla IN ()" support when sent an array of values
+// TODO better support for querying for NULL values
+// XXX Support for tables without a _key field?
 class PDOClass {
 
 	private $_statement;	// Last PDOStatement instance
