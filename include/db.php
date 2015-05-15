@@ -58,7 +58,7 @@ class PDOStatementLog extends \PDOStatement {
 // XXX unify select() and get()?
 // TODO Add "...WHERE bla IN ()" support when sent an array of values
 // TODO better support for queries with NULL values
-// XXX Support for tables without a _key field?
+// XXX Support for tables without a _key field? I.e. m-n relations tables do have more than one key
 class PDOClass {
 
 	private $_statement;	// Last PDOStatement instance
