@@ -131,7 +131,7 @@ class User extends PDOClass {
 			}
 
 			$this->clean_cookies();
-			$user = $this->find('email', $email);
+			$user = $this->select('email', $email);
 			if (!$user) {
 				return User::NO_USER_FOUND;
 			}
