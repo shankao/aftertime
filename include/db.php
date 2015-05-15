@@ -55,7 +55,7 @@ class PDOStatementLog extends \PDOStatement {
 }
 
 // Limited O/R mapping for CRUD operations
-// XXX unify find() and get()?
+// XXX unify select() and get()?
 // TODO Add "...WHERE bla IN ()" support when sent an array of values
 // TODO better support for querying for NULL values
 // XXX Support for tables without a _key field?
@@ -93,7 +93,7 @@ class PDOClass {
 	}
 
 	// Runs the given SQL binded with the variables in the array, and returns an associative array with the results
-	// Used to extend find()
+	// Used to extend select()
 	protected function query($sql, array $vars = null, $remap_keys = false) {
 		if (!$this->_pdo) {
                         return false;
@@ -195,7 +195,7 @@ class PDOClass {
 		return $this->_statement->execute([':value' => $key_value]);
 	}
 
-	public function find($key = NULL, $value = NULL) {
+	public function select($key = NULL, $value = NULL) {
 		$query = "SELECT * FROM {$this->_table}";
 		if (isset($key)) {
 			if (!in_array($key, $this->_fields) || !isset($value)) {
@@ -208,7 +208,7 @@ class PDOClass {
 
 	// Gets an element selected by the class' key
 	public function get($id) {
-		$objects = $this->find($this->_key, $id);
+		$objects = $this->select($this->_key, $id);
 		if ($objects === false || count($objects) == 0) {
 			return false;
 		}
