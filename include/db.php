@@ -61,7 +61,7 @@ class PDOStatementLog extends \PDOStatement {
 // XXX Support for tables without a _key field? I.e. m-n relations tables do have more than one key
 class PDOClass {
 
-	private $_statement;	// Last PDOStatement instance
+	protected $_statement;	// Last PDOStatement instance
 	protected $_pdo;	// PDO instance
 
 	protected $_table;	// Override 
@@ -93,10 +93,10 @@ class PDOClass {
 
 	// Runs the given SQL binded with the variables in the array, and returns an associative array with the results
 	// Used to extend select()
-	protected function query($sql, array $vars = null, $remap_keys = false) {
+	protected function query($sql, array $vars = null, $remap_keys = false, $do_fetch = true) {
 		if (!$this->_pdo) {
-                        return false;
-                }
+			return false;
+		}
 		$this->_statement = $this->_pdo->prepare($sql);
 		if (!$this->_statement) {
 			return false;
@@ -109,16 +109,20 @@ class PDOClass {
 		if ($this->_statement->execute() === false) {
 			return false;
 		}
-		$results = $this->_statement->fetchAll(\PDO::FETCH_CLASS, get_class($this), [$this->_pdo]);
-		if ($remap_keys) {
-			$results2 = array();
-			foreach ($results as $result) {
-				$key = $result->{$result->_key};
-				$results2[$key] = $result;
+		if ($do_fetch) {	
+			$results = $this->_statement->fetchAll(\PDO::FETCH_CLASS, get_class($this), [$this->_pdo]);
+			if ($remap_keys) {
+				$results2 = array();
+				foreach ($results as $result) {
+					$key = $result->{$result->_key};
+					$results2[$key] = $result;
+				}
+				$results = $results2;
 			}
-			$results = $results2;
+			return $results;
+		} else {
+			return true;
 		}
-		return $results;
 	}
 
 	public function __construct(\PDO $pdo) {
