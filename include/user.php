@@ -40,10 +40,11 @@ class User extends PDOClass {
 		return isset($_SESSION[User::SESSION_VARNAME]);
 	}
 
-	private function set_cookies($email, $password) {
+	// Note that the one in the cookie is the encrypted password
+	private function set_cookies() {
 		// Keep for 10 days
-		setcookie(User::COOKIE_USER, $email, time()+User::COOKIE_TIME, '/', null, false, true);
-		setcookie(User::COOKIE_PASSWD, $password, time()+User::COOKIE_TIME, '/', null, false, true);
+		setcookie(User::COOKIE_USER, $this->email, time()+User::COOKIE_TIME, '/', null, false, true);
+		setcookie(User::COOKIE_PASSWD, $this->password, time()+User::COOKIE_TIME, '/', null, false, true);
 	}
 
 	private function clean_cookies() {
@@ -142,7 +143,7 @@ class User extends PDOClass {
 
 			$this->put_user_in_session();
 			if ($set_cookies) {	
-				$this->set_cookies($this->email, $this->password);	// Note that it's the encrypted passwd
+				$this->set_cookies();
 			}
 		}
 		return User::OK;
