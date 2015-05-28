@@ -56,7 +56,6 @@ class PDOStatementLog extends \PDOStatement {
 
 // Limited O/R mapping for CRUD operations
 // XXX unify select() and get()?
-// TODO Add "...WHERE bla IN ()" support when sent an array of values
 // TODO better support for queries with NULL values
 // XXX Support for tables without a _key field? I.e. m-n relations tables do have more than one key
 class PDOClass {
@@ -189,25 +188,46 @@ class PDOClass {
 		return $this->_statement->execute([':value' => $key_value]);
 	}
 
-	public function select($key = NULL, $value = NULL) {
+	// Does a SELECT with the fields of the object, combined by an AND operator
+	// TODO deal with values that can be NULL
+	// TODO Add "...WHERE bla IN ()" support when sent an array of values
+	public function select($fetch_first = false) {
 		$query = "SELECT * FROM {$this->_table}";
-		if (isset($key)) {
-			if (!in_array($key, $this->_fields) || !isset($value)) {
-				return false;
+		$first_field = true;
+		$query_values = array();
+		foreach ($this->_fields as $field) {
+			if (isset($this->$field)) {
+				if ($first_field) {
+					$query .= ' WHERE';
+					$first_field = false;
+				} else {
+					$query .= ' AND'; 
+				}
+				$query .= " $field = :$field";
+				$query_values[$field] = $this->$field;
 			}
-			$query .= " WHERE $key = :value";
 		}
-		return $this->query($query, ["value" => $value]);
+		$results = $this->query($query, $query_values);
+		if ($results === false) {
+			return false;
+		} 
+		if ($fetch_first) {
+			if (count($results) > 0) {
+				$this->copy($results[0]);
+			} else {	
+				return false;	// Asked to fetch first, but no results
+			}
+		}
+		return $results;
 	}
 
 	// Gets an element selected by the class' key
 	public function get($id) {
-		$objects = $this->select($this->_key, $id);
-		if ($objects === false || count($objects) == 0) {
-			return false;
+		foreach ($this->_fields as $field) {	// Cleanup other fields before the select
+			unset($this->$field);
 		}
-		$this->copy($objects[0]);
-		return true;
+		$this->{$this->_key} = $id;
+		return $this->select(true);
 	}
 
 	public function copy($object) {

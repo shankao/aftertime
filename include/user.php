@@ -131,17 +131,9 @@ class User extends PDOClass {
 			}
 
 			$this->clean_cookies();
-			$user = $this->select('email', $email);
-			if (!$user) {
+			$this->email = $email;
+			if ($this->select(true) === false) {
 				return User::NO_USER_FOUND;
-			}
-			$user = $user[0];
-
-			// Copy the found user's fields on top of this object
-			foreach ($this->_fields as $var) {
-				if (isset($user->$var)) {
-					$this->$var = $user->$var;
-				}
 			}
 
 			if (!$this->check_password($password, $this->password, $password_is_encrypted)) {
