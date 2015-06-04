@@ -102,7 +102,18 @@ class PDOClass {
 		}
 		if ($vars) {
 			foreach ($vars as $name => $value) {
-				$this->_statement->bindValue(":$name", $value);
+				if (is_array($value)) {
+					if (count($value) == 0) {
+						continue;
+					}
+					$i = 0;
+					foreach ($value as $val) {
+						$this->_statement->bindValue(":$name"."_$i", $val);
+						$i++;
+					}
+				} else {
+					$this->_statement->bindValue(":$name", $value);
+				}
 			}
 		}
 		if ($this->_statement->execute() === false) {
@@ -190,7 +201,6 @@ class PDOClass {
 
 	// Does a SELECT with the fields of the object, combined by an AND operator
 	// TODO deal with values that can be NULL
-	// TODO Add "...WHERE bla IN ()" support when sent an array of values
 	public function select($fetch_first = false) {
 		$query = "SELECT * FROM {$this->_table}";
 		$first_field = true;
@@ -201,9 +211,24 @@ class PDOClass {
 					$query .= ' WHERE';
 					$first_field = false;
 				} else {
-					$query .= ' AND'; 
+					$query .= ' AND';
 				}
-				$query .= " $field = :$field";
+				$query .= " $field";
+				if (is_array($this->$field)) {
+					if (count($this->$field) == 0) {
+						continue;
+					}
+					$query .= ' IN (';
+					for ($i = 0; $i < count($this->$field); $i++) {
+						if ($i > 0) {
+							$query .= ', ';
+						}
+						$query .= ":$field"."_$i";
+					}
+					$query .= ')';
+				} else {
+					$query .= " = :$field";
+				}
 				$query_values[$field] = $this->$field;
 			}
 		}
