@@ -84,7 +84,7 @@ class PDOClass {
 			}
 			$query_fields .= $var;
 			$query_values_place .= ":$var";
-			$query_values[":$var"] = $this->$var;
+			$query_values["$var"] = $this->$var;
 			$update_values .= "$var = :$var";
 		}
 		return array($query_fields, $query_values_place, $query_values, $update_values);
@@ -147,56 +147,43 @@ class PDOClass {
 			return false;
 		}
 		list($query_fields, $query_values_place, $query_values) = $this->get_query_parts();
-		$query = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
-		$this->_statement = $this->_pdo->prepare($query);
-		if (!$this->_statement) {
+		$sql = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
+		if ($this->query($sql, $query_values, false) === false) {
 			return false;
-		} else {
-			if ($this->_statement->execute($query_values) === false) {
-				return false;
-			} else {
-				if (!isset($this->{$this->_key})) {
-					$this->{$this->_key} = $this->_pdo->lastInsertId();
-				}
-				return true;
-			}
 		}
+		if (!isset($this->{$this->_key})) {
+			$this->{$this->_key} = $this->_pdo->lastInsertId();
+		}
+		return true;
 	}
 
 	public function update() {
 		if (!$this->_pdo) {
 			return false;
 		}
-		$key = $this->_key;
-		if (!isset($this->$key)) {
+		$key_name = $this->_key;
+		if (!isset($this->$key_name)) {
 			return false;
 		}
 		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
-		$query = "UPDATE {$this->_table} SET $update_values WHERE {$this->_key} = :{$this->_key}";
-		$this->_statement = $this->_pdo->prepare($query);
-		if (!$this->_statement) {
-			return false;
-                }
-		return $this->_statement->execute($query_values);
+		$sql = "UPDATE {$this->_table} SET $update_values WHERE $key_name = :$key_name";
+		return $this->query($sql, $query_values, false);
 	}
 
+	// Supports to indicate the key value in 2 different ways
 	function delete($key_value = NULL) {
 		if (!$this->_pdo) {
                         return false;
                 }
-		$keyname = $this->_key;
+		$key_name = $this->_key;
 		if ($key_value === NULL) {
-			if (!isset($this->$keyname)) {
+			if (!isset($this->$key_name)) {
 				return null;
 			}
-			$key_value = $this->$keyname;
+			$key_value = $this->$key_name;
 		}
-		$query = "DELETE FROM {$this->_table} WHERE $keyname = :value";
-		$this->_statement = $this->_pdo->prepare($query);
-		if (!$this->_statement) {
-			return false;
-                }
-		return $this->_statement->execute([':value' => $key_value]);
+		$sql = "DELETE FROM {$this->_table} WHERE $key_name = :$key_name";
+		return $this->query($sql, [$key_name => $key_value], false);
 	}
 
 	// Does a SELECT with the fields of the object, combined by an AND operator
