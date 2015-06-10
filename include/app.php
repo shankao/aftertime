@@ -194,7 +194,7 @@ abstract class app {
 			$vars['errors'] = $this->errors;
 		}
 		if ($this->user->is_user_logged()) {
-			$vars['user'] = $this->user->toArray();
+			$vars['user'] = (array)$this->user;
 		}
 		$vars['config'] = $config;
 		$vars['debug'] = $this->debug();
