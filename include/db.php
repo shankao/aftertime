@@ -133,15 +133,6 @@ class PDOClass {
 		$this->_pdo = $pdo;
 	}
 
-	public function toArray() {
-		foreach ($this->_fields as $var) {
-			if (isset($this->$var)) {
-				$result[$var] = $this->$var;
-			}
-		}
-		return $result;
-	}
-	
 	public function insert() {
 		if (!$this->_pdo) {
 			return false;
