@@ -90,6 +90,14 @@ class PDOClass {
 		return array($query_fields, $query_values_place, $query_values, $update_values);
 	}
 
+	private function copy($object) {
+		foreach ($this->_fields as $var) {
+			if (isset($object->$var)) {
+				$this->$var = $object->$var;
+			}
+		}
+	}
+
 	// Runs the given SQL binded with the variables in the array, and returns an associative array with the results
 	// Used to extend select()
 	protected function query($sql, array $vars = null, $do_fetch = true) {
@@ -231,14 +239,6 @@ class PDOClass {
 		}
 		$this->{$this->_key} = $id;
 		return $this->select(true);
-	}
-
-	public function copy($object) {
-		foreach ($this->_fields as $var) {
-			if (isset($object->$var)) {
-				$this->$var = $object->$var;
-			}
-		}
 	}
 
 	public function errorInfo() {
