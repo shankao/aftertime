@@ -21,6 +21,8 @@ class User extends PDOClass {
 	protected $_fields = ['user_id', 'email', 'password'];
 	protected $_key = 'user_id';
 
+	public $user_id, $email, $password;
+
 	private function get_user_from_session() {
 		$sdata = unserialize($_SESSION[User::SESSION_VARNAME]);
 		foreach ($sdata as $name => $value) {
@@ -29,7 +31,10 @@ class User extends PDOClass {
 	}
 
 	private function put_user_in_session() {
-		$_SESSION[User::SESSION_VARNAME] = serialize($this->toArray());
+		foreach ($this->_fields as $field) {
+			$user_array[$field] = $this->$field;
+		}
+		$_SESSION[User::SESSION_VARNAME] = serialize($user_array);
 	}
 
 	private function clean_user_session() {
