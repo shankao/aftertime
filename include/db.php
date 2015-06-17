@@ -169,20 +169,16 @@ class PDOClass {
 		return $this->query($sql, $query_values, false);
 	}
 
-	// Supports to indicate the key value in 2 different ways
-	function delete($key_value = NULL) {
+	public function delete() {
 		if (!$this->_pdo) {
                         return false;
                 }
 		$key_name = $this->_key;
-		if ($key_value === NULL) {
-			if (!isset($this->$key_name)) {
-				return null;
-			}
-			$key_value = $this->$key_name;
+		if (!isset($this->$key_name)) {
+			return null;
 		}
 		$sql = "DELETE FROM {$this->_table} WHERE $key_name = :$key_name";
-		return $this->query($sql, [$key_name => $key_value], false);
+		return $this->query($sql, [$key_name => $this->$key_name], false);
 	}
 
 	// Does a SELECT with the fields of the object, combined by an AND operator
