@@ -32,7 +32,7 @@ class PDOStatementLog extends \PDOStatement {
 		if ($params) {
 			$query = str_replace(array_keys($params), $params, $query);
 		}
-//		log_entry("PDO query: $query");		// XXX too verbose
+		log_entry("PDO query: $query");		// XXX too verbose
 		$result = parent::execute($params);
 		if ($this->errorCode() != \PDO::ERR_NONE) {
                         log_entry('PDO ERROR: '.$this->errorInfo()[2].' running: '.$query);
