@@ -90,7 +90,6 @@ class PDOClass {
 	}
 
 	// Runs the given SQL binded with the variables in the array, and returns an associative array with the results
-	// Used to extend select()
 	protected function query($sql, array $vars = null, $do_fetch = true) {
 		if (!$this->_pdo) {
 			return false;
