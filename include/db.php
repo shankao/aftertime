@@ -258,10 +258,13 @@ function init_db() {
 
 	try {
 		$debug = true;	// XXX
+		$options = [
+			\PDO::ATTR_EMULATE_PREPARES => false
+		];
 		if ($debug) {
-			return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password']);
+			return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password'], $options);
 		} else {
-			return new \PDO($dsn, $dbconfig['user'], $dbconfig['password']);
+			return new \PDO($dsn, $dbconfig['user'], $dbconfig['password'], $options);
 		}
 	} catch (\PDOException $e) {
 		log_entry("PDO Exception: ".$e->getMessage());
