@@ -40,14 +40,6 @@ class PDOStatementLog extends \PDOStatement {
 		return $result;
 	}
 
-	public function prepare (string $statement, array $driver_options = array()) {
-		$result = parent::prepare($statement, $driver_options);
-		if ($this->errorCode() != \PDO::ERR_NONE) {
-                        log_entry('PDO ERROR: '.$this->errorInfo()[2].' preparing: '.$statement);
-                }
-		return $result;
-	}
-
 	public function bindValue ($parameter, $value, $data_type = \PDO::PARAM_STR) {
 		$this->binds[$parameter] = $value;
 		return parent::bindValue($parameter, $value, $data_type);
@@ -106,6 +98,9 @@ class PDOClass {
 		}
 		$this->_statement = $this->_pdo->prepare($sql);
 		if (!$this->_statement) {
+			if ($this->_pdo->errorCode() != \PDO::ERR_NONE) {
+				log_entry('PDO ERROR: '.$this->_pdo->errorInfo()[2].' preparing: '.$sql);
+			}
 			return false;
 		}
 		if ($vars) {
