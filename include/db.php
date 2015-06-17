@@ -47,7 +47,6 @@ class PDOStatementLog extends \PDOStatement {
 }
 
 // Limited O/R mapping for CRUD operations
-// XXX unify select() and get()?
 // TODO better support for queries with NULL values
 // XXX Support for tables without a _key field? I.e. m-n relations tables do have more than one key
 class PDOClass {
@@ -222,15 +221,6 @@ class PDOClass {
 			}
 		}
 		return $results;
-	}
-
-	// Gets an element selected by the class' key
-	public function get($id) {
-		foreach ($this->_fields as $field) {	// Cleanup other fields before the select
-			unset($this->$field);
-		}
-		$this->{$this->_key} = $id;
-		return $this->select(true);
 	}
 
 	public function errorInfo() {
