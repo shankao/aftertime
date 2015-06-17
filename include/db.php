@@ -165,7 +165,8 @@ class PDOClass {
 			return false;
 		}
 		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
-		$sql = "UPDATE {$this->_table} SET $update_values WHERE $key_name = :$key_name";
+		$sql = "UPDATE {$this->_table} SET $update_values WHERE $key_name = :key_$key_name";
+		$query_values["key_$key_name"] = $this->$key_name;
 		return $this->query($sql, $query_values, false);
 	}
 
