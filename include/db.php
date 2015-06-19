@@ -30,7 +30,21 @@ class PDOStatementLog extends \PDOStatement {
 			$params = $this->binds;
 		}
 		if ($params) {
-			$query = str_replace(array_keys($params), $params, $query);
+			$params_print = array_map(
+				function($value) {
+					if (is_null($value)) {
+						return 'NULL';
+					} else if ($value === false) {
+						return 'false';
+					} else if ($value === true) {
+						return 'true';
+					} else {
+						return $value;
+					}
+				},
+				$params
+			);
+			$query = str_replace(array_keys($params_print), $params_print, $query);
 		}
 //		log_entry("PDO query: $query");		// XXX too verbose
 		$result = parent::execute($params);
@@ -47,7 +61,6 @@ class PDOStatementLog extends \PDOStatement {
 }
 
 // Limited O/R mapping for CRUD operations
-// TODO better support for queries with NULL values
 // XXX Support for tables without a _key field? I.e. m-n relations tables do have more than one key
 class PDOClass {
 
@@ -65,6 +78,9 @@ class PDOClass {
 		foreach ($this->_fields as $var) {
 			if (!isset($this->$var)) {
 				continue;
+			}
+			if ($this->$var === 'NULL') {
+				$this->$var = null;
 			}
 			if (!$first) {
 				$query_fields .= ', ';
@@ -89,6 +105,18 @@ class PDOClass {
 		}
 	}
 
+	private function get_pdo_type($value) {
+		if (is_null($value)) {
+			return \PDO::PARAM_NULL;
+		} else if (is_bool($value)) {
+			return \PDO::PARAM_BOOL;
+		} else if (is_integer($value)) {
+			return \PDO::PARAM_INT;
+		} else {
+			return \PDO::PARAM_STR;
+		}
+	}
+
 	// Runs the given SQL binded with the variables in the array, and returns an associative array with the results
 	protected function query($sql, array $vars = null, $do_fetch = true) {
 		if (!$this->_pdo) {
@@ -109,11 +137,11 @@ class PDOClass {
 					}
 					$i = 0;
 					foreach ($value as $val) {
-						$this->_statement->bindValue(":$name"."_$i", $val);
+						$this->_statement->bindValue(":$name"."_$i", $val, $this->get_pdo_type($val));
 						$i++;
 					}
 				} else {
-					$this->_statement->bindValue(":$name", $value);
+					$this->_statement->bindValue(":$name", $value, $this->get_pdo_type($value));
 				}
 			}
 		}
