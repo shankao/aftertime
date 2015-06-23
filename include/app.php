@@ -236,7 +236,7 @@ abstract class app {
 
 	public function has_error($code = null) {
 		if ($code === null) {
-			return count($this->errors);
+			return count($this->errors) > 0? true : false;
 		} else {
 			return in_array($code, $this->errors)? true : false;
 		}
