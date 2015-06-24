@@ -37,6 +37,11 @@ final class Log {
 				if ($config && isset($config['logs'])) {
 					$logs_folder = getcwd().'/'.$config['logs'];
 				} else {
+					if (!isset($config['site'])) {
+						self::out('No site entry found in config');
+						self::$muted = true;
+						return false;
+					}
 					$logs_folder = sys_get_temp_dir()."/{$config['site']}/logs";
 				}
 				if (!create_file($logs_folder, true, 0777)) {
@@ -85,7 +90,10 @@ final class Log {
 		$time = date('H:i:s');
 		$caller = self::$caller? ' '.self::$caller : '';
 		if (!self::$muted) {
-			error_log ("$time$caller $text\n", 3, self::log_file());
+			$filename = self::log_file();
+			if ($filename !== false) {
+				error_log ("$time$caller $text\n", 3, $filename);
+			}
 		}
 	}
 

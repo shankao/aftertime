@@ -258,6 +258,7 @@ class PDOClass {
 function init_db() {
 	$config = Config::get();
 	if (!isset($config['database'])) {
+		log_entry('No database entry found in config');
 		return false;
 	}
 	$dbconfig = $config['database'];
