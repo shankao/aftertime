@@ -64,17 +64,13 @@ final class Config {
 		$error = false;
 		if (is_readable($file)) {
 			if (($contents = file_get_contents($file)) !== false) {
-				if (function_exists('json_decode')) {	// XXX i.e. Ubuntu needs php5-json package installed
-					$fileconf = json_decode($contents, true);
-					if (!$fileconf) {
-						if (function_exists('json_last_error_msg')) {
-							$error = json_last_error_msg();
-						} else {
-							$error = 'Error in json_decode()';
-						}
+				$fileconf = json_decode($contents, true);
+				if (!$fileconf) {
+					if (function_exists('json_last_error_msg')) {	// PHP 5 >= 5.5.0
+						$error = json_last_error_msg();
+					} else {
+						$error = 'Error in json_decode()';
 					}
-				} else {
-					$error = 'json_decode() function is not available';
 				}
 			} else {
 				$error = 'Cannot read file';
