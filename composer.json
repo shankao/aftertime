@@ -1,6 +1,8 @@
 {
 	"name": "aftertime/aftertime",
 	"require": {
+		"php": ">=5.3",
+		"ext-json": "*",
 		"yiisoft/jquery": "1.9.1"
 	}
 }

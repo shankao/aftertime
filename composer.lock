@@ -1,10 +1,11 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "bb3537d2838d3499a4d11e3b59fedd7c",
+    "hash": "739fb01fe99ba5dfcd42966f0c1e7f32",
+    "content-hash": "2fd30e4598054783bcaa361f7d138933",
     "packages": [
         {
             "name": "yiisoft/jquery",
@@ -37,6 +38,9 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=5.3",
+        "ext-json": "*"
+    },
     "platform-dev": []
 }
