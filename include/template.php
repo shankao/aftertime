@@ -1,7 +1,7 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/log.php';
+require_once __DIR__.'/log_entry.php';
 
 // Very simple template class
 class Template {
@@ -58,10 +58,4 @@ class Template {
 		return $result;
         }
 }
-
-// One-liner for lazyness
-function template_render($filename, array $vars = null, $logging = true) {
-	$t = new Template($filename, $vars, $logging);
-	return $t->render();
-}  
 ?>

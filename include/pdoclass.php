@@ -1,64 +1,7 @@
 <?php
 namespace Aftertime;
 
-/* 
-Handy DB related functions 
-*/
-require_once __DIR__.'/config.php';
 require_once __DIR__.'/log.php';
-
-class PDOLog extends \PDO {
-	function __construct($dsn, $username='', $password='', $driver_options=array()) {
-		parent::__construct ($dsn, $username, $password, $driver_options);
-		$this->setAttribute (\PDO::ATTR_STATEMENT_CLASS, array('Aftertime\PDOStatementLog', array($this)));
-	}
-}
-
-// TODO add optional per-query logging
-// TODO add optional per-query benchmarking
-class PDOStatementLog extends \PDOStatement {
-	protected $dbh;
-	private $binds = array();
-
-	protected function __construct($dbh) {
-		$this->dbh = $dbh;
-	}
-
-	public function execute (array $params = NULL) {
-		$query = $this->queryString;
-		if (!$params && !empty($this->binds)) {
-			$params = $this->binds;
-		}
-		if ($params) {
-			$params_print = array_map(
-				function($value) {
-					if (is_null($value)) {
-						return 'NULL';
-					} else if ($value === false) {
-						return 'false';
-					} else if ($value === true) {
-						return 'true';
-					} else {
-						return $value;
-					}
-				},
-				$params
-			);
-			$query = str_replace(array_keys($params_print), $params_print, $query);
-		}
-//		log_entry("PDO query: $query");		// XXX too verbose
-		$result = parent::execute($params);
-		if ($this->errorCode() != \PDO::ERR_NONE) {
-                        log_entry('PDO ERROR: '.$this->errorInfo()[2].' running: '.$query);
-                }
-		return $result;
-	}
-
-	public function bindValue ($parameter, $value, $data_type = \PDO::PARAM_STR) {
-		$this->binds[$parameter] = $value;
-		return parent::bindValue($parameter, $value, $data_type);
-	}
-}
 
 // Limited O/R mapping for CRUD operations
 // XXX Support for tables without a _key field? I.e. m-n relations tables do have more than one key
@@ -252,33 +195,6 @@ class PDOClass {
 
 	public function errorInfo() {
 		return $this->_statement->errorInfo();
-	}
-}
-
-function init_db() {
-	$config = Config::get();
-	if (!isset($config['database'])) {
-		log_entry('No database entry found in config');
-		return false;
-	}
-	$dbconfig = $config['database'];
-
-	// Note we force a UTF8 connection
-	$dsn = "{$dbconfig['protocol']}:host={$dbconfig['host']};dbname={$dbconfig['dbname']};charset=utf8";
-
-	try {
-		$debug = true;	// XXX
-		$options = [
-			\PDO::ATTR_EMULATE_PREPARES => false
-		];
-		if ($debug) {
-			return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password'], $options);
-		} else {
-			return new \PDO($dsn, $dbconfig['user'], $dbconfig['password'], $options);
-		}
-	} catch (\PDOException $e) {
-		log_entry("PDO Exception: ".$e->getMessage());
-		return false;
 	}
 }
 ?>

@@ -4,8 +4,9 @@ namespace Aftertime;
 require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/config.php';
 require_once __DIR__.'/log.php';
-require_once __DIR__.'/app.php';
-require_once __DIR__.'/template.php';
+require_once __DIR__.'/log_entry.php';
+require_once __DIR__.'/appfactory.php';
+require_once __DIR__.'/template_render.php';
 
 class Aftertime {
 

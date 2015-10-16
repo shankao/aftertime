@@ -1,16 +1,8 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/helpers.php';
+require_once __DIR__.'/create_file.php';
 require_once __DIR__.'/config.php';
-
-function log_entry ($text, $sizelimit = 2000) {
-	return Log::log_entry ($text, $sizelimit);
-}
-
-function log_entry_db ($class, $message, $logtype, $level) {
-	return Log::log_entry_db ($class, $message, $logtype, $level);
-}
 
 final class Log {
 	static private $caller = '';

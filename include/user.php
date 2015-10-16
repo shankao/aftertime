@@ -1,6 +1,9 @@
 <?php
 namespace Aftertime;
 
+require_once __DIR__.'/pdoclass.php';
+require_once __DIR__.'/config.php';
+
 /*
    User management 
    It requires a PDO connection up and running with a table called 'users'

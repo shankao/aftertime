@@ -2,12 +2,7 @@
 namespace Aftertime;
 
 /* Helper functions */
-require_once __DIR__.'/log.php';
-// TODO: move where they better correspond
-
-function html_value($var) {
-	return nl2br(htmlspecialchars($var));
-}
+require_once __DIR__.'/log_entry.php';
 
 // Checks write permissions if the file exists, or creates it of it doesn't
 // Same thing for folders
@@ -19,8 +14,8 @@ function create_file($filename, $is_folder = false, $mode = false) {
 		}
 
 		$oldumask = umask(0);
-		if ($is_folder && !@mkdir($filename, $mode, true)) {
-			$result = false;
+		if ($is_folder) { 
+			$result = mkdir($filename, $mode, true);
 		} else if (!@touch($filename)) {
 			$result = false;
 		} else {	// No folder, touch() OK

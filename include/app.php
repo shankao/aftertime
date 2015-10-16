@@ -1,90 +1,13 @@
 <?php
 namespace Aftertime;
 
+require_once __DIR__.'/log_entry.php';
 require_once __DIR__.'/log.php';
 require_once __DIR__.'/config.php';
-require_once __DIR__.'/db.php';
-require_once __DIR__.'/helpers.php';
+require_once __DIR__.'/init_db.php';
 require_once __DIR__.'/user.php';
 require_once __DIR__.'/validate.php';
 require_once __DIR__.'/template.php';
-
-// Returns an App object chosen from the config and request params
-final class appFactory {
-
-	private function check_url() {
-		// Log and check the request URL
-		$url = $_SERVER['PHP_SELF'];
-		$url .= !empty($_SERVER['QUERY_STRING'])? "?{$_SERVER['QUERY_STRING']}" : '';
-		$from = "{$_SERVER['REMOTE_ADDR']}";
-		if (preg_match('/^\/(index\.php)(\?.*)?$/', $url) === 0) {
-			log_entry("REQUEST FILTERED: $url from $from");
-			return false;
-		} else {
-			log_entry("REQUEST: $url from $from");
-			return true;
-		}
-	}
-
-	public function build($request) {
-	
-		if (self::check_url() === false) {
-			return null;
-		}
-
-		// app default and check
-		$config = Config::get();
-		if (empty($request['app'])) {
-			if (!isset($config['init_app'])) {
-				log_entry ("ERROR: init_app not set");
-				return null;
-			} else {
-				$request['app'] = $config['init_app'];
-			}
-		}
-                $app_config = Config::get("apps.{$request['app']}");
-		if ($app_config === false) {
-			log_entry("ERROR: application '{$request['app']}' invalid");
-			return null;
-		}
-		log_entry("Checking 'app' for '{$request['app']}': OK");
-
-		// page default and checks
-		if (empty($request['page'])) {
-			if (!isset($app_config['init_page'])) {
-				log_entry ("ERROR: init_page not set");
-				return null;
-			} else {
-				$request['page'] = $app_config['init_page'];
-			}
-		}
-                if (!isset($app_config['pages'][$request['page']])) {
-			log_entry ("ERROR: page '{$request['page']}' invalid");
-                        return null;
-                }
-		if (isset($app_config['class_location'])) {
-			$app_code_file = "{$config['site']}/{$app_config['class_location']}";
-		} else {
-			$app_code_file = "{$config['site']}/{$request['app']}/code.php";
-		}
-		if (!is_readable($app_code_file)) {
-			log_entry ("Cannot load the app's code at $app_code_file");
-			return null;
-		}
-		require_once $app_code_file;
-		if (isset($app_config['class_name'])) {
-			$app_class_name = $app_config['class_name'];
-		} else {
-			$app_class_name = $request['app'];
-		}
-		log_entry("Checking 'page' for '{$request['page']}': OK");
-
-		log_entry ("Creating app $app_class_name");
-		$app = new $app_class_name;
-		$app->params = $request;
-		return $app;
-	}
-}
 
 abstract class app {
 
@@ -96,6 +19,7 @@ abstract class app {
 	public $template;		// Rendering page
 	public $db;			// Database connection
 
+	// fixme db_error() does not exist anymore and this would fail badly
 	protected function db_error() {
 		$error = db_error();	// That's the function in include/helpers.php
 		if ($error) {
