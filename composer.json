@@ -1,4 +1,5 @@
 {
+	"name": "aftertime/aftertime",
 	"require": {
 		"yiisoft/jquery": "1.9.1"
 	}
