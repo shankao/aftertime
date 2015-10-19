@@ -1,7 +1,7 @@
 <?php /*
 Returns the site's configuration
 */
-require_once __DIR__.'/../include/config.php';
+require_once __DIR__.'/../vendor/autoload.php';
 if (aftertime_init(false, '../..') === false) {
 	echo Config::init_log();
 	exit (-1);

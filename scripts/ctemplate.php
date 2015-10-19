@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__.'/../include/template.php';
-require_once __DIR__.'/../include/config.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
 $opts = getopt('t:');
 if (!isset($opts['t'])) {
