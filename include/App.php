@@ -1,14 +1,6 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/log_entry.php';
-require_once __DIR__.'/log.php';
-require_once __DIR__.'/config.php';
-require_once __DIR__.'/init_db.php';
-require_once __DIR__.'/user.php';
-require_once __DIR__.'/validate.php';
-require_once __DIR__.'/template.php';
-
 abstract class app {
 
 	private $debug = false;

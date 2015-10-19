@@ -4,9 +4,6 @@ namespace Aftertime;
 /* 
 Handy DB related functions 
 */
-require_once __DIR__.'/config.php';
-require_once __DIR__.'/log.php';
-require_once __DIR__.'/pdolog.php';
 
 function init_db() {
 	$config = Config::get();

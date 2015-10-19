@@ -1,12 +1,8 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/log_entry.php';
-require_once __DIR__.'/app.php';
-require_once __DIR__.'/config.php';
-
 // Returns an App object chosen from the config and request params
-final class appFactory {
+final class AppFactory {
 
 	private function check_url() {
 		// Log and check the request URL

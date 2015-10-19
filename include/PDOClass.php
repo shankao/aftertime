@@ -1,8 +1,6 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/log.php';
-
 // Limited O/R mapping for CRUD operations
 // XXX Support for tables without a _key field? I.e. m-n relations tables do have more than one key
 class PDOClass {

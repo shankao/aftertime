@@ -1,8 +1,6 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/array_merge_recursive_distinct.php';
-
 // TODO Keep the config cached in memory between PHP calls somehow
 final class Config {
 	static private $config = null;

@@ -1,9 +1,6 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/create_file.php';
-require_once __DIR__.'/config.php';
-
 final class Log {
 	static private $caller = '';
 	static private $slow_query_log = true, $slow_query_time = 2;	// In seconds

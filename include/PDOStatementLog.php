@@ -1,8 +1,6 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/log.php';
-
 // TODO add optional per-query logging
 // TODO add optional per-query benchmarking
 class PDOStatementLog extends \PDOStatement {

@@ -2,7 +2,6 @@
 namespace Aftertime;
 
 /* Helper functions */
-require_once __DIR__.'/log_entry.php';
 
 // Checks write permissions if the file exists, or creates it of it doesn't
 // Same thing for folders

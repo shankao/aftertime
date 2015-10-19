@@ -1,8 +1,6 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/log.php';
-
 class Validate {
 	private $errors = array();
 

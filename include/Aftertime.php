@@ -2,11 +2,6 @@
 namespace Aftertime;
 
 require_once __DIR__.'/../vendor/autoload.php';
-require_once __DIR__.'/config.php';
-require_once __DIR__.'/log.php';
-require_once __DIR__.'/log_entry.php';
-require_once __DIR__.'/appfactory.php';
-require_once __DIR__.'/template_render.php';
 
 class Aftertime {
 
@@ -65,6 +60,9 @@ class Aftertime {
 	}
 
 	public function __destruct () {
+		// As of PHP 5.4.0, REQUEST_TIME_FLOAT is available in the $_SERVER superglobal array.
+		// It contains the timestamp of the start of the request with microsecond precision.
+		//	$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
 		log_entry ('=== Page generation time was ' . (microtime(true) - $this->time_start) . ' ===');
 	}
 
@@ -72,7 +70,7 @@ class Aftertime {
 		if (!$this->is_ready) {	// Something failed on the constructor
 			return false;	
 		}
-		$app_factory = new appFactory;
+		$app_factory = new AppFactory;
 		$this->app = $app_factory->build($_REQUEST);
 		if ($this->app) {
 			$this->app->debug($this->debug());

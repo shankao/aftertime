@@ -1,5 +1,19 @@
 {
 	"name": "aftertime/aftertime",
+	"autoload": {
+		"psr-4": {
+			"Aftertime\\": "include/"
+		},
+		"files": [
+			"include/array_merge_recursive_distinct.php",
+			"include/log_entry_db.php",
+			"include/html_value.php",
+			"include/log_entry.php",
+			"include/template_render.php",
+			"include/create_file.php",
+			"include/init_db.php"
+		]
+	},
 	"require": {
 		"php": ">=5.3.7",
 		"ext-json": "*",

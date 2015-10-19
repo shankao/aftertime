@@ -1,8 +1,6 @@
 <?php
 namespace Aftertime;
 
-require_once __DIR__.'/log_entry.php';
-
 // Very simple template class
 class Template {
 
