@@ -69,7 +69,7 @@ final class Config {
 					if (function_exists('json_last_error_msg')) {	// PHP 5 >= 5.5.0
 						$error = json_last_error_msg();
 					} else {
-						$error = 'Error in json_decode()';
+						$error = 'Error in json_decode(): code '.json_last_error();
 					}
 				}
 			} else {
