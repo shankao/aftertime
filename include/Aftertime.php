@@ -48,7 +48,7 @@ class Aftertime {
 
 			ob_start(null, 4096);
 			ini_set ('arg_separator.output', '&amp;');
-			if (!session_start()) {
+			if (session_start() === false) {
 				log_entry('ERROR: Cannot start session');
 				return;
 			}
