@@ -43,7 +43,7 @@ class Aftertime {
 			ini_set ('date.timezone', $config['timezone']);
 		}
 
-		if ($this->init_log() === false || 1) {
+		if ($this->init_log() === false) {
 			if ($this->is_web() && $this->debug === false) {
 				echo 'Logging error';	// Don't output much on web
 			} else {
