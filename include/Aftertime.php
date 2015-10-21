@@ -30,9 +30,7 @@ class Aftertime {
 		}
 		$config = Config::init($config_folder);
 		if ($config === false) {
-			if ($this->debug) {
-				echo nl2br(Config::init_log());
-			}
+			$this->log_debug(nl2br(Config::init_log()));
 			return;
 		} else {
 			if (is_bool($config['debug'])) {
@@ -44,9 +42,13 @@ class Aftertime {
 			}
 			
 			if ($this->init_log() === false) {
+				$this->log_debug('No \'logs\' key present in the config');
 				return;
 			}
-			log_entry("Debug mode: {$this->debug}");
+			if ($this->debug) {
+				log_entry("Debug mode: {$this->debug}");
+				log_entry(Config::init_log());
+			}
 
 			if ($this->is_web() && $this->init_web() === false) {
 				return;
@@ -75,12 +77,10 @@ class Aftertime {
 		// Set up logs folder from config
 		$config = Config::get();
 		if (!isset($config['logs'])) {
-			$this->log_debug('No \'logs\' key present in the config');
 			return false;
 		}
 		Log::log_file($config['logs']);	// This initializes the logs
 
-		log_entry(Config::init_log());
 		ini_set ('error_log', Log::log_file());
 		set_error_handler(array('Aftertime\Log', 'php_errors'));
 		set_exception_handler(array('Aftertime\Log', 'php_exceptions'));
