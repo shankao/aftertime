@@ -23,11 +23,6 @@ class Aftertime {
 
 	public function __construct ($config_folder) {
 		$this->time_start = microtime(true);
-		if ($this->debug) {
-			ini_set ('error_reporting', 'E_ALL');
-		} else {
-			ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
-		}
 		$config = Config::init($config_folder);
 		if ($config === false) {
 			$this->log_debug(nl2br(Config::init_log()));
@@ -35,6 +30,12 @@ class Aftertime {
 		} else {
 			if (is_bool($config['debug'])) {
 				$this->debug = $config['debug'];
+			}
+
+			if ($this->debug) {
+				ini_set ('error_reporting', 'E_ALL');
+			} else {
+				ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
 			}
 
 			if (isset($config['timezone'])) {
