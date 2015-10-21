@@ -29,7 +29,7 @@ class Aftertime {
 			return;
 		}
 
-		if (is_bool($config['debug'])) {
+		if (isset($config['debug']) && is_bool($config['debug'])) {
 			$this->debug = $config['debug'];
 		}
 
