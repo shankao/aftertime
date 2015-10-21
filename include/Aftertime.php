@@ -108,11 +108,10 @@ class Aftertime {
 		$dsn = "{$dbconfig['protocol']}:host={$dbconfig['host']};dbname={$dbconfig['dbname']};charset=utf8";
 
 		try {
-			$debug = true;	// XXX
 			$options = [
 				\PDO::ATTR_EMULATE_PREPARES => false
 			];
-			if ($debug) {
+			if ($this->debug) {
 				return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password'], $options);
 			} else {
 				return new \PDO($dsn, $dbconfig['user'], $dbconfig['password'], $options);
