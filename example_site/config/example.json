@@ -1,4 +1,6 @@
 {
+	"logs": "/tmp/test",
+	"debug": true,
 	"site": "example_site",
 	"webtitle": "Example site",
 	"init_app": "example_app",
