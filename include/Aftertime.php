@@ -83,7 +83,7 @@ class Aftertime {
 		}
 		$app_factory = new AppFactory;
 		$this->app = $app_factory->build($_REQUEST);
-		if ($this->app === false) {
+		if ($this->app === null) {
 			template_render(__DIR__.'/../templates/apperror.php');
 			return false;
 		}
