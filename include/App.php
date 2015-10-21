@@ -106,7 +106,7 @@ abstract class app {
 		if (isset($this->errors)) {
 			$vars['errors'] = $this->errors;
 		}
-		if ($this->user->is_user_logged()) {
+		if ($this->user && $this->user->is_user_logged()) {
 			$vars['user'] = (array)$this->user;
 		}
 		$vars['config'] = $config;
