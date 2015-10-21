@@ -48,11 +48,6 @@ function log_entry_db ($class, $message, $logtype, $level) {
 	return Log::log_entry_db ($class, $message, $logtype, $level);
 }
 
-// TODO: move where it better corresponds
-function html_value($var) {
-	return nl2br(htmlspecialchars($var));
-}
-
 // One-liner for lazyness
 function template_render($filename, array $vars = null, $logging = true) {
 	$t = new Template($filename, $vars, $logging);
