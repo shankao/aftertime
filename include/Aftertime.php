@@ -20,7 +20,7 @@ class Aftertime {
 
 		$this->debug = $debug;
 		$config = Config::init($config_folder);
-		if ($config === false || 1) {
+		if ($config === false) {
 			if ($this->is_web() && $this->debug === false) {
 				echo 'Config error';	// Don't output much on web
 			} else {
