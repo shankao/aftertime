@@ -55,12 +55,9 @@ abstract class app {
 			}
 		}
 
-		$this->db = init_db();
 		if ($this->db) {
 			$this->user = new User($this->db);
 			$this->user->login();
-		} else {
-			log_entry('Error initializing DB');
 		}
 /*		// XXX Commented until fixed
 		if ($this->check_http_auth() == false) {

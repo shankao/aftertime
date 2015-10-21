@@ -90,16 +90,44 @@ class Aftertime {
 		}
 		$app_factory = new AppFactory;
 		$this->app = $app_factory->build($_REQUEST);
-		if ($this->app) {
-			$this->app->debug($this->debug());
-			if ($this->app->run() !== 'redirect') {
-				return $this->app->render_template();
-			}
-		} else {
+		if ($this->app === false) {
 			template_render(__DIR__.'/../templates/apperror.php');
 			return false;
 		}
+		$this->app->db = $this->init_db();
+		$this->app->debug($this->debug());
+		if ($this->app->run() !== 'redirect') {
+			return $this->app->render_template();
+		}
 		return true;
+	}
+
+	// Returns a PDO instance initialized following Aftertime\Config
+	public function init_db () {
+		$config = Config::get();
+		if (!isset($config['database'])) {
+			log_entry('No database entry found in config');
+			return false;
+		}
+		$dbconfig = $config['database'];
+
+		// Note we force a UTF8 connection
+		$dsn = "{$dbconfig['protocol']}:host={$dbconfig['host']};dbname={$dbconfig['dbname']};charset=utf8";
+
+		try {
+			$debug = true;	// XXX
+			$options = [
+				\PDO::ATTR_EMULATE_PREPARES => false
+			];
+			if ($debug) {
+				return new PDOLog($dsn, $dbconfig['user'], $dbconfig['password'], $options);
+			} else {
+				return new \PDO($dsn, $dbconfig['user'], $dbconfig['password'], $options);
+			}
+		} catch (\PDOException $e) {
+			log_entry("PDO Exception: ".$e->getMessage());
+			return false;
+		}
 	}
 }
 ?>
