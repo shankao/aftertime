@@ -14,18 +14,17 @@ class Aftertime {
 		return php_sapi_name() === 'cli'? false : true;
 	}
 
-	// Use only if/while no Log class avaliable
-	private function log_debug($msg) {
-		if ($this->debug) {
-			echo "$msg\n";
-		}
-	}
-
 	public function __construct ($config_folder) {
+
 		$this->time_start = microtime(true);
+
 		$config = Config::init($config_folder);
-		if ($config === false) {
-			$this->log_debug(nl2br(Config::init_log()));
+		if ($config === false || 1) {
+			if ($this->is_web() && $this->debug === false) {
+				echo 'Config error';	// Don't output much on web
+			} else {
+				echo nl2br(Config::init_log());
+			}
 			return;
 		}
 
@@ -44,7 +43,9 @@ class Aftertime {
 		}
 
 		if ($this->init_log() === false) {
-			$this->log_debug('No \'logs\' key present in the config');
+			if ($this->debug) {
+				echo 'No \'logs\' key present in the config';
+			}
 			return;
 		}
 		if ($this->debug) {
