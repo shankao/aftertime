@@ -17,7 +17,11 @@ class Aftertime {
 		return $this->debug;
 	}
 
-	public function __construct ($config_folder, $web = true) {
+	private function is_web() {
+		return php_sapi_name() === 'cli'? false : true;
+	}
+
+	public function __construct ($config_folder) {
 		$this->time_start = microtime(true);
 		if ($this->debug()) {
 			ini_set ('error_reporting', 'E_ALL');
@@ -42,7 +46,7 @@ class Aftertime {
 				log_entry("Debug mode: {$this->debug()}");
 			}
 
-			if ($web === true && $this->init_web() === false) {
+			if ($this->is_web() && $this->init_web() === false) {
 				return;
 			}
 			$this->init_paths($config['site']);
