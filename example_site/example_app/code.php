@@ -3,7 +3,7 @@
 Main class for our example app.
 The name of the class must match the app ID
 */
-class example_app extends app {
+class example_app extends Aftertime\App {
 	// Custom validator
 	// It can return multiple error codes in an array or false for "no error found"
 	public function my_validator($param, $request) {
