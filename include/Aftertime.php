@@ -14,10 +14,11 @@ class Aftertime {
 		return php_sapi_name() === 'cli'? false : true;
 	}
 
-	public function __construct ($config_folder) {
+	public function __construct ($config_folder, $debug = false) {
 
 		$this->time_start = microtime(true);
 
+		$this->debug = $debug;
 		$config = Config::init($config_folder);
 		if ($config === false || 1) {
 			if ($this->is_web() && $this->debug === false) {
