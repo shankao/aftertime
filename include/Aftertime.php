@@ -7,7 +7,8 @@ class Aftertime {
 
 	private $time_start;
 	private $debug = false;
-	private $is_ready = false;
+
+	public $is_valid = false;
 
 	public function debug($debug = null) {
 		if ($debug !== null) {
@@ -16,14 +17,13 @@ class Aftertime {
 		return $this->debug;
 	}
 
-	public function __construct ($config_folder) {
+	public function __construct ($config_folder, $web = true) {
 		$this->time_start = microtime(true);
 		if ($this->debug()) {
 			ini_set ('error_reporting', 'E_ALL');
 		} else {
 			ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
 		}
-
 		$config = Config::init($config_folder);
 		if ($config === false) {
 			if ($this->debug()) {
@@ -31,43 +31,57 @@ class Aftertime {
 			}
 			return;
 		} else {
-			log_entry(Config::init_log());
 			if (isset($config['timezone'])) {
 				ini_set ('date.timezone', $config['timezone']);
 			}
+
+			$this->init_log();
+
 			if (is_bool($config['debug'])) {
 				$this->debug($config['debug']);
 				log_entry("Debug mode: {$this->debug()}");
 			}
 
-			// Log initialization
-			ini_set ('error_log', Log::log_file());
-			set_error_handler(array('Aftertime\Log', 'php_errors'));
-			set_exception_handler(array('Aftertime\Log', 'php_exceptions'));
-			register_shutdown_function(array('Aftertime\Log', 'log_shutdown'));
-
-			ob_start(null, 4096);
-			ini_set ('arg_separator.output', '&amp;');
-			if (session_start() === false) {
-				log_entry('ERROR: Cannot start session');
+			if ($web === true && $this->init_web() === false) {
 				return;
 			}
-
-			// XXX Should remove the site folder here?
-			ini_set ('include_path', $config['site']);
+			$this->init_paths($config['site']);
 		}
-		$this->is_ready = true;
+		$this->is_valid = true;
+	}
+
+	private function init_paths($site) {
+		// XXX Should remove the site folder here?
+		ini_set ('include_path', $site);
+	}
+
+	private function init_web() {
+		ob_start(null, 4096);
+		ini_set ('arg_separator.output', '&amp;');
+		if (session_start() === false) {
+			log_entry('ERROR: Cannot start session');
+			return false;
+		}
+		return true;
+	}
+
+	private function init_log() {
+		log_entry(Config::init_log());
+		ini_set ('error_log', Log::log_file());
+		set_error_handler(array('Aftertime\Log', 'php_errors'));
+		set_exception_handler(array('Aftertime\Log', 'php_exceptions'));
+		register_shutdown_function(array('Aftertime\Log', 'log_shutdown'));
 	}
 
 	public function __destruct () {
 		// As of PHP 5.4.0, REQUEST_TIME_FLOAT is available in the $_SERVER superglobal array.
 		// It contains the timestamp of the start of the request with microsecond precision.
 		//	$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-		log_entry ('=== Page generation time was ' . (microtime(true) - $this->time_start) . ' ===');
+		log_entry ('=== Aftertime execution time was ' . (microtime(true) - $this->time_start) . ' ===');
 	}
 
 	public function run_app() {
-		if (!$this->is_ready) {	// Something failed on the constructor
+		if (!$this->is_valid) {	// Something failed on the constructor
 			return false;	
 		}
 		$app_factory = new AppFactory;
