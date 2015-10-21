@@ -14,6 +14,13 @@ class Aftertime {
 		return php_sapi_name() === 'cli'? false : true;
 	}
 
+	// Use only if/while no Log class avaliable
+	private function log_debug($msg) {
+		if ($this->debug) {
+			echo "$msg\n";
+		}
+	}
+
 	public function __construct ($config_folder) {
 		$this->time_start = microtime(true);
 		if ($this->debug) {
@@ -28,16 +35,18 @@ class Aftertime {
 			}
 			return;
 		} else {
+			if (is_bool($config['debug'])) {
+				$this->debug = $config['debug'];
+			}
+
 			if (isset($config['timezone'])) {
 				ini_set ('date.timezone', $config['timezone']);
 			}
-
-			$this->init_log();
-
-			if (is_bool($config['debug'])) {
-				$this->debug = $config['debug'];
-				log_entry("Debug mode: {$this->debug}");
+			
+			if ($this->init_log() === false) {
+				return;
 			}
+			log_entry("Debug mode: {$this->debug}");
 
 			if ($this->is_web() && $this->init_web() === false) {
 				return;
@@ -63,11 +72,20 @@ class Aftertime {
 	}
 
 	private function init_log() {
+		// Set up logs folder from config
+		$config = Config::get();
+		if (!isset($config['logs'])) {
+			$this->log_debug('No \'logs\' key present in the config');
+			return false;
+		}
+		Log::log_file($config['logs']);	// This initializes the logs
+
 		log_entry(Config::init_log());
 		ini_set ('error_log', Log::log_file());
 		set_error_handler(array('Aftertime\Log', 'php_errors'));
 		set_exception_handler(array('Aftertime\Log', 'php_exceptions'));
 		register_shutdown_function(array('Aftertime\Log', 'log_shutdown'));
+		return true;
 	}
 
 	public function __destruct () {

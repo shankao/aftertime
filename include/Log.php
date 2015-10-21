@@ -15,35 +15,22 @@ final class Log {
 		echo "$text\n";
 	}
 
-	static function log_file () {
+	static function log_file ($new_logsfolder = null) {
 		static $logs_folder = null;
 		static $filename = null;
 		static $filedate = null;
 
+		if (!empty($new_logsfolder)) {
+			$logs_folder = $new_logsfolder;
+		}
+		if (!$logs_folder) {
+			return false;
+		}
+
 		$date = date('Y-m-d');
 		if (!$filename || $date != $filedate) {
-			if (!isset($logs_folder)) {
-				$config = Config::get();
-				if ($config && isset($config['logs'])) {
-					$logs_folder = getcwd().'/'.$config['logs'];
-				} else {
-					if (!isset($config['site'])) {
-						self::out('No site entry found in config');
-						self::$muted = true;
-						return false;
-					}
-					$logs_folder = sys_get_temp_dir()."/{$config['site']}/logs";
-				}
-				if (!create_file($logs_folder, true, 0777)) {
-					self::out("Cannot create the logs folder: $logs_folder");
-					self::$muted = true;
-					return false;
-				}
-			}
-
 			$filename = "$logs_folder/$date.log";
 			$filedate = $date;
-
 			if (!create_file($filename, false, 0666)) {
 				self::out("Cannot write in the logs file: $filename");
 				self::$muted = true;
@@ -80,7 +67,7 @@ final class Log {
 		$time = date('H:i:s');
 		$caller = self::$caller? ' '.self::$caller : '';
 		if (!self::$muted) {
-			$filename = self::log_file();
+			$filename = self::log_file();	// Must be initialized before
 			if ($filename !== false) {
 				error_log ("$time$caller $text\n", 3, $filename);
 			}
