@@ -47,7 +47,7 @@ class Aftertime {
 				return;
 			}
 			if ($this->debug) {
-				log_entry("Debug mode: {$this->debug}");
+				log_entry('Debug mode set');
 				log_entry(Config::init_log());
 			}
 
