@@ -6,16 +6,9 @@ require_once __DIR__.'/../vendor/autoload.php';
 class Aftertime {
 
 	private $time_start;
-	private $debug = false;
 
+	public $debug = false;
 	public $is_valid = false;
-
-	public function debug($debug = null) {
-		if ($debug !== null) {
-			$this->debug = $debug;
-		}
-		return $this->debug;
-	}
 
 	private function is_web() {
 		return php_sapi_name() === 'cli'? false : true;
@@ -23,14 +16,14 @@ class Aftertime {
 
 	public function __construct ($config_folder) {
 		$this->time_start = microtime(true);
-		if ($this->debug()) {
+		if ($this->debug) {
 			ini_set ('error_reporting', 'E_ALL');
 		} else {
 			ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
 		}
 		$config = Config::init($config_folder);
 		if ($config === false) {
-			if ($this->debug()) {
+			if ($this->debug) {
 				echo nl2br(Config::init_log());
 			}
 			return;
@@ -42,8 +35,8 @@ class Aftertime {
 			$this->init_log();
 
 			if (is_bool($config['debug'])) {
-				$this->debug($config['debug']);
-				log_entry("Debug mode: {$this->debug()}");
+				$this->debug = $config['debug'];
+				log_entry("Debug mode: {$this->debug}");
 			}
 
 			if ($this->is_web() && $this->init_web() === false) {
@@ -95,7 +88,7 @@ class Aftertime {
 			return false;
 		}
 		$this->app->db = $this->init_db();
-		$this->app->debug($this->debug());
+		$this->app->debug($this->debug);
 		if ($this->app->run() !== 'redirect') {
 			return $this->app->render_template();
 		}
