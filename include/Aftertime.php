@@ -27,36 +27,37 @@ class Aftertime {
 		if ($config === false) {
 			$this->log_debug(nl2br(Config::init_log()));
 			return;
-		} else {
-			if (is_bool($config['debug'])) {
-				$this->debug = $config['debug'];
-			}
-
-			if ($this->debug) {
-				ini_set ('error_reporting', 'E_ALL');
-			} else {
-				ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
-			}
-
-			if (isset($config['timezone'])) {
-				ini_set ('date.timezone', $config['timezone']);
-			}
-			
-			if ($this->init_log() === false) {
-				$this->log_debug('No \'logs\' key present in the config');
-				return;
-			}
-			if ($this->debug) {
-				log_entry('Debug mode set');
-				log_entry(Config::init_log());
-			}
-
-			if ($this->is_web() && $this->init_web() === false) {
-				log_entry('ERROR: Cannot start session');
-				return;
-			}
-			$this->init_paths($config['site']);
 		}
+
+		if (is_bool($config['debug'])) {
+			$this->debug = $config['debug'];
+		}
+
+		if ($this->debug) {
+			ini_set ('error_reporting', 'E_ALL');
+		} else {
+			ini_set ('error_reporting', 'E_ALL & ~E_STRICT');
+		}
+
+		if (isset($config['timezone'])) {
+			ini_set ('date.timezone', $config['timezone']);
+		}
+
+		if ($this->init_log() === false) {
+			$this->log_debug('No \'logs\' key present in the config');
+			return;
+		}
+		if ($this->debug) {
+			log_entry('Debug mode set');
+			log_entry(Config::init_log());
+		}
+
+		if ($this->is_web() && $this->init_web() === false) {
+			log_entry('ERROR: Cannot start session');
+			return;
+		}
+		$this->init_paths($config['site']);
+
 		$this->is_valid = true;
 	}
 
