@@ -43,9 +43,11 @@ class Aftertime {
 			ini_set ('date.timezone', $config['timezone']);
 		}
 
-		if ($this->init_log() === false) {
-			if ($this->debug) {
-				echo 'No \'logs\' key present in the config';
+		if ($this->init_log() === false || 1) {
+			if ($this->is_web() && $this->debug === false) {
+				echo 'Logging error';	// Don't output much on web
+			} else {
+				echo "No 'logs' key present in the config\n";
 			}
 			return;
 		}
