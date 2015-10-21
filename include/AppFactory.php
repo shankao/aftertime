@@ -8,7 +8,7 @@ final class AppFactory {
 		// Log and check the request URL
 		$url = $_SERVER['PHP_SELF'];
 		$url .= !empty($_SERVER['QUERY_STRING'])? "?{$_SERVER['QUERY_STRING']}" : '';
-		$from = "{$_SERVER['REMOTE_ADDR']}";
+		$from = $_SERVER['REMOTE_ADDR'];
 		if (preg_match('/^\/(index\.php)(\?.*)?$/', $url) === 0) {
 			log_entry("REQUEST FILTERED: $url from $from");
 			return false;
