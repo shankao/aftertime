@@ -89,10 +89,12 @@ class Aftertime {
 	}
 
 	public function __destruct () {
-		// As of PHP 5.4.0, REQUEST_TIME_FLOAT is available in the $_SERVER superglobal array.
-		// It contains the timestamp of the start of the request with microsecond precision.
-		//	$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-		log_entry ('=== Aftertime execution time was ' . (microtime(true) - $this->time_start) . ' ===');
+		if ($this->is_web()) {
+			// As of PHP 5.4.0, REQUEST_TIME_FLOAT is available in the $_SERVER superglobal array.
+			// It contains the timestamp of the start of the request with microsecond precision.
+			//	$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+			log_entry ('=== Aftertime execution time was ' . (microtime(true) - $this->time_start) . ' ===');
+		}
 	}
 
 	public function run_app() {
