@@ -51,6 +51,7 @@ class Aftertime {
 			}
 
 			if ($this->is_web() && $this->init_web() === false) {
+				log_entry('ERROR: Cannot start session');
 				return;
 			}
 			$this->init_paths($config['site']);
@@ -67,7 +68,6 @@ class Aftertime {
 		ob_start(null, 4096);
 		ini_set ('arg_separator.output', '&amp;');
 		if (session_start() === false) {
-			log_entry('ERROR: Cannot start session');
 			return false;
 		}
 		return true;
