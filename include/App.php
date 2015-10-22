@@ -74,7 +74,7 @@ abstract class app {
 					$this->app_error_add($error);
 				}
 				if (isset($page_config['params_error_page'])) {
-					return $this->redirect($page_config['params_error_page']);
+					return $this->app_redirect($page_config['params_error_page']);
 				}
 			}
 		}
