@@ -31,7 +31,7 @@ final class Log {
 	}
 
 	static function caller ($caller = false) {
-		if ($caller && is_string($caller)) {
+		if (is_string($caller) || empty($caller)) {
 			self::$caller = $caller;
 		}
 		return self::$caller;
