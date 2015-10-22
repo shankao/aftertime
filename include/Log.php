@@ -32,8 +32,8 @@ final class Log {
 			$filename = "$logs_folder/$date.log";
 			$filedate = $date;
 			if (!create_file($filename, false, 0666)) {
-				self::out("Cannot write in the logs file: $filename");
-				self::$muted = true;
+				//self::out("Cannot write in the logs file: $filename");
+				$filename = null;
 				return false;
 			}
 		}
@@ -68,9 +68,11 @@ final class Log {
 		$caller = self::$caller? ' '.self::$caller : '';
 		if (!self::$muted) {
 			$filename = self::log_file();	// Must be initialized before
-			if ($filename !== false) {
+			if ($filename === false) {
+				echo "$time$caller $text\n";
+			} else {
 				error_log ("$time$caller $text\n", 3, $filename);
-			}
+			} 
 		}
 	}
 
