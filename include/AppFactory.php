@@ -54,6 +54,10 @@ final class AppFactory {
 			log_entry ("ERROR: page '{$request['page']}' invalid");
                         return null;
                 }
+		if (strpos($request['page'], 'app_') === 0) {
+			log_entry ("ERROR: page '{$request['page']}' name not allowed");
+                        return null;
+		}
 		if (isset($app_config['class_location'])) {
 			$app_code_file = "{$config['site']}/{$app_config['class_location']}";
 		} else {
