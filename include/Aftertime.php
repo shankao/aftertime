@@ -85,7 +85,9 @@ class Aftertime {
 		if (!isset($config['logs'])) {
 			return false;
 		}
-		Log::log_file($config['logs']);	// This initializes the logs
+		if (Log::log_file($config['logs']) === false && $this->is_web()) {
+			return false;
+		}
 
 		ini_set ('error_log', Log::log_file());
 		set_error_handler(array('Aftertime\Log', 'php_errors'));
