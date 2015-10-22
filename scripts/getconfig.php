@@ -1,12 +1,13 @@
 <?php /*
-Returns the site's configuration
+Returns the site's configuration, given the config folder as param
 */
 require_once __DIR__.'/../vendor/autoload.php';
-if (aftertime_init(false, '../..') === false) {
-	echo Config::init_log();
+$folder = empty($argv[1])? '.' : $argv[1];
+if (Aftertime\Config::init($folder) === false) {
+	echo Aftertime\Config::init_log();
 	exit (-1);
 }
 
-Config::print_values();
+Aftertime\Config::print_values();
 exit (0);
 ?>
