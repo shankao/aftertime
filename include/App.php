@@ -11,17 +11,6 @@ abstract class app {
 	public $template;		// Rendering page
 	public $db;			// Database connection
 
-	// fixme db_error() does not exist anymore and this would fail badly
-	final protected function app_db_error() {
-		$error = db_error();	// That's the function in include/helpers.php
-		if ($error) {
-			$this->app_error_add('DB_ERROR', $error);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	final private function app_init_template() {
 		$page_config = Config::get("apps.{$this->params['app']}.pages.{$this->params['page']}");
 		if (!isset($page_config['template'])) {
