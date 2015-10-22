@@ -6,15 +6,6 @@ final class Log {
 	static private $slow_query_log = true, $slow_query_time = 2;	// In seconds
 	static private $muted = false;
 
-	public function out ($text, $commented = true) {
-		$time = date('H:i:s');
-		$text = "$time: $text";
-		if ($commented) {
-			$text = "<!-- $text -->";
-		}
-		echo "$text\n";
-	}
-
 	static function log_file ($new_logsfolder = null) {
 		static $logs_folder = null;
 		static $filename = null;
@@ -32,7 +23,6 @@ final class Log {
 			$filename = "$logs_folder/$date.log";
 			$filedate = $date;
 			if (!create_file($filename, false, 0666)) {
-				//self::out("Cannot write in the logs file: $filename");
 				$filename = null;
 				return false;
 			}
