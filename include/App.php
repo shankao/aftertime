@@ -101,7 +101,7 @@ abstract class app {
 		}
 */
 
-		$this->init_template();
+		$this->app_init_template();
 
 		// Run the page method
 		if (!is_callable(array($this, $pagename))) {
