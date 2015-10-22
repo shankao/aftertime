@@ -28,3 +28,11 @@ All the site's code is inside the "example_site" folder.
 Simply point your web browser to its folder to get to the main page.
 You will find some logs under /tmp/example_site
 
+Some ideas for the future
+------------------
+* Add unit tests. PHPUnit
+* Decouple the User management from the rest
+* Better management of global services
+* Run-time config management with a web-based interface
+* Caching
+* Better routing
