@@ -14,7 +14,7 @@ class Aftertime {
 		return php_sapi_name() === 'cli'? false : true;
 	}
 
-	public function __construct ($config_folder, $debug = false) {
+	public function __construct ($config_folder, $debug = null) {
 
 		$this->time_start = microtime(true);
 
@@ -29,8 +29,10 @@ class Aftertime {
 			return;
 		}
 
-		if (isset($config['debug']) && is_bool($config['debug'])) {
-			$this->debug = $config['debug'];
+		if (!is_bool($debug)) {	// Gives prio to the passed $debug param
+			if (isset($config['debug']) && is_bool($config['debug'])) {
+				$this->debug = $config['debug'];
+			}
 		}
 
 		if ($this->debug) {
