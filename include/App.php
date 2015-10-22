@@ -22,6 +22,41 @@ abstract class app {
 		}
 	}
 
+	private function init_template() {
+		$page_config = Config::get("apps.{$this->params['app']}.pages.{$this->params['page']}");
+		if (!isset($page_config['template'])) {
+			log_entry('No template specified for this page');
+			return false;
+		}
+		$page_template = $page_config['template'];
+		$config = Config::get();
+
+		switch ($page_template) {	// XXX TemplateLog types
+			case 'default':
+			case 'apperror':
+				$template_filename = __DIR__."/../templates/$page_template.php";
+				break;
+			default:	// Local app template. XXX Maybe is worth to remove the appname here and let the app choose
+				$appname = get_class($this);
+				$template_filename = "{$config['site']}/$appname/$page_template.php";
+				break;
+		}
+
+		if (isset($this->params)) {
+			$vars['params'] = $this->params;
+		}
+		if (isset($this->errors)) {
+			$vars['errors'] = $this->errors;
+		}
+		if ($this->user && $this->user->is_user_logged()) {
+			$vars['user'] = (array)$this->user;
+		}
+		$vars['config'] = $config;
+		$vars['debug'] = $this->debug();
+		$this->template = new Template($template_filename, $vars);
+		return true;
+	}
+
 //------------------------ public
 	
 	public function run() {
@@ -80,41 +115,6 @@ abstract class app {
 		return $result;
 	}
 	
-	private function init_template() {
-		$page_config = Config::get("apps.{$this->params['app']}.pages.{$this->params['page']}");
-		if (!isset($page_config['template'])) {
-			log_entry('No template specified for this page');
-			return false;
-		}
-		$page_template = $page_config['template'];
-		$config = Config::get();
-
-		switch ($page_template) {	// XXX TemplateLog types
-			case 'default':
-			case 'apperror':
-				$template_filename = __DIR__."/../templates/$page_template.php";
-				break;
-			default:	// Local app template. XXX Maybe is worth to remove the appname here and let the app choose
-				$appname = get_class($this);
-				$template_filename = "{$config['site']}/$appname/$page_template.php";
-				break;
-		}
-
-		if (isset($this->params)) {
-			$vars['params'] = $this->params;
-		}
-		if (isset($this->errors)) {
-			$vars['errors'] = $this->errors;
-		}
-		if ($this->user && $this->user->is_user_logged()) {
-			$vars['user'] = (array)$this->user;
-		}
-		$vars['config'] = $config;
-		$vars['debug'] = $this->debug();
-		$this->template = new Template($template_filename, $vars);
-		return true;
-	}
-
 	final public function render_template() {
 		if (!$this->template) {
 			return false;
