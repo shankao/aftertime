@@ -12,17 +12,17 @@ abstract class app {
 	public $db;			// Database connection
 
 	// fixme db_error() does not exist anymore and this would fail badly
-	protected function db_error() {
+	final protected function app_db_error() {
 		$error = db_error();	// That's the function in include/helpers.php
 		if ($error) {
-			$this->error_add('DB_ERROR', $error);
+			$this->app_error_add('DB_ERROR', $error);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	private function init_template() {
+	final private function app_init_template() {
 		$page_config = Config::get("apps.{$this->params['app']}.pages.{$this->params['page']}");
 		if (!isset($page_config['template'])) {
 			log_entry('No template specified for this page');
@@ -52,14 +52,14 @@ abstract class app {
 			$vars['user'] = (array)$this->user;
 		}
 		$vars['config'] = $config;
-		$vars['debug'] = $this->debug();
+		$vars['debug'] = $this->app_debug();
 		$this->template = new Template($template_filename, $vars);
 		return true;
 	}
 
 //------------------------ public
 	
-	public function run() {
+	final public function app_run() {
 		$appname = $this->params['app'];
 		$pagename = $this->params['page'];
 		Log::caller($appname);
@@ -67,7 +67,7 @@ abstract class app {
 		// Recover errors from the last App and remove them from the session
 		if (isset($_SESSION['errors'])) {
 			foreach ($_SESSION['errors'] as $error) {
-				$this->error_add($error);
+				$this->app_error_add($error);
 			}
 			unset($_SESSION['errors']);
 		}
@@ -82,7 +82,7 @@ abstract class app {
 			$validator->check_array($this->params, $page_config['params']);
 			if ($validator->has_errors()) {
 				foreach ($validator->errors() as $error) {
-					$this->error_add($error);
+					$this->app_error_add($error);
 				}
 				if (isset($page_config['params_error_page'])) {
 					return $this->redirect($page_config['params_error_page']);
@@ -96,7 +96,7 @@ abstract class app {
 		}
 /*		// XXX Commented until fixed
 		if ($this->check_http_auth() == false) {
-			$this->error_add('HTTP_AUTH_ERROR');
+			$this->app_error_add('HTTP_AUTH_ERROR');
 			return false;	// redirect to a 505 page?
 		}
 */
@@ -115,7 +115,7 @@ abstract class app {
 		return $result;
 	}
 	
-	final public function render_template() {
+	final public function app_render_template() {
 		if (!$this->template) {
 			return false;
 		} else {
@@ -124,9 +124,9 @@ abstract class app {
 	}
 
 	// HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
-	public function redirect($dest, array $params = null, $response = 303) {
-		if ($this->has_error()) {
-			$_SESSION['errors'] = $this->get_all_errors();
+	final public function app_redirect($dest, array $params = null, $response = 303) {
+		if ($this->app_has_error()) {
+			$_SESSION['errors'] = $this->app_get_all_errors();
 		}
 		
 		$parts = explode('/', $dest);
@@ -143,11 +143,11 @@ abstract class app {
 		return 'redirect';
 	}
 
-	public function error_add($code) {
+	final public function app_error_add($code) {
 		$this->errors[] = $code;
 	}
 
-	public function has_error($code = null) {
+	final public function app_has_error($code = null) {
 		if ($code === null) {
 			return count($this->errors) > 0? true : false;
 		} else {
@@ -155,11 +155,11 @@ abstract class app {
 		}
 	}
 
-	public function get_all_errors() {
+	final public function app_get_all_errors() {
 		return $this->errors;
 	}
 	
-	public function debug($debug = null) {
+	final public function app_debug($debug = null) {
                 if ($debug !== null) {
                         $this->debug = $debug;
                 }

@@ -118,9 +118,9 @@ class Aftertime {
 			return false;
 		}
 		$this->app->db = $this->init_db();
-		$this->app->debug($this->debug);
-		if ($this->app->run() !== 'redirect') {
-			return $this->app->render_template();
+		$this->app->app_debug($this->debug);
+		if ($this->app->app_run() !== 'redirect') {
+			return $this->app->app_render_template();
 		}
 		return true;
 	}
