@@ -12,5 +12,8 @@
 		"php": ">=5.3.7",
 		"ext-json": "*",
 		"yiisoft/jquery": "1.9.1"
-	}
+	},
+	"require-dev": {
+        	"phpunit/phpunit": "4.8.*"
+   	}
 }
