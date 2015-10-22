@@ -1,7 +1,8 @@
 Aftertime: a lightweight, simple and scalable PHP web framework
 =========
 
-* Provide the simplest solution for the problem
+* Provide the simplest solution that solves the problem
+* Limited run-time dependencies
 * Avoid deep levels of abstraction
 * Actively fight code bloat, legacy code and bit rot in general.
 * Plan for multiple server deployment from the beginning
