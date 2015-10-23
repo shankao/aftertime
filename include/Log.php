@@ -77,10 +77,8 @@ final class Log {
 	}
 
 	static function php_errors ($errno, $errstr, $errfile, $errline) {
-		if ($errno != E_STRICT) {
-			self::log_entry("$errstr ($errfile:$errline)");
-			self::log_backtrace();
-		}
+		self::log_entry("$errstr ($errfile:$errline)");
+		self::log_backtrace();
 		return false;
 	}
 
