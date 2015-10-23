@@ -14,8 +14,8 @@ class LogTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('', Log::caller());
 		$this->assertEquals('', Log::caller(123));
 		$this->assertEquals('caller', Log::caller('caller'));
-		$this->assertEquals('caller', Log::caller());
-		$this->assertEquals('caller', Log::caller(false));
+		$this->assertEquals('', Log::caller());
+		$this->assertEquals('', Log::caller(false));
 		$this->assertEquals('another', Log::caller('another'));
 		$this->assertEquals('another', Log::caller(true));
 	}
