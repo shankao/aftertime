@@ -2,11 +2,24 @@
 require_once __DIR__.'/../vendor/autoload.php';
 
 use Aftertime\Log;
+use org\bovigo\vfs\vfsStream;
 
 class LogTest extends PHPUnit_Framework_TestCase {
+
+	private $vfs;
+
+	public function setUp() {
+		$this->vfs = vfsStream::setup();
+	}
+
 	// Not complete
 	public function test_log_file() {
-		$this->assertEquals(false, Aftertime\Log::log_file());
+		$this->assertFalse(Log::log_file());
+
+		$logs_folder = $this->vfs->url().'/logs';
+		$logfile = Log::log_file($logs_folder);
+		$this->assertRegExp('/vfs:\/\/root\/logs\/....-..-..\.log/', $logfile);
+		$this->assertFalse(Log::log_file(false));
 	}
 
 	// Complete
