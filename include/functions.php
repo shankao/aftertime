@@ -44,10 +44,6 @@ function log_entry ($text, $sizelimit = 2000) {
 	return Log::log_entry ($text, $sizelimit);
 }
 
-function log_entry_db ($class, $message, $logtype, $level) {
-	return Log::log_entry_db ($class, $message, $logtype, $level);
-}
-
 // One-liner for lazyness
 function template_render($filename, array $vars = null, $logging = true) {
 	$t = new Template($filename, $vars, $logging);
