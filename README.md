@@ -29,6 +29,10 @@ All the site's code is inside the "example_site" folder.
 Simply point your web browser to its folder to get to the main page.
 You will find some logs under /tmp/example_site
 
+Run the tests
+------------------
+./vendor/bin/phpunit tests
+
 Some ideas for the future
 ------------------
 * Add unit tests. PHPUnit
