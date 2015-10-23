@@ -18,6 +18,40 @@ class LogTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('', Log::caller(false));
 		$this->assertEquals('another', Log::caller('another'));
 		$this->assertEquals('another', Log::caller(true));
+		$this->assertEquals('', Log::caller());
+	}
+
+	public function test_log_echo() {
+		$this->expectOutputRegex('/^..:..:.. line$/');
+		Log::log_entry('line');
+	}
+
+	public function test_log_echo_mute() {
+		$this->expectOutputRegex('/^..:..:.. Logs are muted\n..:..:.. Logs are unmuted$/');
+		Log::mute(true);
+		Log::log_entry('line');
+		Log::mute(false);
+	}
+
+	public function test_log_echo_unmute() {
+		$this->expectOutputRegex('/^..:..:.. Logs are muted\n..:..:.. Logs are unmuted\n..:..:.. another$/');
+		Log::mute(true);
+		Log::log_entry('line');
+		Log::mute(false);
+		Log::log_entry('another');
+	}
+
+	public function test_log_echo_caller() {
+		$this->expectOutputRegex('/^..:..:.. me! line\n..:..:.. me! line2$/');
+		Log::caller('me!');
+		Log::log_entry('line');
+		Log::log_entry('line2');
+		Log::caller(false);
+	}
+
+	public function test_log_entry_db() {
+		$this->expectOutputRegex('/^..:..:.. myclass\/query: SELECT NOW\(\)$/');
+		Log::log_entry_db('myclass', "SELECT NOW()\n\n\n\n", 'query', 1);
 	}
 }
 ?>
