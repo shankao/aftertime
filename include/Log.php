@@ -66,22 +66,6 @@ final class Log {
 		}
 	}
 
-	static function log_entry_db ($class, $message, $logtype, $level) {
-		$message = str_replace("\n", '', $message);
-
-		if (self::$slow_query_log && preg_match('/QUERY DONE IN  ([0-9.]+) seconds/', $message, $matches)) {
-			if ($matches[1] > self::$slow_query_time) {
-				self::log_entry('SLOW QUERY');
-			}
-		}
-
-		if (in_array($logtype, array('CONNECT FAILED')) ||
-			$level == 1 && in_array($logtype, array('QUERY', 'ERROR', 'query', 'Query Error'))
-			) {
-			self::log_entry("$class/$logtype: $message");
-		}
-	}
-
 	static function log_backtrace() {
 		$level = 0;
 		foreach(debug_backtrace() as $bt) {

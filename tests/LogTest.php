@@ -48,10 +48,5 @@ class LogTest extends PHPUnit_Framework_TestCase {
 		Log::log_entry('line2');
 		Log::caller(false);
 	}
-
-	public function test_log_entry_db() {
-		$this->expectOutputRegex('/^..:..:.. myclass\/query: SELECT NOW\(\)$/');
-		Log::log_entry_db('myclass', "SELECT NOW()\n\n\n\n", 'query', 1);
-	}
 }
 ?>
