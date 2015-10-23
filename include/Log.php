@@ -20,12 +20,8 @@ final class Log {
 
 		$date = date('Y-m-d');
 		if (!$filename || $date != $filedate) {
-			$filename = "$logs_folder/$date.log";
 			$filedate = $date;
-			if (!create_file($filename, false, 0666)) {
-				$filename = null;
-				return false;
-			}
+			$filename = "$logs_folder/$date.log";
 		}
 		return $filename;
 	}
