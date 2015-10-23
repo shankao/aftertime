@@ -11,10 +11,10 @@ final class Log {
 		static $filename = null;
 		static $filedate = null;
 
-		if (!empty($new_logsfolder)) {
+		if ($new_logsfolder !== null) {
 			$logs_folder = $new_logsfolder;
 		}
-		if (!$logs_folder) {
+		if (empty($logs_folder)) {
 			return false;
 		}
 
