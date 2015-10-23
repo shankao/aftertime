@@ -48,5 +48,27 @@ class LogTest extends PHPUnit_Framework_TestCase {
 		Log::log_entry('line2');
 		Log::caller(false);
 	}
+
+	public function test_log_php_error() {
+		set_error_handler(array('Aftertime\Log', 'php_errors'));
+		$this->expectOutputRegex(<<<EOT
+/^..:..:.. file\(not_existing_file\.php\): failed to open stream: No such file or directory \(.*?\/LogTest\.php:[0-9]+\)
+(..:..:.. at .*?:[0-9])*/
+EOT
+		);
+		@file('not_existing_file.php');
+	}
+
+	public function test_log_php_exception() {
+		set_exception_handler(array('Aftertime\Log', 'php_exceptions'));
+		$this->assertEquals(array('Aftertime\Log', 'php_exceptions'), set_exception_handler(null));
+		$this->expectOutputRegex(<<<EOT
+/^..:..:.. Exception: Testing exception
+..:..:.. #0 \[internal function\]: LogTest->test_log_php_exception\(\)
+(#[0-9]+? .*?\([0-9]+?\): .*?)+/
+EOT
+);
+		LOG::php_exceptions(new Exception('Testing exception', 23));
+	}
 }
 ?>
