@@ -7,22 +7,34 @@ use org\bovigo\vfs\vfsStream;
 class LogTest extends PHPUnit_Framework_TestCase {
 
 	private $vfs;
+	private $logs_folder;
 
 	public function setUp() {
 		$this->vfs = vfsStream::setup();
+		$this->logs_folder = $this->vfs->url().'/logs';
+		mkdir($this->logs_folder);
 	}
 
-	// Not complete
+	public function tearDown() {
+		Log::log_file(false);
+	}
+
 	public function test_log_file() {
 		$this->assertFalse(Log::log_file());
-
-		$logs_folder = $this->vfs->url().'/logs';
-		$logfile = Log::log_file($logs_folder);
-		$this->assertRegExp('/vfs:\/\/root\/logs\/....-..-..\.log/', $logfile);
+		$logfile = Log::log_file($this->logs_folder);
+		$this->assertRegExp('/^vfs:\/\/root\/logs\/....-..-..\.log$/', $logfile);
 		$this->assertFalse(Log::log_file(false));
 	}
 
-	// Complete
+	public function test_log_entry() {
+		$logfile = Log::log_file($this->logs_folder);
+		$this->assertFalse(is_readable($logfile));
+		Log::log_entry('logline in logfile');
+		$this->assertRegExp('/^..:..:.. logline in logfile$/', file_get_contents($logfile));
+		Log::log_entry('Second line');
+		$this->assertRegExp('/^..:..:.. logline in logfile\n..:..:.. Second line$/', file_get_contents($logfile));
+	}
+
 	public function test_caller() {
 		$this->assertEquals('', Log::caller());
 		$this->assertEquals('', Log::caller(123));
