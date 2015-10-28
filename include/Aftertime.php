@@ -6,7 +6,6 @@ class Aftertime {
 	private $time_start;
 
 	public $debug = false;
-	public $is_valid = false;
 
 	private function is_web() {
 		return php_sapi_name() === 'cli'? false : true;
@@ -24,7 +23,7 @@ class Aftertime {
 			} else {
 				echo nl2br(Config::init_log());
 			}
-			return;
+			throw new AftertimeException;
 		}
 
 		if (!is_bool($debug)) {	// Gives prio to the passed $debug param
@@ -49,7 +48,7 @@ class Aftertime {
 			} else {
 				echo "No 'logs' key present in the config\n";
 			}
-			return;
+			throw new AftertimeException;
 		}
 		if ($this->debug) {
 			log_entry('Debug mode set');
@@ -58,11 +57,9 @@ class Aftertime {
 
 		if ($this->is_web() && $this->init_web() === false) {
 			log_entry('ERROR: Cannot start session');
-			return;
+			throw new AftertimeException;
 		}
 		$this->init_paths($config['site']);
-
-		$this->is_valid = true;
 	}
 
 	private function init_paths($site) {
@@ -106,9 +103,6 @@ class Aftertime {
 	}
 
 	public function run_app() {
-		if (!$this->is_valid) {	// Something failed on the constructor
-			return false;	
-		}
 		$app_factory = new AppFactory;
 		$this->app = $app_factory->build($_REQUEST);
 		if ($this->app === null) {
