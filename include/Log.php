@@ -6,7 +6,7 @@ final class Log {
 	static private $slow_query_log = true, $slow_query_time = 2;	// In seconds
 	static private $muted = false;
 
-	static function log_file ($new_logsfolder = null) {
+	static public function log_file ($new_logsfolder = null) {
 		static $logs_folder = null;
 		static $filename = null;
 		static $filedate = null;
@@ -26,14 +26,14 @@ final class Log {
 		return $filename;
 	}
 
-	static function caller ($caller = false) {
+	static public function caller ($caller = false) {
 		if (is_string($caller) || empty($caller)) {
 			self::$caller = $caller;
 		}
 		return self::$caller;
 	}
 
-	static function mute($mute = null) {
+	static public function mute($mute = null) {
 		if ($mute !== null && is_bool($mute)) {
 			if ($mute == true) {
 				self::log_entry('Logs are muted');
@@ -46,7 +46,7 @@ final class Log {
                 return self::$muted;
 	}
 
-	static function log_entry ($text, $sizelimit = 2000) {
+	static public function log_entry ($text, $sizelimit = 2000) {
 		if (strlen($text) > $sizelimit) {
 			$text = substr($text, 0, $sizelimit/2) . '...(truncated)...' . substr($text, $sizelimit*-1/2);
 		}
@@ -62,7 +62,7 @@ final class Log {
 		}
 	}
 
-	static function log_backtrace() {
+	static private function log_backtrace() {
 		$level = 0;
 		foreach(debug_backtrace() as $bt) {
 			if ($level > 2 && !empty($bt['file'])) {
@@ -72,18 +72,18 @@ final class Log {
 		}
 	}
 
-	static function php_errors ($errno, $errstr, $errfile, $errline) {
+	static public function php_errors ($errno, $errstr, $errfile, $errline) {
 		self::log_entry("$errstr ($errfile:$errline)");
 		self::log_backtrace();
 		return false;
 	}
 
-	static function php_exceptions(\Exception $ex) {
+	static public function php_exceptions(\Exception $ex) {
 		self::log_entry('Exception: ' . $ex->getMessage());
 		self::log_entry($ex->getTraceAsString());
 	}
 
-	static function log_shutdown () {
+	static public function log_shutdown () {
 		$error = error_get_last();
 		if ($error && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
 			self::log_entry("ERROR type {$error['type']}: {$error['message']} at {$error['file']}:{$error['line']}");
@@ -91,7 +91,7 @@ final class Log {
 		}
 	}
 
-	static function slow_query_log ($status = null, $query_time = 2) {
+	static public function slow_query_log ($status = null, $query_time = 2) {
 		if ($status === null) {
 			return self::$slow_query_log;
 		}
