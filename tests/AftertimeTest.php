@@ -6,6 +6,8 @@ use Aftertime\Aftertime;
 class AftertimeTest extends PHPUnit_Framework_TestCase {
 	/**
 	* @expectedException Aftertime\AftertimeException
+	* @expectedExceptionMessage Can't initialize config
+	* @expectedExceptionCode 0
 	*/
 	public function test_bad_config() {
 		$this->expectOutputRegex(<<<EOT

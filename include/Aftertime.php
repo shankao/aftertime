@@ -23,7 +23,7 @@ class Aftertime {
 			} else {
 				echo nl2br(Config::init_log());
 			}
-			throw new AftertimeException;
+			throw new AftertimeException("Can't initialize config", AftertimeException::E_CONFIG_INIT);
 		}
 
 		if (!is_bool($debug)) {	// Gives prio to the passed $debug param
@@ -48,7 +48,7 @@ class Aftertime {
 			} else {
 				echo "No 'logs' key present in the config\n";
 			}
-			throw new AftertimeException;
+			throw new AftertimeException("Can't initialize logs", AftertimeException::E_LOG_INIT);
 		}
 		if ($this->debug) {
 			log_entry('Debug mode set');
@@ -57,7 +57,7 @@ class Aftertime {
 
 		if ($this->is_web() && $this->init_web() === false) {
 			log_entry('ERROR: Cannot start session');
-			throw new AftertimeException;
+			throw new AftertimeException("Cannot start session", AftertimeException::E_SESSION_INIT);
 		}
 		$this->init_paths($config['site']);
 	}
