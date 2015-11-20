@@ -11,9 +11,9 @@ What's included?
 ----------------
 * Simple routing capabilities with validation
 * PDO as direct database interface, and PDOClass for very simple Object-Relational Mapping
-* Configuration system
-* Logging system. Because maintenance represents 90% of the work
-* Simple PHP-based template system
+* Configuration module
+* Logging module. Because maintenance represents 90% of the work
+* Simple PHP-based template module
 * User authentication and management classes
 * Common HTML templates and javascript libraries included: jQuery, Lab.js
 * Lightweight!
