@@ -31,11 +31,11 @@ You will find some logs under /tmp/example_site
 
 Run the tests
 ------------------
-./vendor/bin/phpunit tests
+make test
 
 Some ideas for the future
 ------------------
-* Add unit tests. PHPUnit
+* Add more unit tests
 * Decouple the User management from the rest
 * Better management of global services
 * Run-time config management with a web-based interface
