@@ -23,41 +23,41 @@ class User extends PDOClass {
 
 	public $user_id, $email, $password;
 
-	private function get_user_from_session() {
+	private function getUserFromSession() {
 		$sdata = unserialize($_SESSION[User::SESSION_VARNAME]);
 		foreach ($sdata as $name => $value) {
 			$this->$name = $value;
 		}
 	}
 
-	private function put_user_in_session() {
+	private function putUserInSession() {
 		foreach ($this->_fields as $field) {
 			$user_array[$field] = $this->$field;
 		}
 		$_SESSION[User::SESSION_VARNAME] = serialize($user_array);
 	}
 
-	private function clean_user_session() {
+	private function cleanUserSession() {
 		unset($_SESSION[User::SESSION_VARNAME]);
 	}
 
-	private function is_user_in_session() {
+	private function isUserInSession() {
 		return isset($_SESSION[User::SESSION_VARNAME]);
 	}
 
 	// Note that the one in the cookie is the encrypted password
-	private function set_cookies() {
+	private function setCookies() {
 		// Keep for 10 days
 		setcookie(User::COOKIE_USER, $this->email, time()+User::COOKIE_TIME, '/', null, false, true);
 		setcookie(User::COOKIE_PASSWD, $this->password, time()+User::COOKIE_TIME, '/', null, false, true);
 	}
 
-	private function clean_cookies() {
+	private function cleanCookies() {
 		setcookie(User::COOKIE_USER, '', time()-3600, '/', null, false, true);
 		setcookie(User::COOKIE_PASSWD, '', time()-3600, '/', null, false, true);
 	}
 
-	private function get_cookies() {
+	private function getCookies() {
 		if (isset($_COOKIE[User::COOKIE_USER]) && isset($_COOKIE[User::COOKIE_PASSWD])) {
 			$result['email'] = $_COOKIE[User::COOKIE_USER];
 			$result['password'] = $_COOKIE[User::COOKIE_PASSWD];
@@ -68,7 +68,7 @@ class User extends PDOClass {
 	}
 
 	// Basic auth. code taken from http://www.php.net/manual/en/features.http-auth.php
-	private function check_http_auth() {
+	private function checkHttpAuth() {
 		$c = Config::get('apps.'.get_class($this));
 		if (isset($c['user']) && isset($c['passwd'])) {
 			// TODO Check better auth. ways instead of "Basic". Maybe autogenerating .htaccess and .htpasswd files
@@ -95,7 +95,7 @@ class User extends PDOClass {
 
 	// This is the default. Note that apps. are free to override it. XXX Convert to interface?
 	// TODO Check this (PHP 5.5+): http://www.php.net/manual/en/book.password.php
-	public function encrypt_password ($password) {
+	public function encryptPassword ($password) {
 		if (empty($password)) return null;
 
 		$type = 'blowfish';
@@ -109,7 +109,7 @@ class User extends PDOClass {
 		return $result;
 	}
 
-	public function check_password ($input, $encrypted, $input_is_encrypted=false) {
+	public function checkPassword ($input, $encrypted, $input_is_encrypted=false) {
 		if (empty($input) || empty($encrypted)) return false;
 
 		if ($input_is_encrypted) {
@@ -122,11 +122,11 @@ class User extends PDOClass {
 
 	public function login ($email = '', $password = '', $set_cookies=false) {
 		if ($this->is_user_logged()) {
-			$this->get_user_from_session();
+			$this->getUserFromSession();
 		} else {
 			$password_is_encrypted = false;
 			if (empty($email) || empty($password)) {	// Try cookies auth
-				$cookies = $this->get_cookies();
+				$cookies = $this->getCookies();
 				if ($cookies === false) { 
 					return User::NO_EMAIL_PASSWD;	// No more methods to try
 				}
@@ -136,19 +136,19 @@ class User extends PDOClass {
 				$set_cookies = true;	// Keep them
 			}
 
-			$this->clean_cookies();
+			$this->cleanCookies();
 			$this->email = $email;
 			if ($this->select(true) === false) {
 				return User::NO_USER_FOUND;
 			}
 
-			if (!$this->check_password($password, $this->password, $password_is_encrypted)) {
+			if (!$this->checkPassword($password, $this->password, $password_is_encrypted)) {
 				return User::WRONG_PASSWD;
 			}
 
-			$this->put_user_in_session();
+			$this->putUserInSession();
 			if ($set_cookies) {	
-				$this->set_cookies();
+				$this->setCookies();
 			}
 		}
 		return User::OK;
@@ -156,13 +156,13 @@ class User extends PDOClass {
 
 	public function logout () {
 		if ($this->is_user_logged()) {
-			$this->clean_user_session();
-			$this->clean_cookies();
+			$this->cleanUserSession();
+			$this->cleanCookies();
 		}
 	}
 
-	public function is_user_logged() {
-		return $this->is_user_in_session();
+	public function isUserLogged() {
+		return $this->isUserInSession();
 	}
 }
 

@@ -4,7 +4,7 @@ namespace Aftertime;
 class Validate {
 	private $errors = array();
 
-	private function translate_flags($string) {
+	private function translateFlags($string) {
 		$output = 0;
 		foreach (explode('|', $string) as $filter_str) {
 			$filter_str = trim($filter_str);
@@ -35,7 +35,7 @@ class Validate {
 	}
 
 	// Checks a custom callback validator and adds up the errors found
-	public function check_callback (callable $fn, $value, array $extra_data = null) {
+	public function checkCallback (callable $fn, $value, array $extra_data = null) {
 		$fn_errors = call_user_func($fn, $value, $extra_data);
 		if ($fn_errors) {
 			log_entry ("ERROR: callback validator failed");
@@ -48,14 +48,14 @@ class Validate {
 	}
 
 	// Validation using PHP filter functions http://www.php.net/manual/en/ref.filter.php
-	public function check_filter ($key, $value, array $spec) {
+	public function checkFilter ($key, $value, array $spec) {
 		$filter_type = $spec['filter'];
 		$options = array();
 		if (isset($spec['filter_options'])) {
 			$options['options'] = $spec['filter_options'];
 		}
 		if (isset($spec['filter_flags'])) {
-			$flags = $this->translate_flags($spec['filter_flags']);
+			$flags = $this->translateFlags($spec['filter_flags']);
 			if ($flags === false) {
 				$this->errors[] = 'PARAM_WRONG_FLAGS_'.strtoupper($key);
 			} else {
@@ -75,7 +75,7 @@ class Validate {
 		}
 	}
 
-	public function check_required($key, $value, $spec) {
+	public function checkRequired($key, $value, $spec) {
 		if (empty($value)) {
 			$param_required = isset($spec['required'])? $spec['required'] : false;
 			if ($param_required) {
@@ -86,10 +86,10 @@ class Validate {
 	}
 
 	// Checks one value from the array of all, following the value spec
-	private function check_value ($key, $spec, array $allvars) {
+	private function checkValue ($key, $spec, array $allvars) {
 		$value = isset($allvars[$key])? $allvars[$key] : null;
 		if (empty($value)) {
-			$this->check_required($key, $value, $spec);
+			$this->checkRequired($key, $value, $spec);
 		} else {
 			$filter_type = isset($spec['filter'])? $spec['filter'] : null;
 			if ($filter_type) {
@@ -104,23 +104,23 @@ class Validate {
 							log_entry ("ERROR: cannot find validator function '$fn'");
 							$this->errors[] = 'VALIDATOR_FUNCTION_NOT_CALLABLE';
 						} else {
-							$this->check_callback($fn, $value, $allvars);
+							$this->checkCallback($fn, $value, $allvars);
 						}
 					}
 				} else {
-					$this->check_filter($key, $value, $spec);
+					$this->checkFilter($key, $value, $spec);
 				}
 			}
 		}
 	}
 
 	// Checks multiple values in the request, by using the indicated configuration
-	public function check_array (array $values, array $values_spec) {
+	public function checkArray (array $values, array $values_spec) {
 		$unknown_values = $values;
 		unset($unknown_values['app']);
 		unset($unknown_values['page']);
 		foreach ($values_spec as $key => $key_spec) {
-			$this->check_value($key, $key_spec, $values);
+			$this->checkValue($key, $key_spec, $values);
 			unset($unknown_values[$key]);
 		}
 		if (count($unknown_values)) {
@@ -135,7 +135,7 @@ class Validate {
 		return $this->errors;
 	}
 
-	public function has_errors() {
+	public function hasErrors() {
 		return count($this->errors);
 	}
 }

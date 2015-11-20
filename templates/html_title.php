@@ -1,7 +1,7 @@
 <?php
 $title = Aftertime\HTMLTitle::get();
 if (empty($title)) {
-	Aftertime\HTMLTitle::set_from_page($app, $page);
+	Aftertime\HTMLTitle::setFromPage($app, $page);
 }
 ?>
 <title><?php echo Aftertime\HTMLTitle::get(); ?></title>

@@ -16,22 +16,22 @@ class LogTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function tearDown() {
-		Log::log_file(false);
+		Log::setFile(false);
 	}
 
-	public function test_log_file() {
-		$this->assertFalse(Log::log_file());
-		$logfile = Log::log_file($this->logs_folder);
+	public function test_setFile() {
+		$this->assertFalse(Log::setFile());
+		$logfile = Log::setFile($this->logs_folder);
 		$this->assertRegExp('/^vfs:\/\/root\/logs\/....-..-..\.log$/', $logfile);
-		$this->assertFalse(Log::log_file(false));
+		$this->assertFalse(Log::setFile(false));
 	}
 
-	public function test_log_entry() {
-		$logfile = Log::log_file($this->logs_folder);
+	public function test_logEntry() {
+		$logfile = Log::setFile($this->logs_folder);
 		$this->assertFalse(is_readable($logfile));
-		Log::log_entry('logline in logfile');
+		Log::logEntry('logline in logfile');
 		$this->assertRegExp('/^..:..:.. logline in logfile$/', file_get_contents($logfile));
-		Log::log_entry('Second line');
+		Log::logEntry('Second line');
 		$this->assertRegExp('/^..:..:.. logline in logfile\n..:..:.. Second line$/', file_get_contents($logfile));
 	}
 
@@ -48,34 +48,34 @@ class LogTest extends PHPUnit_Framework_TestCase {
 
 	public function test_log_echo() {
 		$this->expectOutputRegex('/^..:..:.. line$/');
-		Log::log_entry('line');
+		Log::logEntry('line');
 	}
 
 	public function test_log_echo_mute() {
 		$this->expectOutputRegex('/^..:..:.. Logs are muted\n..:..:.. Logs are unmuted$/');
 		Log::mute(true);
-		Log::log_entry('line');
+		Log::logEntry('line');
 		Log::mute(false);
 	}
 
 	public function test_log_echo_unmute() {
 		$this->expectOutputRegex('/^..:..:.. Logs are muted\n..:..:.. Logs are unmuted\n..:..:.. another$/');
 		Log::mute(true);
-		Log::log_entry('line');
+		Log::logEntry('line');
 		Log::mute(false);
-		Log::log_entry('another');
+		Log::logEntry('another');
 	}
 
 	public function test_log_echo_caller() {
 		$this->expectOutputRegex('/^..:..:.. me! line\n..:..:.. me! line2$/');
 		Log::caller('me!');
-		Log::log_entry('line');
-		Log::log_entry('line2');
+		Log::logEntry('line');
+		Log::logEntry('line2');
 		Log::caller(false);
 	}
 
 	public function test_log_php_error() {
-		set_error_handler(array('Aftertime\Log', 'php_errors'));
+		set_error_handler(array('Aftertime\Log', 'phpErrors'));
 		$this->expectOutputRegex(<<<EOT
 /^..:..:.. file\(not_existing_file\.php\): failed to open stream: No such file or directory \(.*?\/LogTest\.php:[0-9]+\)
 (..:..:.. at .*?:[0-9])*/
@@ -85,15 +85,15 @@ EOT
 	}
 
 	public function test_log_php_exception() {
-		set_exception_handler(array('Aftertime\Log', 'php_exceptions'));
-		$this->assertEquals(array('Aftertime\Log', 'php_exceptions'), set_exception_handler(null));
+		set_exception_handler(array('Aftertime\Log', 'phpExceptions'));
+		$this->assertEquals(array('Aftertime\Log', 'phpExceptions'), set_exception_handler(null));
 		$this->expectOutputRegex(<<<EOT
 /^..:..:.. Exception: Testing exception
 ..:..:.. #0 \[internal function\]: LogTest->test_log_php_exception\(\)
 (#[0-9]+? .*?\([0-9]+?\): .*?)+/
 EOT
 );
-		LOG::php_exceptions(new Exception('Testing exception', 23));
+		Log::phpExceptions(new Exception('Testing exception', 23));
 	}
 }
 

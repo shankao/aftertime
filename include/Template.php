@@ -18,7 +18,7 @@ class Template {
 		$this->logging = $logging;
 	}
 	
-	public function set_var ($name, $value) {
+	public function set ($name, $value) {
 		$this->vars[$name] = $value;
 	}
 

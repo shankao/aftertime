@@ -4,7 +4,7 @@ namespace Aftertime;
 class HTMLTitle {
 	static private $title_tag = '';
 
-	static public function set_from_page($app, $page) {
+	static public function setFromPage($app, $page) {
 		$config = Config::get();
 		$page_config = Config::get("apps.$app.pages.$page");
 		if (isset($page_config['title'])) {

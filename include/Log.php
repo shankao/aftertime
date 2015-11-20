@@ -6,7 +6,7 @@ final class Log {
 	static private $slow_query_log = true, $slow_query_time = 2;	// In seconds
 	static private $muted = false;
 
-	static public function log_file ($new_logsfolder = null) {
+	static public function setFile ($new_logsfolder = null) {
 		static $logs_folder = null;
 		static $filename = null;
 		static $filedate = null;
@@ -33,27 +33,27 @@ final class Log {
 		return self::$caller;
 	}
 
-	static public function mute($mute = null) {
+	static public function mute ($mute = null) {
 		if ($mute !== null && is_bool($mute)) {
 			if ($mute == true) {
-				self::log_entry('Logs are muted');
+				self::logEntry('Logs are muted');
 	                        self::$muted = true;
 			} else {
 				self::$muted = false;
-				self::log_entry('Logs are unmuted');
+				self::logEntry('Logs are unmuted');
 			}
                 }
                 return self::$muted;
 	}
 
-	static public function log_entry ($text, $sizelimit = 2000) {
+	static public function logEntry ($text, $sizelimit = 2000) {
 		if (strlen($text) > $sizelimit) {
 			$text = substr($text, 0, $sizelimit/2) . '...(truncated)...' . substr($text, $sizelimit*-1/2);
 		}
 		$time = date('H:i:s');
 		$caller = self::$caller? ' '.self::$caller : '';
 		if (!self::$muted) {
-			$filename = self::log_file();	// Must be initialized before
+			$filename = self::setFile();	// Must be initialized before
 			if ($filename === false) {
 				echo "$time$caller $text\n";
 			} else {
@@ -62,36 +62,36 @@ final class Log {
 		}
 	}
 
-	static private function log_backtrace() {
+	static private function logBacktrace() {
 		$level = 0;
 		foreach(debug_backtrace() as $bt) {
 			if ($level > 2 && !empty($bt['file'])) {
-				self::log_entry("at {$bt['file']}:{$bt['line']}");
+				self::logEntry("at {$bt['file']}:{$bt['line']}");
 			}
 			$level++;
 		}
 	}
 
-	static public function php_errors ($errno, $errstr, $errfile, $errline) {
-		self::log_entry("$errstr ($errfile:$errline)");
-		self::log_backtrace();
+	static public function phpErrors ($errno, $errstr, $errfile, $errline) {
+		self::logEntry("$errstr ($errfile:$errline)");
+		self::logBacktrace();
 		return false;
 	}
 
-	static public function php_exceptions(\Exception $ex) {
-		self::log_entry('Exception: ' . $ex->getMessage());
-		self::log_entry($ex->getTraceAsString());
+	static public function phpExceptions(\Exception $ex) {
+		self::logEntry('Exception: ' . $ex->getMessage());
+		self::logEntry($ex->getTraceAsString());
 	}
 
-	static public function log_shutdown () {
+	static public function logShutdown () {
 		$error = error_get_last();
 		if ($error && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
-			self::log_entry("ERROR type {$error['type']}: {$error['message']} at {$error['file']}:{$error['line']}");
-			self::log_entry('Ending script');
+			self::logEntry("ERROR type {$error['type']}: {$error['message']} at {$error['file']}:{$error['line']}");
+			self::logEntry('Ending script');
 		}
 	}
 
-	static public function slow_query_log ($status = null, $query_time = 2) {
+	static public function logSlowQuery ($status = null, $query_time = 2) {
 		if ($status === null) {
 			return self::$slow_query_log;
 		}

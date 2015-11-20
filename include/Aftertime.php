@@ -7,7 +7,7 @@ class Aftertime {
 
 	public $debug = false;
 
-	private function is_web() {
+	private function isWeb() {
 		return php_sapi_name() === 'cli'? false : true;
 	}
 
@@ -18,10 +18,10 @@ class Aftertime {
 		$this->debug = $debug;
 		$config = Config::init($config_folder);
 		if ($config === false) {
-			if ($this->is_web() && $this->debug === false) {
+			if ($this->isWeb() && $this->debug === false) {
 				echo 'Config error';	// Don't output much on web
 			} else {
-				echo nl2br(Config::init_log());
+				echo nl2br(Config::initLog());
 			}
 			throw new AftertimeException("Can't initialize config", AftertimeException::E_CONFIG_INIT);
 		}
@@ -42,8 +42,8 @@ class Aftertime {
 			ini_set ('date.timezone', $config['timezone']);
 		}
 
-		if ($this->init_log() === false) {
-			if ($this->is_web() && $this->debug === false) {
+		if ($this->initLog() === false) {
+			if ($this->isWeb() && $this->debug === false) {
 				echo 'Logging error';	// Don't output much on web
 			} else {
 				echo "No 'logs' key present in the config\n";
@@ -52,22 +52,22 @@ class Aftertime {
 		}
 		if ($this->debug) {
 			log_entry('Debug mode set');
-			log_entry(Config::init_log());
+			log_entry(Config::initLog());
 		}
 
-		if ($this->is_web() && $this->init_web() === false) {
+		if ($this->isWeb() && $this->initWeb() === false) {
 			log_entry('ERROR: Cannot start session');
 			throw new AftertimeException("Cannot start session", AftertimeException::E_SESSION_INIT);
 		}
-		$this->init_paths($config['site']);
+		$this->initPaths($config['site']);
 	}
 
-	private function init_paths($site) {
+	private function initPaths($site) {
 		// XXX Should remove the site folder here?
 		ini_set ('include_path', $site);
 	}
 
-	private function init_web() {
+	private function initWeb() {
 		ob_start(null, 4096);
 		ini_set ('arg_separator.output', '&amp;');
 		if (session_start() === false) {
@@ -76,25 +76,25 @@ class Aftertime {
 		return true;
 	}
 
-	private function init_log() {
+	private function initLog() {
 		// Set up logs folder from config
 		$config = Config::get();
 		if (!isset($config['logs'])) {
 			return false;
 		}
-		if (Log::log_file($config['logs']) === false && $this->is_web()) {
+		if (Log::setFile($config['logs']) === false && $this->isWeb()) {
 			return false;
 		}
 
-		ini_set ('error_log', Log::log_file());
-		set_error_handler(array('Aftertime\Log', 'php_errors'));
-		set_exception_handler(array('Aftertime\Log', 'php_exceptions'));
-		register_shutdown_function(array('Aftertime\Log', 'log_shutdown'));
+		ini_set ('error_log', Log::setFile());	// XXX function with 2 uses
+		set_error_handler(array('Aftertime\Log', 'phpErrors'));
+		set_exception_handler(array('Aftertime\Log', 'phpExceptions'));
+		register_shutdown_function(array('Aftertime\Log', 'logShutdown'));
 		return true;
 	}
 
 	public function __destruct () {
-		if ($this->is_web()) {
+		if ($this->isWeb()) {
 			// As of PHP 5.4.0, REQUEST_TIME_FLOAT is available in the $_SERVER superglobal array.
 			// It contains the timestamp of the start of the request with microsecond precision.
 			//	$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
@@ -102,23 +102,23 @@ class Aftertime {
 		}
 	}
 
-	public function run_app() {
+	public function runApp() {
 		$app_factory = new AppFactory;
 		$this->app = $app_factory->build($_REQUEST);
 		if ($this->app === null) {
 			template_render(__DIR__.'/../templates/apperror.php');
 			return false;
 		}
-		$this->app->db = $this->init_db();
-		$this->app->app_debug($this->debug);
-		if ($this->app->app_run() !== 'redirect') {
-			return $this->app->app_render_template();
+		$this->app->db = $this->initDB();
+		$this->app->debug($this->debug);
+		if ($this->app->run() !== 'redirect') {
+			return $this->app->renderTemplate();
 		}
 		return true;
 	}
 
 	// Returns a PDO instance initialized following Aftertime\Config
-	public function init_db () {
+	public function initDB () {
 		$config = Config::get();
 		if (!isset($config['database'])) {
 			log_entry('No database entry found in config');

@@ -29,7 +29,7 @@ final class Config {
 					self::log("Skip $filename: not current host");
 					continue;
 				}
-				if (self::load_json($filename) === null) {
+				if (self::loadJSON($filename) === null) {
 					$return = false;
 				}
 			}
@@ -59,7 +59,7 @@ final class Config {
 		return self::$config;
 	}
 
-	private function load_json($file) {
+	private function loadJSON($file) {
 		$fileconf = null;
 		$error = false;
 		if (is_readable($file)) {
@@ -97,7 +97,7 @@ final class Config {
 		self::$log .= "$string\n";
 	}
 
-	static public function init_log() {
+	static public function initLog() {
 		return self::$log;
 	}
 
@@ -121,18 +121,18 @@ final class Config {
 		self::$config = $config;
 	}
 
-	static public function print_values($prefix = '') {
-		self::print_config_values(self::$config, $prefix);
+	static public function printValues($prefix = '') {
+		self::printConfigValues(self::$config, $prefix);
 	}
 
-	static private function print_config_values ($config, $prefix = '') {
+	static private function printConfigValues ($config, $prefix = '') {
 		if (empty($config)) {
 			$prefix = substr($prefix, 0, -1);
 			echo "$prefix=\n";
 		} else {
 			foreach ($config as $key => $value) {
 				if (is_array($value)) {
-					self::print_config_values($value, "$prefix$key.");
+					self::printConfigValues($value, "$prefix$key.");
 				} else {
 					echo "$prefix$key=$value\n";
 				}

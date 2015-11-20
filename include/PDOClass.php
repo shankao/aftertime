@@ -12,7 +12,7 @@ class PDOClass {
 	protected $_fields;	// Override 
 	protected $_key;	// Override 
 
-	private function get_query_parts() {
+	private function getQueryParts() {
 		$first = true;
 		$query_fields = $query_values_place = $update_values = '';
 		$query_values = array();
@@ -46,7 +46,7 @@ class PDOClass {
 		}
 	}
 
-	private function get_pdo_type($value) {
+	private function getPDOType($value) {
 		if (is_null($value)) {
 			return \PDO::PARAM_NULL;
 		} else if (is_bool($value)) {
@@ -78,11 +78,11 @@ class PDOClass {
 					}
 					$i = 0;
 					foreach ($value as $val) {
-						$this->_statement->bindValue(":$name"."_$i", $val, $this->get_pdo_type($val));
+						$this->_statement->bindValue(":$name"."_$i", $val, $this->getPDOType($val));
 						$i++;
 					}
 				} else {
-					$this->_statement->bindValue(":$name", $value, $this->get_pdo_type($value));
+					$this->_statement->bindValue(":$name", $value, $this->getPDOType($value));
 				}
 			}
 		}
@@ -107,7 +107,7 @@ class PDOClass {
 		if (!$this->_pdo) {
 			return false;
 		}
-		list($query_fields, $query_values_place, $query_values) = $this->get_query_parts();
+		list($query_fields, $query_values_place, $query_values) = $this->getQueryParts();
 		$sql = "INSERT INTO {$this->_table} ($query_fields) VALUES ($query_values_place)";
 		if ($this->query($sql, $query_values, false) === false) {
 			return false;
@@ -126,7 +126,7 @@ class PDOClass {
 		if (!isset($this->$key_name)) {
 			return false;
 		}
-		list($query_fields, $query_values_place, $query_values, $update_values) = $this->get_query_parts();
+		list($query_fields, $query_values_place, $query_values, $update_values) = $this->getQueryParts();
 		$sql = "UPDATE {$this->_table} SET $update_values WHERE $key_name = :key_$key_name";
 		$query_values["key_$key_name"] = $this->$key_name;
 		return $this->query($sql, $query_values, false);

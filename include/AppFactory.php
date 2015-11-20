@@ -4,7 +4,7 @@ namespace Aftertime;
 // Returns an App object chosen from the config and request params
 final class AppFactory {
 
-	private function check_url() {
+	private function checkURL() {
 		// Log and check the request URL
 		$url = $_SERVER['PHP_SELF'];
 		$url .= !empty($_SERVER['QUERY_STRING'])? "?{$_SERVER['QUERY_STRING']}" : '';
@@ -20,7 +20,7 @@ final class AppFactory {
 
 	public function build($request) {
 	
-		if (self::check_url() === false) {
+		if (self::checkURL() === false) {
 			return null;
 		}
 

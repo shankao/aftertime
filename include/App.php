@@ -1,7 +1,7 @@
 <?php
 namespace Aftertime;
 
-abstract class app {
+abstract class App {
 
 	private $debug = false;
 
@@ -11,7 +11,7 @@ abstract class app {
 	public $template;		// Rendering page
 	public $db;			// Database connection
 
-	final private function app_init_template() {
+	final private function initTemplate() {
 		$page_config = Config::get("apps.{$this->params['app']}.pages.{$this->params['page']}");
 		if (!isset($page_config['template'])) {
 			log_entry('No template specified for this page');
@@ -37,18 +37,18 @@ abstract class app {
 		if (isset($this->errors)) {
 			$vars['errors'] = $this->errors;
 		}
-		if ($this->user && $this->user->is_user_logged()) {
+		if ($this->user && $this->user->isUserLogged()) {
 			$vars['user'] = (array)$this->user;
 		}
 		$vars['config'] = $config;
-		$vars['debug'] = $this->app_debug();
+		$vars['debug'] = $this->debug();
 		$this->template = new Template($template_filename, $vars);
 		return true;
 	}
 
 //------------------------ public
 	
-	final public function app_run() {
+	final public function run() {
 		$appname = $this->params['app'];
 		$pagename = $this->params['page'];
 		Log::caller($appname);
@@ -56,7 +56,7 @@ abstract class app {
 		// Recover errors from the last App and remove them from the session
 		if (isset($_SESSION['errors'])) {
 			foreach ($_SESSION['errors'] as $error) {
-				$this->app_error_add($error);
+				$this->errorAdd($error);
 			}
 			unset($_SESSION['errors']);
 		}
@@ -68,13 +68,13 @@ abstract class app {
 			log_entry("WARNING: params not specified for '$pagename' page. Validation checks will not be performed");
 		} else {
 			$validator = new Validate;
-			$validator->check_array($this->params, $page_config['params']);
-			if ($validator->has_errors()) {
+			$validator->checkArray($this->params, $page_config['params']);
+			if ($validator->hasErrors()) {
 				foreach ($validator->errors() as $error) {
-					$this->app_error_add($error);
+					$this->errorAdd($error);
 				}
 				if (isset($page_config['params_error_page'])) {
-					return $this->app_redirect($page_config['params_error_page']);
+					return $this->redirect($page_config['params_error_page']);
 				}
 			}
 		}
@@ -84,13 +84,13 @@ abstract class app {
 			$this->user->login();
 		}
 /*		// XXX Commented until fixed
-		if ($this->check_http_auth() == false) {
-			$this->app_error_add('HTTP_AUTH_ERROR');
+		if ($this->checkHttpAuth() == false) {
+			$this->errorAdd('HTTP_AUTH_ERROR');
 			return false;	// redirect to a 505 page?
 		}
 */
 
-		$this->app_init_template();
+		$this->initTemplate();
 
 		// Run the page method
 		if (!is_callable(array($this, $pagename))) {
@@ -104,7 +104,7 @@ abstract class app {
 		return $result;
 	}
 	
-	final public function app_render_template() {
+	final public function renderTemplate() {
 		if (!$this->template) {
 			return false;
 		} else {
@@ -113,9 +113,9 @@ abstract class app {
 	}
 
 	// HTTP redirection. Syntax is 'app/page'. You can ommit some (i.e. "/newpage", "newapp/")
-	final public function app_redirect($dest, array $params = null, $response = 303) {
-		if ($this->app_has_error()) {
-			$_SESSION['errors'] = $this->app_get_all_errors();
+	final public function redirect($dest, array $params = null, $response = 303) {
+		if ($this->hasError()) {
+			$_SESSION['errors'] = $this->getErrors();
 		}
 		
 		$parts = explode('/', $dest);
@@ -132,11 +132,11 @@ abstract class app {
 		return 'redirect';
 	}
 
-	final public function app_error_add($code) {
+	final public function errorAdd($code) {
 		$this->errors[] = $code;
 	}
 
-	final public function app_has_error($code = null) {
+	final public function hasError($code = null) {
 		if ($code === null) {
 			return count($this->errors) > 0? true : false;
 		} else {
@@ -144,11 +144,11 @@ abstract class app {
 		}
 	}
 
-	final public function app_get_all_errors() {
+	final public function getErrors() {
 		return $this->errors;
 	}
 	
-	final public function app_debug($debug = null) {
+	final public function debug($debug = null) {
                 if ($debug !== null) {
                         $this->debug = $debug;
                 }
