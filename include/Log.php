@@ -106,4 +106,4 @@ final class Log {
 	private function __construct() {
 	}
 }
-?>
+

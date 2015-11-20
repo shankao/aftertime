@@ -7,4 +7,4 @@ class PDOLog extends \PDO {
 		$this->setAttribute (\PDO::ATTR_STATEMENT_CLASS, array('Aftertime\PDOStatementLog', array($this)));
 	}
 }
-?>
+

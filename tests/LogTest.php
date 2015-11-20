@@ -96,4 +96,4 @@ EOT
 		LOG::php_exceptions(new Exception('Testing exception', 23));
 	}
 }
-?>
+

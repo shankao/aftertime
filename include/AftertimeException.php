@@ -6,4 +6,4 @@ class AftertimeException extends \Exception {
 	const E_LOG_INIT = 1;
 	const E_SESSION_INIT = 2;
 }
-?>
+

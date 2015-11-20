@@ -56,4 +56,4 @@ class Template {
 		return $result;
         }
 }
-?>
+

@@ -10,4 +10,4 @@ if (Aftertime\Config::init($folder) === false) {
 
 Aftertime\Config::print_values();
 exit (0);
-?>
+

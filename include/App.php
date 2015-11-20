@@ -155,4 +155,4 @@ abstract class app {
                 return $this->debug;
         }
 }
-?>
+

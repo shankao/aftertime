@@ -139,4 +139,4 @@ class Validate {
 		return count($this->errors);
 	}
 }
-?>
+

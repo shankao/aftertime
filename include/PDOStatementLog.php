@@ -46,4 +46,4 @@ class PDOStatementLog extends \PDOStatement {
 		return parent::bindValue($parameter, $value, $data_type);
 	}
 }
-?>
+

@@ -25,3 +25,4 @@ class HTMLTitle {
 		return self::$title_tag;
 	}
 }
+

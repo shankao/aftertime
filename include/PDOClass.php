@@ -195,4 +195,4 @@ class PDOClass {
 		return $this->_statement->errorInfo();
 	}
 }
-?>
+

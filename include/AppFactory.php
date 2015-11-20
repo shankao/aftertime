@@ -81,4 +81,4 @@ final class AppFactory {
 		return $app;
 	}
 }
-?>
+

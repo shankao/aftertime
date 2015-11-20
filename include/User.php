@@ -165,4 +165,4 @@ class User extends PDOClass {
 		return $this->is_user_in_session();
 	}
 }
-?>
+

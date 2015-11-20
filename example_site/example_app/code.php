@@ -14,4 +14,4 @@ class example_app extends Aftertime\App {
 		}
 	}
 }
-?>
+

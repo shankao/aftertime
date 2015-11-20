@@ -13,4 +13,4 @@ require_once __DIR__.'/../vendor/autoload.php';
 $aftertime = new Aftertime\Aftertime($opts['c'], false);
 $result = Aftertime\template_render($opts['t'], null, false);
 exit($result? 0 : 1);
-?>
+

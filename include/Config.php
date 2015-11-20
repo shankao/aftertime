@@ -140,4 +140,4 @@ final class Config {
 		}
 	}
 }
-?>
+
