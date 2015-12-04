@@ -3,7 +3,6 @@ namespace Aftertime;
 
 final class Log {
 	static private $caller = '';
-	static private $slow_query_log = true, $slow_query_time = 2;	// In seconds
 	static private $muted = false;
 
 	static public function setFile ($new_logsfolder = null) {
@@ -88,18 +87,6 @@ final class Log {
 		if ($error && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
 			self::logEntry("ERROR type {$error['type']}: {$error['message']} at {$error['file']}:{$error['line']}");
 			self::logEntry('Ending script');
-		}
-	}
-
-	static public function logSlowQuery ($status = null, $query_time = 2) {
-		if ($status === null) {
-			return self::$slow_query_log;
-		}
-		if (is_bool($status)) {
-			self::$slow_query_log = $status;
-		}
-		if (is_numeric($query_time)) {
-			self::$slow_query_time = $query_time;
 		}
 	}
 
